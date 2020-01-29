@@ -1,5 +1,6 @@
 module PowerModelsDSSE
 
-greet() = print("Hello World!")
+using PowerModels
+using PowerModelsDSSE
 
-end # module
+end
