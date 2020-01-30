@@ -6,3 +6,6 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/PowerModelsDSSE.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/PowerModelsDSSE-jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
 [![Coveralls](https://coveralls.io/repos/github/timmyfaraday/PowerModelsDSSE.jl/badge.svg?branch=master)](https://coveralls.io/github/timmyfaraday/PowerModelsDSSE.jl?branch=master)
+
+PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
+Static Distribution System State Estimation. 
