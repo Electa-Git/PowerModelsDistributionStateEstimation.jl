@@ -1,7 +1,3 @@
-using PowerModelsDSSE
-using Test
+using SafeTestsets
 
-@testset "PowerModelsDSSE.jl" begin
-    @test my_f(2,1) == 7
-    @test my_f(1,2) == 8
-end
+@safetestset "my_f_tests" begin include("my_f_tests.jl") end

@@ -3,11 +3,16 @@ uuid = "d0713e65-ce0c-4a8e-a1da-2ed737d217c4"
 authors = ["Tom Van Acker", "Marta Vanin"]
 version = "0.1.0"
 
+[deps]
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+
 [compat]
+ForwardDiff = "0.10"
 julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 
 [targets]
-test = ["Test"]
+test = ["Test","SafeTestsets"]
