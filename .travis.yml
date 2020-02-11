@@ -10,6 +10,7 @@ matrix:
   allow_failures:
     - julia: nightly
   fast_finish: true
+codecov: true
 notifications:
   email: false
 after_success:
