@@ -23,7 +23,7 @@ end
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
-    variable_mc_demand(pm)
+    variable_mc_injection(pm)
     variable_mc_residual(pm)
     _PMD.variable_mc_voltage(pm)
     _PMD.variable_mc_branch_flow(pm)

@@ -11,7 +11,7 @@ Static Distribution System State Estimation.
 
 ## Core Problem Specification
 
-- State Estimation (se), for the Bus Injection Model (BIM)
+- State Estimation (SE), for the Bus Injection Model (BIM)
 
 ## Core Network Formulations
 
@@ -29,7 +29,7 @@ of Leuven (KU Leuven) and EnergyVille. The primary developers are Tom Van Acker
 (@timmyfaraday) and Marta Vanin (@MartaVanin) with support for the following
 contributors:
 
-- Frederik Geth (@frederikgeth) CSIRO, General PowerModelsDistribution Advice.
+- Frederik Geth (@frederikgeth) CSIRO, General PowerModelsDistribution.jl Advice.
 
 ## License
 
