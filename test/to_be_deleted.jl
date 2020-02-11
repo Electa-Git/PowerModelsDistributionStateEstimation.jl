@@ -51,4 +51,4 @@ data["bus"]["4"]["dst_q"]     = MultiConductorVector([_DST.Normal(0.006,0.01),
                                                     _DST.Normal(0.006,0.01),
                                                     _DST.Normal(0.006,0.01)])
 
-# result = run_mc_se(data, PMs.ACPPowerModel, ipopt_solver)
+result = run_mc_se(data, PMs.ACPPowerModel, ipopt_solver)
