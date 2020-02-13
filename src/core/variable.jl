@@ -1,103 +1,62 @@
 ""
-function variable_mc_injection(pm::_PMs.AbstractPowerModel; kwargs...)
-    variable_mc_injection_active(pm; kwargs...)
-    variable_mc_injection_reactive(pm; kwargs...)
-end
-
-function variable_mc_injection_active(  pm::_PMs.AbstractPowerModel;
-                                        nw::Int=pm.cnw, report::Bool=true)
-    cnds  = _PMs.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
-
-    pi = _PMs.var(pm, nw)[:pi] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name = "$(nw)_pi_$(i)"
-            ) for i in _PMs.ids(pm, nw, :bus)
-        )
-
-    report && _PMs.sol_component_value(pm, nw, :bus, :pi, _PMs.ids(pm, nw, :bus), pi)
-end
-
-
-""
-function variable_mc_injection_reactive(pm::_PMs.AbstractPowerModel;
-                                        nw::Int=pm.cnw, report::Bool=true)
-    cnds  = _PMs.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
-
-    qi = _PMs.var(pm, nw)[:qi] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name = "$(nw)_qi_$(i)"
-            ) for i in _PMs.ids(pm, nw, :bus)
-        )
-
-    report && _PMs.sol_component_value(pm, nw, :bus, :qi, _PMs.ids(pm, nw, :bus), qi)
-end
-
-
-""
 function variable_mc_residual(  pm::_PMs.AbstractACPModel;
                                 nw::Int=pm.cnw, report::Bool=true)
-    variable_mc_residual_overall(pm; kwargs...)
-    variable_mc_residual_active_power(pm; kwargs...)
-    variable_mc_residual_reactive_power(pm; kwargs...)
-    variable_mc_residual_voltage_magnitude(pm; kwargs...)
+    variable_mc_residual_bus(pm; kwargs...)
+    variable_mc_residual_gen(pm; kwargs...)
+    variable_mc_residual_load(pm; kwargs...)
+    # further extensions should be added here, e.g., variable_mc_residual_branch(pm; kwargs...)
 end
 
 
 ""
-function variable_mc_residual_overall(  pm::_PMs.AbstractPowerModel;
-                                        nw::Int=pm.cnw, report::Bool=true)
+function variable_mc_residual_bus(  pm::_PMs.AbstractPowerModel;
+                                    nw::Int=pm.cnw, report::Bool=true)
     cnds  = _PMs.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
+    ncnds = length(cnds) ## Might be better to look at the active conductors, i.e., when dst[nm] != nothing
 
-    res = _PMs.var(pm, nw)[:res] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name = "$(nw)_res_$(i)"
+    for m in metrics(pm, nw, :bus)
+        sym = Symbol("res_$(m)")
+        res = _PMs.var(pm, nw)[sym] = Dict(i => JuMP.@variable(pm.model,
+            [c in 1:ncnds], base_name = $"$(nw)_res_$(m)_$(i)"
             ) for i in _PMs.ids(pm, nw, :bus)
         )
 
-    report && _PMs.sol_component_value(pm, nw, :bus, :res, _PMs.ids(pm, nw, :bus), res)
+        report && _PMs.sol_component_value(pm, nw, :bus, sym, _PMs.ids(pm, nw, :bus), res)
+    end
 end
 
 
 ""
-function variable_mc_residual_active_power( pm::_PMs.AbstractPowerModel;
-                                            nw::Int=pm.cnw, report::Bool=true)
+function variable_mc_residual_gen(  pm::_PMs.AbstractPowerModel;
+                                    nw::Int=pm.cnw, report::Bool=true)
     cnds  = _PMs.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    res_p = _PMs.var(pm, nw)[:res_p] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name = "$(nw)_res_p_$(i)"
-            ) for i in _PMs.ids(pm, nw, :bus)
+    for m in metrics(pm, nw, :gen)
+        sym = Symbol("res_$(nm)")
+        res = _PMs.var(pm, nw)[sym] = Dict(g => JuMP.@variable(pm.model,
+            [c in 1:ncnds], base_name = $"$(nw)_res_$(m)_$(g)"
+            ) for g in _PMs.ids(pm, nw, :gen)
         )
 
-    report && _PMs.sol_component_value(pm, nw, :bus, :res_p, _PMs.ids(pm, nw, :bus), res_p)
+        report && _PMs.sol_component_value(pm, nw, :gen, sym, _PMs.ids(pm, nw, :gen), res)
+    end
 end
 
 
 ""
-function variable_mc_residual_reactive_power(   pm::_PMs.AbstractPowerModel;
-                                                nw::Int=pm.cnw, report::Bool=true)
+function variable_mc_residual_load( pm::_PMs.AbstractPowerModel;
+                                    nw::Int=pm.cnw, report::Bool=true)
     cnds  = _PMs.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    res_q = _PMs.var(pm, nw)[:res_q] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name = "$(nw)_res_q_$(i)"
-            ) for i in _PMs.ids(pm, nw, :bus)
+    for m in metrics(pm, nw, :load)
+        sym = Symbol("res_$(nm)")
+        res = _PMs.var(pm, nw)[sym] = Dict(l => JuMP.@variable(pm.model,
+            [c in 1:ncnds], base_name = $"$(nw)_res_$(m)_$(l)"
+            ) for l in _PMs.ids(pm, nw, :load)
         )
 
-    report && _PMs.sol_component_value(pm, nw, :bus, :res_q, _PMs.ids(pm, nw, :bus), res_q)
-end
-
-
-""
-function variable_mc_residual_voltage_magnitude(pm::_PMs.AbstractPowerModel;
-                                                nw::Int=pm.cnw, report::Bool=true)
-    cnds  = _PMs.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
-
-    res_vm = _PMs.var(pm, nw)[:res_vm] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name = "$(nw)_res_vm_$(i)"
-            ) for i in _PMs.ids(pm, nw, :bus)
-        )
-
-    report && _PMs.sol_component_value(pm, nw, :bus, :res_vm, _PMs.ids(pm, nw, :bus), res_vm)
+        report && _PMs.sol_component_value(pm, nw, :load, sym, _PMs.ids(pm, nw, :load), res)
+    end
 end
