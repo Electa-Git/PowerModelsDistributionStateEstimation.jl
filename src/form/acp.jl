@@ -4,13 +4,13 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, nw::Int, i::Int)
     nl = _PMs.ref(pm, nw, :bus_loads, i)
 
     constraint_mc_residual_bus(pm, nw, i)
-    for g in ng constraint_mc_residual_gen(pm, nw, g) end
+    for g in ng constraint_mc_residual_gen(pm, nw, g) end # This can be reduced further if the dst[c] == nothing is captured directly
     for l in nl constraint_mc_residual_load(pm, nw, l) end
 end
 
 
 ""
-function constraint_mc_residual_bus(pm::_PMs.AbstractACPModel, nw::Int, i::Int)
+function constraint_mc_residual_bus(pm::_PMs.AbstractPowerModel, nw::Int, i::Int)
 
     for m in metrics(pm, nw, :bus)
         var = _PMs.var(pm, nw, m, i)
@@ -44,7 +44,7 @@ end
 
 
 ""
-function constraint_mc_residual_gen(pm::_PMs.AbstractACPModel, nw::Int, g::Int)
+function constraint_mc_residual_gen(pm::_PMs.AbstractPowerModel, nw::Int, g::Int)
 
     for m in metrics(pm, nw, :gen)
         var = _PMs.var(pm, nw, m, g)
@@ -80,7 +80,7 @@ function constraint_mc_residual_gen(pm::_PMs.AbstractACPModel, nw::Int, g::Int)
 end
 
 ""
-function constraint_mc_residual_load(pm::_PMs.AbstractACPModel, nw::Int, l::Int)
+function constraint_mc_residual_load(pm::_PMs.AbstractPowerModel, nw::Int, l::Int)
 
     for m in metrics(pm, nw, :load)
         var = _PMs.var(pm, nw, m, l)

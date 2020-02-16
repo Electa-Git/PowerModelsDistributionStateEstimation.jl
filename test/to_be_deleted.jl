@@ -9,7 +9,7 @@ const _DST = Distributions
 # Read-in network data
 data = _PMD.parse_file("/Users/tvanacke/.julia/dev/PowerModelsDSSE/test/data/opendss/case3_unbalanced.dss")
 # Set the setting dictionary
-data["setting"] = Dict("res" => "wls")
+data["setting"] = Dict("estimation_criterion" => "wlav")
 # Add bus uncertainties
 for nb in keys(data["bus"]) data["bus"][nb]["dst"] = Dict{Symbol,Any}() end
 data["bus"]["1"]["dst"][:vm] = MultiConductorVector([_DST.Normal(1.0,0.02),

@@ -1,5 +1,5 @@
 ""
-function variable_mc_residual(  pm::_PMs.AbstractACPModel;
+function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
                                 nw::Int=pm.cnw, report::Bool=true)
     variable_mc_residual_bus(pm; kwargs...)
     variable_mc_residual_gen(pm; kwargs...)

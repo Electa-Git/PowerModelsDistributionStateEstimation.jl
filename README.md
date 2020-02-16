@@ -32,3 +32,11 @@ contributors:
 ## License
 
 xxx
+
+## Conceptual Idea
+
+A Distribution System State Estimator determines the most-likely state of distribution system given a set of uncertainties. These uncertainties may pertain to any "metric" of any network element, e.g., :vm of a :bus, :pd of a :load, etc.
+
+Currently, these uncertainties may either be described by:
+- Float64 -- Implies absolute certainty
+- ContinuousUnivariateDistribution -- models the uncertainty
