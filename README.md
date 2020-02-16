@@ -6,7 +6,11 @@
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
 
 PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
-Static Distribution System State Estimation.
+Static Distribution System State Estimation. A Distribution System State Estimator determines the most-likely state of distribution system given a set of uncertainties. These uncertainties may pertain to any "metric" of any network element, e.g., :vm of a :bus, :pd of a :load, etc.
+
+Currently, uncertainties may either be described by:
+- a deterministic value {Float64}, (I know...)
+- a continuous univariate distribution {Distributions.jl -ContinuousUnivariateDistribution}
 
 ## Core Problem Specification
 
@@ -32,11 +36,3 @@ contributors:
 ## License
 
 xxx
-
-## Conceptual Idea
-
-A Distribution System State Estimator determines the most-likely state of distribution system given a set of uncertainties. These uncertainties may pertain to any "metric" of any network element, e.g., :vm of a :bus, :pd of a :load, etc.
-
-Currently, these uncertainties may either be described by:
-- Float64 -- Implies absolute certainty
-- ContinuousUnivariateDistribution -- models the uncertainty
