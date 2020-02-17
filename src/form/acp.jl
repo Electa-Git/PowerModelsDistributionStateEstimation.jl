@@ -37,7 +37,14 @@ function constraint_mc_residual_bus(pm::_PMs.AbstractPowerModel, nw::Int, i::Int
                 end
             else
                 @warn "Currently, only Gaussian distributions are supported."
+                # dst_fnct(x) = -_DST.logpdf(dst[m][c],x)
+                # grd_fnct(x) = -_DST.gradlogpdf(dst[m][c],x)
+                # register(pm.model,Symbol("df_$(i)_$(c)_$(m)"),1,dst_fnct,grd_fnct,autodiff=true)
+                # JuMP.@NLconstraint(pm.model,res[c] == df_$(i)_$(c)_$(m)(var[c]))
+                # JuMP.@constraint(pm.model,_DST.minimum(dst[m][c]) <= var[c])
+                # JuMP.@constraint(pm.model,var[c] <= _DST.maximum(dst[m][c]))
             end
+        end
     end
 
 end
