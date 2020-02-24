@@ -1,6 +1,19 @@
 ""
-function constraint_mc_residual(pm::_PMs.AbstractPowerModel, nw::Int, i::Int)
+function constraint_mc_load(pm::_PMs.AbstractPowerModel, i::Int;
+                            nw::Int=pm.cnw, report::Bool=true)
+    _PMs.var(pm, nw, :pd_bus)[i] = _PMs.var(pm, nw, :pd, i)
+    _PMs.var(pm, nw, :qd_bus)[i] = _PMs.var(pm, nw, :qd, i)
 
+    if report
+        _PMs.sol(pm, nw, :load, i)[:pd_bus] = _PMs.var(pm, nw, :pd_bus, i)
+        _PMs.sol(pm, nw, :load, i)[:qd_bus] = _PMs.var(pm, nw, :qd_bus, i)
+    end
+end
+
+
+""
+function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
+                                nw::Int=pm.cnw)
     res = _PMs.var(pm, nw, :res, i)
     var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"),
                            _PMs.ref(pm, nw, :meas, i, "id"))
@@ -8,6 +21,9 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, nw::Int, i::Int)
 
     for c in _PMs.conductor_ids(pm; nw=nw)
         if typeof(dst[c]) == Nothing
+            JuMP.@constraint(pm.model,
+                var[c] == 0.0
+            )
             JuMP.@constraint(pm.model,
                 res[c] == 0.0
             )
@@ -18,7 +34,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, nw::Int, i::Int)
             JuMP.@constraint(pm.model,
                 res[c] == 0.0
             )
-        elseif typeof(dst[c]) == Normal{Float64}
+        elseif typeof(dst[c]) == _DST.Normal{Float64}
             if pm.setting["estimation_criterion"] == "wls"
                 JuMP.@constraint(pm.model,
                     res[c] == (var[c]-_DST.mean(dst[c]))^2/_DST.var(dst[c])

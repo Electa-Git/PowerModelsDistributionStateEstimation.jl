@@ -1,6 +1,6 @@
 ""
 function objective_mc_se(pm::_PMs.AbstractPowerModel)
-    return @objective(pm.model, Min,
+    return JuMP.@objective(pm.model, Min,
     sum(
         sum(
             sum( _PMs.var(pm, n, :res, i)[c] for i in _PMs.ids(pm, n, :meas))

@@ -8,7 +8,7 @@ end
 function run_mc_se(data::Dict{String,Any}, model_type, solver; kwargs...)
     return _PMs.run_model(  data, model_type, solver, build_mc_se;
                             multiconductor = true,
-                            ref_extensions = [ref_add_arcs_trans!],
+                            ref_extensions = [_PMD.ref_add_arcs_trans!],
                             kwargs...)
 end
 
@@ -22,14 +22,22 @@ end
 ""
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
+    pm.setting = Dict("estimation_criterion" => "wlav")
+
     # Variables
+    variable_mc_load(pm)
     variable_mc_residual(pm)
-    _PMD.variable_mc_load(pm)
     _PMD.variable_mc_voltage(pm)
     _PMD.variable_mc_generation(pm)
     _PMD.variable_mc_branch_flow(pm)
 
     # Constraints
+    for i in _PMs.ids(pm, :load)
+        constraint_mc_load(pm, i)
+    end
+    # for i in _PMs.ids(pm, :gen)
+    #     _PMD.constraint_mc_generation(pm, i)
+    # end
     for i in _PMs.ids(pm, :ref_buses)
         _PMD.constraint_mc_theta_ref(pm, i)
     end
@@ -45,6 +53,8 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     end
 
     # Objective
-    objective_se(pm)
+    objective_mc_se(pm)
+
+    print(pm.model)
 
 end
