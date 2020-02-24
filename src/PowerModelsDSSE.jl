@@ -11,8 +11,7 @@ module PowerModelsDSSE
 
     include("core/variable.jl")
     include("core/objective.jl")
-
-    include("form/acp.jl")
+    include("core/constraint.jl")
 
     include("prob/se.jl")
 

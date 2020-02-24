@@ -23,24 +23,25 @@ end
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
-
     variable_mc_residual(pm)
     _PMD.variable_mc_load(pm)
     _PMD.variable_mc_voltage(pm)
     _PMD.variable_mc_generation(pm)
     _PMD.variable_mc_branch_flow(pm)
-    
+
     # Constraints
     for i in _PMs.ids(pm, :ref_buses)
         _PMD.constraint_mc_theta_ref(pm, i)
     end
     for i in _PMs.ids(pm, :bus)
-        constraint_mc_residual(pm, i)
         _PMD.constraint_mc_power_balance_load(pm, i)
     end
     for i in _PMs.ids(pm, :branch)
         _PMD.constraint_mc_ohms_yt_from(pm, i)
         _PMD.constraint_mc_ohms_yt_to(pm,i)
+    end
+    for i in _PMs.ids(pm, :meas)
+        constraint_mc_residual(pm, i)
     end
 
     # Objective
