@@ -12,7 +12,7 @@ end
 
 
 """
-    constraint_mc_residual
+    constraint_mc_residual(pm)
 
 Sets the constraint for the residual of any measurement
 """
