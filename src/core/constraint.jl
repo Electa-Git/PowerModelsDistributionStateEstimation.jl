@@ -11,11 +11,7 @@ function constraint_mc_load(pm::_PMs.AbstractPowerModel, i::Int;
 end
 
 
-"""
-    constraint_mc_residual(pm)
-
-Sets the constraint for the residual of any measurement
-"""
+""
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                                 nw::Int=pm.cnw)
     res = _PMs.var(pm, nw, :res, i)
