@@ -15,4 +15,8 @@ module PowerModelsDSSE
 
     include("prob/se.jl")
 
+    export variable_mc_residual
+    export constraint_mc_residual
+    export objective_mc_se
+
 end

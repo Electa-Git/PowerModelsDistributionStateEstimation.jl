@@ -1,4 +1,6 @@
-""
+"""
+    variable_mc_residual
+"""
 function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
                                 nw::Int=pm.cnw, bounded::Bool=true,
                                 report::Bool=true)

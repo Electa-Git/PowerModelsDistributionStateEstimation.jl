@@ -1,4 +1,6 @@
-""
+"""
+    objective_mc_se
+"""
 function objective_mc_se(pm::_PMs.AbstractPowerModel)
     return JuMP.@objective(pm.model, Min,
     sum(

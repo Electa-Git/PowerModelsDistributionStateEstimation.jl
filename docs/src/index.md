@@ -1,9 +1,4 @@
-# PowerModelsDSSE
-
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://timmyfaraday.github.io/PowerModelsDSSE.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsDSSE.jl/dev)
-[![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl)
-[![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
+# PowerModelsDSSE.jl Documentation
 
 PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
 Static Distribution System State Estimation. A Distribution System State
