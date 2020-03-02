@@ -56,10 +56,12 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
             # dst(x) = -_DST.logpdf(dst[c],x)
             # grd(x) = -_DST.gradlogpdf(dst[c],x)
             # hes(x) = -_DST.heslogpdf(dst[c],x) # doesn't exist yet
-            # register(pm.model,Symbol("df_$(m)_$(c)"),1,dst,grd,hes)
+            # register(pm.model,Symbol("df_$(i)_$(c)"),1,dst,grd,hes)
             # Expr(:call, :myf, [x[i] for i=1:n]...)
             # https://stackoverflow.com/questions/44710900/juliajump-variable-number-of-arguments-to-function
-            # JuMP.@NLconstraint(pm.model,res[c] == Expr(:call, Symbol("df_$(m)_$(c)"), var[c])
+            # JuMP.@NLconstraint(pm.model,
+            #     res[c] == Expr(:call, Symbol("df_$(i)_$(c)"), var[c]
+            # )
         end
     end
 end
