@@ -36,12 +36,13 @@ XXX
 
 ## Acknowledgements
 
-This code has been developed as part of the Decision Support at the University
-of Leuven (KU Leuven) and EnergyVille. The primary developers are Tom Van Acker
-(@timmyfaraday) and Marta Vanin (@MartaVanin) with support for the following
+This code has been developed at the Universityof Leuven (KU Leuven) and 
+EnergyVille. The primary developers are Tom Van Acker (@timmyfaraday) and 
+Marta Vanin (@MartaVanin) with support for the following
 contributors:
 
 - Frederik Geth (@frederikgeth) CSIRO, General PowerModelsDistribution.jl Advice.
+- Sander Claeys (@sanderclaeys) KU Leuven, General PowerModelsDistribution.jl Advice.
 
 ## License
 
