@@ -36,7 +36,7 @@ XXX
 
 ## Acknowledgements
 
-This code has been developed at the Universityof Leuven (KU Leuven) and 
+This code has been developed at KU Leuven (University of Leuven) and 
 EnergyVille. The primary developers are Tom Van Acker (@timmyfaraday) and 
 Marta Vanin (@MartaVanin) with support for the following
 contributors:
