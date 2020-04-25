@@ -7,7 +7,7 @@
 
 PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
 Static Distribution System State Estimation. A Distribution System State
-Estimator determines the*most-likely*state of distribution system given a set
+Estimator determines the *most-likely* state of distribution system given a set
 of uncertainties. These uncertainties may pertain to any quantity of any network
 component, e.g., :vm of a :bus, :pd of a :load, etc.
 
