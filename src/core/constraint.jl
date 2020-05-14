@@ -18,16 +18,15 @@ end
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                                 nw::Int=pm.cnw)
 
-    display(i)
+
     res = _PMD.var(pm, nw, :res, i)
     display(res)
     var = _PMD.var(pm, nw, _PMD.ref(pm, nw, :meas, i, "var"),
                            _PMD.ref(pm, nw, :meas, i, "cmp_id"))
-    display(var)
-    dst = _PMD.ref(pm, nw, :meas, i, "dst")
-    display(dst)
 
-    for c in _PMs.conductor_ids(pm; nw=nw)
+    dst = _PMD.ref(pm, nw, :meas, i, "dst")
+
+    for c in _PMD.conductor_ids(pm; nw=nw)
         if typeof(dst[c]) == Float64
             JuMP.@constraint(pm.model,
                 var[c] == dst[c]

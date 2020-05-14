@@ -31,7 +31,7 @@ function build_mc_se(pm::_PMs.AbstractACPModel)
     _PMD.variable_mc_branch_power(pm; bounded = false)
     _PMD.variable_mc_transformer_power(pm; bounded = false)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = false)
-    _PMD.variable_mc_load_setpoint(pm; bounded=false)
+    #_PMD.variable_mc_load_setpoint(pm; bounded=false)
     #TODO check if best to use our own load var
 
     # Constraints
