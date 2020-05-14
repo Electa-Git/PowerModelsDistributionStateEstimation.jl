@@ -13,6 +13,10 @@ Currently, uncertainties may either be described by:
     * a normal distribution, modeled through either wls or wlav approach, or
     * a non-normal distribution, modeled through -logpdf.
 
+## Notes
+
+Currently, bad data detection techniques and observability considerations are out of scope.
+
 ## Core Problem Specification
 
 - State Estimation (SE), for the Bus Injection Model (BIM)
@@ -23,7 +27,20 @@ Currently, uncertainties may either be described by:
 
 ## Network Data Formats
 
-- OpenDSS ".dss" files
+- OpenDSS ".dss" files for grid and profile data
+- CSV ".csv" file with measurement a statistical information for state estimation
+
+## Summary of State Estimation Possibilities
+
+| -  | SDP | VI | ACP | ACR |
+| --- | --- |
+| BF of BI | BF | BF | BI | BI |
+| Advanced SE | Unavailable | Unavailable | Available | Unavailable |
+| Simple SE | Available | Available | Available | Available |
+| 4-wire | v0.2.0 | v0.2.0 | v0.2.0 | v0.2.0 |
+
+BF indicates that the model is a branch flow model, BI that it is a bus injectino model.
+Simple SE does not include modeling of transformers and delta/wye loads, ...
 
 ## Installation
 
@@ -37,6 +54,7 @@ of Leuven (KU Leuven) and EnergyVille. The primary developers are Tom Van Acker
 contributors:
 
 - Frederik Geth (@frederikgeth) CSIRO, General PowerModelsDistribution.jl Advice.
+- Sander Claeys (@SanderClaeys) KU Leuven, General PowerModelsDistribution.jl Advice.
 
 ## License
 
