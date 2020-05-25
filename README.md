@@ -19,6 +19,20 @@ Currently, uncertainties may either be described by:
     * a normal distribution, modeled through either WLS or LAV approach, or
     * a non-normal distribution, modeled through -logpdf.
 
+                   WT₁         WT₂
+                    |----///----|----///----|
+                    n₁   c₁     n₂   c₂     |
+                                            |
+                   WT₃         WT₄          |          n₈
+                    |----///----|----///----|----///----|--⋅ PCC
+                    n₃   c₃     n₄   c₄     |    c₇
+                                            |
+                   WT₅         WT₆          |
+                    |----///----|----///----|
+                    n₅   c₅     n₆   c₆     n₇
+Fig. 1: Tree-like wind farm with six wind turbines.
+
+
 ## Core Problem Specification
 
 - State Estimation (SE), for the Bus Injection Model (BIM)
