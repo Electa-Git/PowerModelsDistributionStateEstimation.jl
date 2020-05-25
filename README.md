@@ -5,20 +5,6 @@
 [![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
 
-PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
-Static Distribution System State Estimation. A Distribution System State
-Estimator determines the *most-likely* state of distribution system given a set
-of uncertainties, e.g., measurement errors, pseudo-measurements, etc. These 
-uncertainties may pertain to any quantity of any network component, e.g., :vm 
-of a :bus, :pd of a :load, etc.
-
-Currently, uncertainties may either be described by:
-- a nothing {Nothing},
-- a deterministic value {Float64}, or
-- a continuous univariate distribution {ContinuousUnivariateDistribution}:
-    * a normal distribution, modeled through either WLS or LAV approach, or
-    * a non-normal distribution, modeled through -logpdf.
-
                    WT₁         WT₂
                     |----///----|----///----|
                     n₁   c₁     n₂   c₂     |
@@ -32,6 +18,19 @@ Currently, uncertainties may either be described by:
                     n₅   c₅     n₆   c₆     n₇
 Fig. 1: Tree-like wind farm with six wind turbines.
 
+PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
+Static Distribution System State Estimation. A Distribution System State
+Estimator determines the *most-likely* state of distribution system given a set
+of uncertainties, e.g., measurement errors, pseudo-measurements, etc. These 
+uncertainties may pertain to any quantity of any network component, e.g., :vm 
+of a :bus, :pd of a :load, etc.
+
+Currently, uncertainties may either be described by:
+- a nothing {Nothing},
+- a deterministic value {Float64}, or
+- a continuous univariate distribution {ContinuousUnivariateDistribution}:
+    * a normal distribution, modeled through either WLS or LAV approach, or
+    * a non-normal distribution, modeled through -logpdf.
 
 ## Core Problem Specification
 
