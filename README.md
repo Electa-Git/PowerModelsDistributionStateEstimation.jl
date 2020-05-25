@@ -5,19 +5,6 @@
 [![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
 
-                   WT₁         WT₂
-                    |----///----|----///----|
-                    n₁   c₁     n₂   c₂     |
-                                            |
-                   WT₃         WT₄          |          n₈
-                    |----///----|----///----|----///----|--⋅ PCC
-                    n₃   c₃     n₄   c₄     |    c₇
-                                            |
-                   WT₅         WT₆          |
-                    |----///----|----///----|
-                    n₅   c₅     n₆   c₆     n₇
-Fig. 1: Tree-like wind farm with six wind turbines.
-
 PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
 Static Distribution System State Estimation. A Distribution System State
 Estimator determines the *most-likely* state of distribution system given a set
