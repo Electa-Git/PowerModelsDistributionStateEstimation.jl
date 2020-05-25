@@ -16,6 +16,7 @@ module PowerModelsDSSE
     include("core/constraint.jl")
 
     include("io/measurement_handling.jl")
+    include("io/result_handling.jl")
 
     include("prob/se.jl")
 

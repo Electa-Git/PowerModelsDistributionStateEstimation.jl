@@ -20,12 +20,12 @@ function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, sol
 end
 
 ""
-function build_mc_se(pm::_PMs.AbstractACPModel)
+function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     pm.setting = Dict("estimation_criterion" => "wlav")
 
     # Variables
-    variable_mc_load(pm)
+    variable_mc_load(pm; report = true)
     variable_mc_residual(pm)
     _PMD.variable_mc_bus_voltage(pm; bounded = false)
     _PMD.variable_mc_branch_power(pm; bounded = false)
@@ -63,6 +63,55 @@ function build_mc_se(pm::_PMs.AbstractACPModel)
     # Objective
     objective_mc_se(pm)
 
-    print(pm.model)
+end
+
+function build_mc_se(pm::_PMs.AbstractIVRModel)
+    # Variables
+    #variable_mc_load(pm)
+     pm.setting = Dict("estimation_criterion" => "wlav")
+
+    variable_mc_residual(pm)
+    _PMD.variable_mc_bus_voltage(pm, bounded = false)
+    _PMD.variable_mc_branch_current(pm, bounded = false)
+    _PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
+    _PMD.variable_mc_transformer_current(pm, bounded = false)
+    _PMD.variable_mc_load_setpoint(pm, bounded = false)
+
+    # Constraints
+    for (i,bus) in _PMD.ref(pm, :ref_buses)
+        @assert bus["bus_type"] == 3
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    # gens should be constrained before KCL, or Pd/Qd undefined
+    for id in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_gen_setpoint(pm, id)
+    end
+
+    # loads should be constrained before KCL, or Pd/Qd undefined
+    for id in _PMD.ids(pm, :load)
+        _PMD.constraint_mc_load_setpoint(pm, id)
+    end
+
+    for (i,bus) in _PMD.ref(pm, :bus)
+        _PMD.constraint_mc_load_current_balance(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_current_from(pm, i)
+        _PMD.constraint_mc_current_to(pm, i)
+
+        _PMD.constraint_mc_bus_voltage_drop(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+        _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    for (i,meas) in _PMD.ref(pm, :meas)
+        constraint_mc_residual(pm, i)
+    end
+
+    objective_mc_se(pm)
 
 end

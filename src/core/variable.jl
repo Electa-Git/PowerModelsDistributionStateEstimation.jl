@@ -21,7 +21,9 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
     report && _IM.sol_component_value(pm, nw, :meas, :res, _PMs.ids(pm, nw, :meas), res)
 end
 
-""
+"""
+    variable_mc_load
+"""
 function variable_mc_load(pm::_PMs.AbstractPowerModel; kwargs...)
     variable_mc_load_active(pm; kwargs...)
     variable_mc_load_reactive(pm; kwargs...)
@@ -33,30 +35,30 @@ function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    pd = _PMs.var(pm, nw)[:pd] = Dict(i => JuMP.@variable(pm.model,
+    pd = _PMD.var(pm, nw)[:pd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_pd_$(i)",
-            start = _PMD.comp_start_value(_PMs.ref(pm, nw, :load, i), "pd_start", c, 0.0)
-        ) for i in _PMs.ids(pm, nw, :load)
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start", 0.0)
+        ) for i in _PMD.ids(pm, nw, :load)
     )
 
     _PMs.var(pm, nw)[:pd_bus] = Dict{Int, Any}()
 
-    report && _IM.sol_component_value(pm, nw, :load, :pd, _PMs.ids(pm, nw, :load), pd)
+    report && _IM.sol_component_value(pm, nw, :load, :pd, _PMD.ids(pm, nw, :load), pd)
 end
-
 
 function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
                                    nw::Int=pm.cnw, report::Bool=true)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    qd = _PMs.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
+    qd = _PMD.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_qd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start", c, 0.0)
-        ) for i in _PMs.ids(pm, nw, :load)
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start", 0.0)
+        ) for i in _PMD.ids(pm, nw, :load)
     )
 
     _PMs.var(pm, nw)[:qd_bus] = Dict{Int, Any}()
 
-    report && _IM.sol_component_value(pm, nw, :load, :qd, _PMs.ids(pm, nw, :load), qd)
+    report && _IM.sol_component_value(pm, nw, :load, :qd, _PMD.ids(pm, nw, :load), qd)
+
 end

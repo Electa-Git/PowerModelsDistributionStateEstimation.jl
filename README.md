@@ -13,7 +13,6 @@ uncertainties may pertain to any quantity of any network component, e.g., :vm
 of a :bus, :pd of a :load, etc.
 
 Currently, uncertainties may either be described by:
-- a nothing {Nothing},
 - a deterministic value {Float64}, or
 - a continuous univariate distribution {ContinuousUnivariateDistribution}:
     * a normal distribution, modeled through either WLS or LAV approach, or

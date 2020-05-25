@@ -43,7 +43,6 @@ function read_measurement!(data::Dict, meas_row::DataFrameRow, actual_meas, seed
     if length(meas_row[:phase]) ==1
         save_dst = data["dst"][1]
         data["dst"] = Any[0.0, 0.0, 0.0]
-        display(data["dst"][parse(Int64,meas_row[:phase])])
         data["dst"][parse(Int64,meas_row[:phase])] = save_dst
     end
 
