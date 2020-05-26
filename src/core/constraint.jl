@@ -13,7 +13,7 @@ end
 
 
 """
-    constraint_mc_residual
+    constraint_mc_residual, polar version (and rectangular?)
 """
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                                 nw::Int=pm.cnw)
@@ -32,11 +32,13 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                 res[c] == 0.0
             )
         elseif typeof(dst[c]) == _DST.Normal{Float64}
-            if pm.setting["estimation_criterion"] == "wls"
-                JuMP.@constraint(pm.model,
-                    res[c] == (var[c]-_DST.mean(dst[c]))^2/_DST.var(dst[c])^2
+            if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
+                weight = _DST.var(dst[c])^2
+                msr = _DST.mean(dst[c])
+                JuMP.@NLconstraint(pm.model,
+                    res[c] == (var[c]-msr)^2/weight
                 )
-            elseif pm.setting["estimation_criterion"] == "wlav"
+            elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                 JuMP.@constraint(pm.model,
                     res[c] >= (var[c]-_DST.mean(dst[c]))/_DST.var(dst[c])
                 )
@@ -61,30 +63,34 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
     end
 end
 
+"""
+    constraint_mc_residual, IVR version
+"""
 function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
                                 nw::Int=pm.cnw)
 
     res = _PMD.var(pm, nw, :res, i)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
-    display(_PMD.ref(pm, nw, :meas, i, "var"))
 
     if _PMD.ref(pm, nw, :meas, i, "var") == :vm
         vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
         vr = _PMD.var(pm, nw, :vr, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
         for c in _PMD.conductor_ids(pm; nw=nw)
             if typeof(dst[c]) == Float64
-                JuMP.@constraint(pm.model,
+                JuMP.@NLconstraint(pm.model,
                     (vi[c]^2+vr[c]^2) == dst[c]^2
                 )
                 JuMP.@constraint(pm.model,
                     res[c] == 0.0
                 )
             elseif typeof(dst[c]) == _DST.Normal{Float64}
-                if pm.setting["estimation_criterion"] == "wls"
-                    JuMP.@constraint(pm.model,
-                        res[c] == (vi[c]^2+vr[c]^2-_DST.mean(dst[c])^2)^2/_DST.var(dst[c])^2
+                if  _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
+                    msr = _DST.mean(dst[c])^2
+                    weight = _DST.var(dst[c])^2
+                    JuMP.@NLconstraint(pm.model,
+                        res[c] == (vi[c]^2+vr[c]^2-msr)^2/weight
                     )
-                elseif pm.setting["estimation_criterion"] == "wlav"
+                elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                     JuMP.@constraint(pm.model,
                         res[c] >= (vi[c]^2+vr[c]^2-_DST.mean(dst[c])^2)/_DST.var(dst[c])
                     )
@@ -109,7 +115,6 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
         end
     elseif _PMD.ref(pm, nw, :meas, i, "var") == :pg
         bus_id = _PMD.ref(pm, nw, :gen, _PMD.ref(pm, nw, :meas, i, "cmp_id"), "gen_bus")
-        display(bus_id)
         vr = _PMD.var(pm, nw, :vr, bus_id)
         vi = _PMD.var(pm, nw, :vi, bus_id)
         crg = _PMD.var(pm, nw, :crg, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
@@ -117,18 +122,20 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
 
        for c in _PMD.conductor_ids(pm; nw=nw)
            if typeof(dst[c]) == Float64
-               JuMP.@constraint(pm.model,
+               JuMP.@NLconstraint(pm.model,
                    vr[c]*crg[c]+vi[c]*cig[c] == dst[c]
                )
                JuMP.@constraint(pm.model,
                    res[c] == 0.0
                )
            elseif typeof(dst[c]) == _DST.Normal{Float64}
-               if pm.setting["estimation_criterion"] == "wls"
-                   JuMP.@constraint(pm.model,
-                       res[c] == (vr[c]*crg[c]+vi[c]*cig[c]-_DST.mean(dst[c]))^2/_DST.var(dst[c])^2
+               if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
+                   msr = _DST.mean(dst[c])
+                   weight = _DST.var(dst[c])^2
+                   JuMP.@NLconstraint(pm.model,
+                       res[c] == (vr[c]*crg[c]+vi[c]*cig[c]-msr)^2/weight
                    )
-               elseif pm.setting["estimation_criterion"] == "wlav"
+               elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                    JuMP.@constraint(pm.model,
                        res[c] >= (vr[c]*crg[c]+vi[c]*cig[c]-_DST.mean(dst[c]))/_DST.var(dst[c])
                    )
@@ -153,7 +160,6 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
          end
        elseif _PMD.ref(pm, nw, :meas, i, "var") == :qg
            bus_id = _PMD.ref(pm, nw, :gen, _PMD.ref(pm, nw, :meas, i, "cmp_id"), "gen_bus")
-           display(bus_id)
            vr = _PMD.var(pm, nw, :vr, bus_id)
            vi = _PMD.var(pm, nw, :vi, bus_id)
            crg = _PMD.var(pm, nw, :crg, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
@@ -161,18 +167,20 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
 
           for c in _PMD.conductor_ids(pm; nw=nw)
               if typeof(dst[c]) == Float64
-                  JuMP.@constraint(pm.model,
+                  JuMP.@NLconstraint(pm.model,
                       -vr[c]*cig[c]+vi[c]*crg[c] == dst[c]
                   )
                   JuMP.@constraint(pm.model,
                       res[c] == 0.0
                   )
               elseif typeof(dst[c]) == _DST.Normal{Float64}
-                  if pm.setting["estimation_criterion"] == "wls"
-                      JuMP.@constraint(pm.model,
-                          res[c] == (-vr[c]*cig[c]+vi[c]*crg[c]-_DST.mean(dst[c]))^2/_DST.var(dst[c])^2
+                  if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
+                      msr = _DST.mean(dst[c])
+                      weight = _DST.var(dst[c])^2
+                      JuMP.@NLconstraint(pm.model,
+                          res[c] == (-vr[c]*cig[c]+vi[c]*crg[c]-msr)^2/weight
                       )
-                  elseif pm.setting["estimation_criterion"] == "wlav"
+                  elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                       JuMP.@constraint(pm.model,
                           res[c] >= (-vr[c]*cig[c]+vi[c]*crg[c]-_DST.mean(dst[c]))/_DST.var(dst[c])
                       )
@@ -194,7 +202,6 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
                   #     res[c] == Expr(:call, Symbol("df_$(i)_$(c)"), var[c]
                   # )
               end
-          end
-       end
-    end#TODO add same for :va, even though we don't use it
+          end#or c
+     end
 end

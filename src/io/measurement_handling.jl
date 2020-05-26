@@ -59,3 +59,29 @@ function dataString_to_array(input::String)::Array
     end
     return float_array
 end
+"""
+   this isn't necessary if you don't want to pass measurement values as start value to the pd variable
+"""
+function add_measurement_id_to_load!(pmd_data::Dict, meas_file::String)::Dict
+    meas_df = CSV.read(meas_file)
+    for row in 1:size(meas_df)[1]
+        if meas_df[row,:meas_var] == "pd"
+            if length(meas_df[row,:phase]) == 1
+               pmd_data["load"][string(meas_df[row,:cmp_id])]["pd_meas"] = [0.0, 0.0, 0.0]
+               pmd_data["load"][string(meas_df[row,:cmp_id])]["pd_meas"][parse(Int64, meas_df[row,:phase])] = parse(Float64, meas_df[row,:val])
+            else
+               meas_arr = dataString_to_array(meas_df[row,:val])
+               pmd_data["load"][string(meas_df[row,:cmp_id])]["pd_meas"] = meas_arr
+            end
+        elseif meas_df[row,:meas_var] == "qd"
+            if length(meas_df[row,:phase]) == 1
+               pmd_data["load"][string(meas_df[row,:cmp_id])]["qd_meas"] = [0.0, 0.0, 0.0]
+               pmd_data["load"][string(meas_df[row,:cmp_id])]["qd_meas"][parse(Int64, meas_df[row,:phase])] = parse(Float64, meas_df[row,:val])
+            else
+               meas_arr = dataString_to_array(meas_df[row,:val])
+               pmd_data["load"][string(meas_df[row,:cmp_id])]["qd_meas"] = meas_arr
+            end
+        end
+    end
+    return pmd_data
+end

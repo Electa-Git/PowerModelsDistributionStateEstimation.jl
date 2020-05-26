@@ -23,5 +23,5 @@ module PowerModelsDSSE
     export variable_mc_residual
     export constraint_mc_residual
     export objective_mc_se
-
+    export calculate_vm_error
 end

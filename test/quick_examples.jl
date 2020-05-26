@@ -13,7 +13,8 @@ pmd_data = _PMD.transform_data_model(data) #NB this is sadly necessary at the mo
 meas_file = "C:\\Users\\mvanin\\.julia\\dev\\PowerModelsDSSE\\test\\data\\case3_input.csv"
 
 PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_file, false, 0)
-pmd_data["setting"] = Dict("estimation_criterion" => "wls")
+PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas_file)
+pmd_data["setting"] = Dict("estimation_criterion" => "wlav")
 se_result = PowerModelsDSSE.run_ivr_mc_se(pmd_data, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0))
-pf_result = _PMD.run_mc_opf(pmd_data, _PMs.IVRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-5, "print_level"=>0))
-vm_error_array,err_max,err_mean = calculate_vm_error(se_result, pf_result)
+pf_result = _PMD.run_mc_opf(pmd_data, _PMs.IVRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0))
+vm_error_array,err_max,err_mean = PowerModelsDSSE.calculate_vm_error(se_result, pf_result)

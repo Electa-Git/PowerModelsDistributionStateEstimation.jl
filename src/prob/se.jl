@@ -22,10 +22,8 @@ end
 ""
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
-    pm.setting = Dict("estimation_criterion" => "wlav")
-
     # Variables
-    variable_mc_load(pm; report = true)
+    variable_mc_load(pm; report = true, meas_start=true)
     variable_mc_residual(pm)
     _PMD.variable_mc_bus_voltage(pm; bounded = false)
     _PMD.variable_mc_branch_power(pm; bounded = false)
@@ -67,9 +65,6 @@ end
 
 function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
-    #variable_mc_load(pm)
-     pm.setting = Dict("estimation_criterion" => "wlav")
-
     variable_mc_residual(pm)
     _PMD.variable_mc_bus_voltage(pm, bounded = false)
     _PMD.variable_mc_branch_current(pm, bounded = false)
