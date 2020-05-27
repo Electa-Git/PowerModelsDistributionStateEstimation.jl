@@ -1,17 +1,3 @@
-""
-#TODO:deprecated?
-function constraint_mc_load(pm::_PMs.AbstractPowerModel, i::Int;
-                            nw::Int=pm.cnw, report::Bool=true)
-    _PMs.var(pm, nw, :pd_bus)[i] = _PMs.var(pm, nw, :pd, i)
-    _PMs.var(pm, nw, :qd_bus)[i] = _PMs.var(pm, nw, :qd, i)
-
-    if report
-        _PMs.sol(pm, nw, :load, i)[:pd_bus] = _PMs.var(pm, nw, :pd_bus, i)
-        _PMs.sol(pm, nw, :load, i)[:qd_bus] = _PMs.var(pm, nw, :qd_bus, i)
-    end
-end
-
-
 """
     constraint_mc_residual, polar version (and rectangular?)
 """
