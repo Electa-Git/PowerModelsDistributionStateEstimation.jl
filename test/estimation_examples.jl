@@ -7,6 +7,7 @@
         pmd_data_case3 = _PMD.transform_data_model(data_case3)
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data_case3, meas_case3, false, 0)
         PowerModelsDSSE.add_measurement_id_to_load!(pmd_data_case3, meas_case3)
+        pmd_data["setting"] = Dict("weight_rescaler" => 100)
 
         @testset "simple acp case3 wlav se" begin
             pmd_data_case3["setting"] = Dict("estimation_criterion" => "wlav")
