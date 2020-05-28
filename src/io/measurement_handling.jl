@@ -18,7 +18,7 @@ function add_measurement_to_pmd_data!(pmd_data::Dict, meas_file::String; actual_
     meas_df = CSV.read(meas_file)
     pmd_data["meas"] = Dict{String, Any}()
     [pmd_data["meas"]["$m_id"] = Dict{String,Any}() for m_id in meas_df[!,:meas_id]]
-    for row in 1:size(meas_df)[1]
+    for row in 1:size(meas_df)[1] # TODO: TOM: A possible cleaner way is to look into linear and carthesian indices as an iterator.
         @assert meas_df[row,:dst] == "Normal" "Currently only normal distributions supported"
         pmd_data["meas"]["$(meas_df[row,:meas_id])"] = Dict{String,Any}()
         pmd_data["meas"]["$(meas_df[row,:meas_id])"]["cmp"] = Symbol(meas_df[row,:cmp_type])

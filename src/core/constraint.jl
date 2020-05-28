@@ -1,3 +1,21 @@
+<<<<<<< HEAD
+=======
+""
+#TODO:deprecated?
+#TODO: TOM: Are these variables available in the new version of PowerModels? If so, please deprecate away! Less code = Beter code.
+function constraint_mc_load(pm::_PMs.AbstractPowerModel, i::Int;
+                            nw::Int=pm.cnw, report::Bool=true)
+    _PMs.var(pm, nw, :pd_bus)[i] = _PMs.var(pm, nw, :pd, i)
+    _PMs.var(pm, nw, :qd_bus)[i] = _PMs.var(pm, nw, :qd, i)
+
+    if report
+        _PMs.sol(pm, nw, :load, i)[:pd_bus] = _PMs.var(pm, nw, :pd_bus, i)
+        _PMs.sol(pm, nw, :load, i)[:qd_bus] = _PMs.var(pm, nw, :qd_bus, i)
+    end
+end
+
+
+>>>>>>> f8781278f1f327c0f5a58f02cccdc73292eaefe9
 """
     constraint_mc_residual, polar version (and rectangular?)
 """
@@ -20,6 +38,11 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
             )
         elseif typeof(dst[c]) == _DST.Normal{Float64}
             if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
+<<<<<<< HEAD
+=======
+                weight = _DST.var(dst[c])^2 # TODO: TOM: The var function returns (std)^2, so the current implementation gives (std)^4
+                msr = _DST.mean(dst[c]) # TODO: TOM: Why bother with defining these terms, just put them inline
+>>>>>>> f8781278f1f327c0f5a58f02cccdc73292eaefe9
                 JuMP.@NLconstraint(pm.model,
                     res[c] == (var[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
                 )
@@ -60,8 +83,9 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
     nph = 3
 
     if _PMD.ref(pm, nw, :meas, i, "var") == :vm
-        vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
+        vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id")) 
         vr = _PMD.var(pm, nw, :vr, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
+<<<<<<< HEAD
         expr = JuMP.@NLexpression( pm.model, [c in 1:nph], vi[c]^2+vr[c]^2 )
     elseif _PMD.ref(pm, nw, :meas, i, "var") == :pg || _PMD.ref(pm, nw, :meas, i, "var") == :qg
         bus_id = _PMD.ref(pm, nw, :gen, _PMD.ref(pm, nw, :meas, i, "cmp_id"), "gen_bus")
@@ -76,6 +100,9 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
         end
     end
     if _PMD.ref(pm, nw, :meas, i, "var") == :vm
+=======
+    # TODO: This seems like a lot of duplicate code, suggestion (see issue), return an expression for the var, similar for everything that follows!
+>>>>>>> f8781278f1f327c0f5a58f02cccdc73292eaefe9
         for c in _PMD.conductor_ids(pm; nw=nw)
             if typeof(dst[c]) == Float64
                 JuMP.@NLconstraint(pm.model,
