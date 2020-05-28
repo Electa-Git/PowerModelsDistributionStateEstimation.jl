@@ -1,6 +1,6 @@
 using Statistics
 
-function calculate_vm_error(se_sol::Dict, pf_sol::Dict)
+function calculate_error(se_sol::Dict, pf_sol::Dict; vm_or_va = "vm")
     if haskey(se_sol, "solution")
         se_sol = se_sol["solution"]
     end
@@ -14,13 +14,13 @@ function calculate_vm_error(se_sol::Dict, pf_sol::Dict)
     if haskey(se_sol["bus"]["1"], "vr")
         convert_rectangular_to_polar!(se_sol["bus"])
     end
-    vm_diff = []
+    diff = []
     for (b,bus) in pf_sol["bus"]
-        for cond_vm in 1:length(bus["vm"])
-            push!(vm_diff, abs(bus["vm"][cond_vm]-se_sol["bus"][b]["vm"][cond_vm]))
+        for cond in 1:length(bus[vm_or_va])
+            push!(diff, abs(bus[vm_or_va][cond]-se_sol["bus"][b][vm_or_va][cond]))
         end
     end
-    return vm_diff, maximum(vm_diff), mean(vm_diff)
+    return diff, maximum(diff), mean(diff)
 end
 
 function convert_rectangular_to_polar!(sol::Dict{String,Any})

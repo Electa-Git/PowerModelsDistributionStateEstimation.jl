@@ -16,7 +16,6 @@ end
 
 ""
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
-    display(data)
     if !haskey(data["setting"], "weight_rescaler")
         data["setting"]["weight_rescaler"] = 1
     end
@@ -62,7 +61,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     end
 
     for i in _PMD.ids(pm, :transformer)
-        constraint_mc_transformer_power(pm, i)
+        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
     # Objective

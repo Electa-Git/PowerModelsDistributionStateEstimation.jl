@@ -19,18 +19,16 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                 res[c] == 0.0
             )
         elseif typeof(dst[c]) == _DST.Normal{Float64}
-            weight = _DST.var(dst[c])*rsc
-            msr = _DST.mean(dst[c])
             if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                 JuMP.@NLconstraint(pm.model,
-                    res[c] == (var[c]-msr)^2/weight^2
+                    res[c] == (var[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
                 )
             elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                 JuMP.@constraint(pm.model,
-                    res[c] >= (var[c]-msr)/weight
+                    res[c] >= (var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
                 )
                 JuMP.@constraint(pm.model,
-                    res[c] >= -(var[c]-msr)/weight
+                    res[c] >= -(var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
                 )
             end
         else
@@ -87,18 +85,16 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
                     res[c] == 0.0
                 )
             elseif typeof(dst[c]) == _DST.Normal{Float64}
-                msr = _DST.mean(dst[c])
-                weight = _DST.var(dst[c])*rsc
                 if  _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                     JuMP.@NLconstraint(pm.model,
-                        res[c] == (expr[c]-msr^2)^2/weight^2
+                        res[c] == (expr[c]-_DST.mean(dst[c])^2)^2/(_DST.std(dst[c])*rsc)^2
                     )
                 elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                     JuMP.@NLconstraint(pm.model,
-                        res[c] >= (expr[c]-msr^2)/weight
+                        res[c] >= (expr[c]-_DST.mean(dst[c])^2)/(_DST.std(dst[c])*rsc)
                     )
                     JuMP.@NLconstraint(pm.model,
-                        res[c] >= -(expr[c]-msr^2)/weight
+                        res[c] >= -(expr[c]-_DST.mean(dst[c])^2)/(_DST.std(dst[c])*rsc)
                     )
                 end
             else
@@ -127,18 +123,16 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
                    res[c] == 0.0
                )
            elseif typeof(dst[c]) == _DST.Normal{Float64}
-               msr = _DST.mean(dst[c])
-               weight = _DST.var(dst[c])*rsc
                if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                    JuMP.@NLconstraint(pm.model,
-                       res[c] == (expr[c]-msr)^2/weight^2
+                       res[c] == (expr[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
                    )
                elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                    JuMP.@NLconstraint(pm.model,
-                       res[c] >= (expr[c]-msr)/weight
+                       res[c] >= (expr[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
                    )
                    JuMP.@NLconstraint(pm.model,
-                       res[c] >= -(expr[c]-msr)/weight
+                       res[c] >= -(expr[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
                    )
                end
            else
