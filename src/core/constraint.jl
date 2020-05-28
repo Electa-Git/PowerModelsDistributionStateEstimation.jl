@@ -1,5 +1,6 @@
 ""
 #TODO:deprecated?
+#TODO: TOM: Are these variables available in the new version of PowerModels? If so, please deprecate away! Less code = Beter code.
 function constraint_mc_load(pm::_PMs.AbstractPowerModel, i::Int;
                             nw::Int=pm.cnw, report::Bool=true)
     _PMs.var(pm, nw, :pd_bus)[i] = _PMs.var(pm, nw, :pd, i)
@@ -33,8 +34,8 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
             )
         elseif typeof(dst[c]) == _DST.Normal{Float64}
             if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
-                weight = _DST.var(dst[c])^2
-                msr = _DST.mean(dst[c])
+                weight = _DST.var(dst[c])^2 # TODO: TOM: The var function returns (std)^2, so the current implementation gives (std)^4
+                msr = _DST.mean(dst[c]) # TODO: TOM: Why bother with defining these terms, just put them inline
                 JuMP.@NLconstraint(pm.model,
                     res[c] == (var[c]-msr)^2/weight
                 )
@@ -73,8 +74,9 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
 
     if _PMD.ref(pm, nw, :meas, i, "var") == :vm
-        vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
+        vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id")) 
         vr = _PMD.var(pm, nw, :vr, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
+    # TODO: This seems like a lot of duplicate code, suggestion (see issue), return an expression for the var, similar for everything that follows!
         for c in _PMD.conductor_ids(pm; nw=nw)
             if typeof(dst[c]) == Float64
                 JuMP.@NLconstraint(pm.model,
