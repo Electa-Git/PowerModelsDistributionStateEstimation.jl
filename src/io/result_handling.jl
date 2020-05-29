@@ -1,5 +1,7 @@
 using Statistics
 
+# TODO: TOM: We should have an thourough discussion on which functionality we want to implement in this regard for v0.1, this should be driven from the features presented in literature.
+
 function calculate_error(se_sol::Dict, pf_sol::Dict; vm_or_va = "vm")
     if haskey(se_sol, "solution")
         se_sol = se_sol["solution"]

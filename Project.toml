@@ -27,6 +27,8 @@ julia = "^1"
 
 [extras]
 JSONTables = "b9914132-a727-11e9-1322-f18e41205b0b"
+Mosek = "6405355b-0ac2-5fba-af84-adbd65488c0e"
+MosekTools = "1ec41992-ff65-5c91-ac43-2df89e9693a4"
 NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 OpenDSSDirect = "a8b11937-1041-50f2-9818-136bb7a8fb06"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"

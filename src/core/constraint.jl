@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-=======
-""
-#TODO:deprecated?
-#TODO: TOM: Are these variables available in the new version of PowerModels? If so, please deprecate away! Less code = Beter code.
-function constraint_mc_load(pm::_PMs.AbstractPowerModel, i::Int;
-                            nw::Int=pm.cnw, report::Bool=true)
-    _PMs.var(pm, nw, :pd_bus)[i] = _PMs.var(pm, nw, :pd, i)
-    _PMs.var(pm, nw, :qd_bus)[i] = _PMs.var(pm, nw, :qd, i)
-
-    if report
-        _PMs.sol(pm, nw, :load, i)[:pd_bus] = _PMs.var(pm, nw, :pd_bus, i)
-        _PMs.sol(pm, nw, :load, i)[:qd_bus] = _PMs.var(pm, nw, :qd_bus, i)
-    end
-end
-
-
->>>>>>> f8781278f1f327c0f5a58f02cccdc73292eaefe9
 """
     constraint_mc_residual, polar version (and rectangular?)
 """
@@ -28,6 +10,12 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :setting)["weight_rescaler"]
 
+    σ = [1.0 1.0 1.0]
+    z = [0.0 0.0 0.0]
+    #NB I need to register the following expressions to include them in jump constraints
+    for c in 1:nph σ[c] = _DST.std(dst[c])*rsc end
+    for c in 1:nph z[c] = _DST.mean(dst[c]) end
+
     for c in _PMD.conductor_ids(pm; nw=nw)
         if typeof(dst[c]) == Float64
             JuMP.@constraint(pm.model,
@@ -38,20 +26,15 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
             )
         elseif typeof(dst[c]) == _DST.Normal{Float64}
             if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
-<<<<<<< HEAD
-=======
-                weight = _DST.var(dst[c])^2 # TODO: TOM: The var function returns (std)^2, so the current implementation gives (std)^4
-                msr = _DST.mean(dst[c]) # TODO: TOM: Why bother with defining these terms, just put them inline
->>>>>>> f8781278f1f327c0f5a58f02cccdc73292eaefe9
                 JuMP.@NLconstraint(pm.model,
-                    res[c] == (var[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
+                    res[c] == (var[c]-z[c])^2/σ[c]^2
                 )
             elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                 JuMP.@constraint(pm.model,
-                    res[c] >= (var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
+                    res[c] >= (var[c]-z[c])/σ[c]
                 )
                 JuMP.@constraint(pm.model,
-                    res[c] >= -(var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
+                    res[c] >= -(var[c]-z[c])/σ[c]
                 )
             end
         else
@@ -81,14 +64,19 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :setting)["weight_rescaler"]
     nph = 3
+    σ = [1.0 1.0 1.0]
+    z = [0.0 0.0 0.0]
+    #NB I need to register the following expressions to include them in jump constraints
+    for c in 1:nph σ[c] = _DST.std(dst[c])*rsc end
+    for c in 1:nph z[c] = _DST.mean(dst[c]) end
 
     if _PMD.ref(pm, nw, :meas, i, "var") == :vm
-        vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id")) 
+        vi = _PMD.var(pm, nw, :vi, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
         vr = _PMD.var(pm, nw, :vr, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
-<<<<<<< HEAD
         expr = JuMP.@NLexpression( pm.model, [c in 1:nph], vi[c]^2+vr[c]^2 )
     elseif _PMD.ref(pm, nw, :meas, i, "var") == :pg || _PMD.ref(pm, nw, :meas, i, "var") == :qg
         bus_id = _PMD.ref(pm, nw, :gen, _PMD.ref(pm, nw, :meas, i, "cmp_id"), "gen_bus")
+        # TODO: This seems like a lot of duplicate code, suggestion (see issue), return an expression for the var, similar for everything that follows!
         vr = _PMD.var(pm, nw, :vr, bus_id)
         vi = _PMD.var(pm, nw, :vi, bus_id)
         crg = _PMD.var(pm, nw, :crg, _PMD.ref(pm, nw, :meas, i, "cmp_id"))
@@ -100,9 +88,6 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
         end
     end
     if _PMD.ref(pm, nw, :meas, i, "var") == :vm
-=======
-    # TODO: This seems like a lot of duplicate code, suggestion (see issue), return an expression for the var, similar for everything that follows!
->>>>>>> f8781278f1f327c0f5a58f02cccdc73292eaefe9
         for c in _PMD.conductor_ids(pm; nw=nw)
             if typeof(dst[c]) == Float64
                 JuMP.@NLconstraint(pm.model,
@@ -114,14 +99,14 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
             elseif typeof(dst[c]) == _DST.Normal{Float64}
                 if  _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                     JuMP.@NLconstraint(pm.model,
-                        res[c] == (expr[c]-_DST.mean(dst[c])^2)^2/(_DST.std(dst[c])*rsc)^2
+                        res[c] == (expr[c]-z[c]^2)^2/σ[c]^2
                     )
                 elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                     JuMP.@NLconstraint(pm.model,
-                        res[c] >= (expr[c]-_DST.mean(dst[c])^2)/(_DST.std(dst[c])*rsc)
+                        res[c] >= (expr[c]-z[c]^2)/σ[c]
                     )
                     JuMP.@NLconstraint(pm.model,
-                        res[c] >= -(expr[c]-_DST.mean(dst[c])^2)/(_DST.std(dst[c])*rsc)
+                        res[c] >= -(expr[c]-z[c]^2)/σ[c]
                     )
                 end
             else
@@ -152,14 +137,14 @@ function constraint_mc_residual(pm::_PMs.AbstractIVRModel, i::Int;
            elseif typeof(dst[c]) == _DST.Normal{Float64}
                if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                    JuMP.@NLconstraint(pm.model,
-                       res[c] == (expr[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
+                       res[c] == (expr[c]-z[c])^2/σ[c]^2
                    )
                elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                    JuMP.@NLconstraint(pm.model,
-                       res[c] >= (expr[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
+                       res[c] >= (expr[c]-z[c])/σ[c]
                    )
                    JuMP.@NLconstraint(pm.model,
-                       res[c] >= -(expr[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
+                       res[c] >= -(expr[c]-z[c])/σ[c]
                    )
                end
            else

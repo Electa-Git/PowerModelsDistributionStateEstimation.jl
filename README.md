@@ -20,15 +20,24 @@ Currently, uncertainties may either be described by:
 
 ## Core Problem Specification
 
-- State Estimation (SE), for the Bus Injection Model (BIM)
+- State Estimation (SE) as equality constrained optimization problem
 
-## Core Network Formulations
+## Core Network Constraint Formulations
 
-- AC (polar coordinates)
+- AC Polar (exact)
+- AC Rectangular (exact)
+- AC IV Rectangular (exact)
+- SDP (positive semi-definite relaxation)
+
+All the formulations are three-phase unbalanced and feature accurate delta/wye load models.
+The exact formulations also feature delta/wye transformer models.
+Network constraint, load and transformer models are taken from PowerModelsDistribution.jl
+You can find a quickguide here [add_hyperlink]
+
 
 ## Network Data Formats
 
-- OpenDSS ".dss" files
+- OpenDSS ".dss" files in the PowerModelsDistribution format
 
 ## Installation
 

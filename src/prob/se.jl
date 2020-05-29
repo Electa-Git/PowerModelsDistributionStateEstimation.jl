@@ -15,6 +15,10 @@ function run_ivr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...
 end
 
 ""
+function run_sdp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+    return run_mc_se(data, _PMDs.SDPUBFPowerModel, solver; kwargs...)
+end
+""
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
     if !haskey(data["setting"], "weight_rescaler")
         data["setting"]["weight_rescaler"] = 1
@@ -26,7 +30,7 @@ function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, sol
 end
 
 ""
-function build_mc_se(pm::_PMs.AbstractPowerModel)
+function build_mc_se(pm::_PMs.AbstractPowerModel)#works with both ACPolar and ACRectangular
 
     # Variables
     variable_mc_load(pm; report = true, meas_start=true)
@@ -36,7 +40,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     _PMD.variable_mc_transformer_power(pm; bounded = false)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = false)
     #_PMD.variable_mc_load_setpoint(pm; bounded=false)
-    #TODO check if best to use our own load var
+    #TODO check if best to use our own load var, depends on whether I can add starting values
 
     # Constraints
     for (i,load) in _PMD.ref(pm, :load)
