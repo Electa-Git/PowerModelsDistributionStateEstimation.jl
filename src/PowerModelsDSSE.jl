@@ -11,9 +11,12 @@ module PowerModelsDSSE
     const _PMD = PowerModelsDistribution
     const _IM = InfrastructureModels
 
-    include("core/variable.jl")
-    include("core/objective.jl")
+
     include("core/constraint.jl")
+    include("core/conversion_types.jl")
+    include("core/measurement_conversion.jl")
+    include("core/objective.jl")
+    include("core/variable.jl")
 
     include("io/measurement_handling.jl")
     include("io/result_handling.jl")
