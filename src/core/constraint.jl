@@ -5,7 +5,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                                 nw::Int=pm.cnw)
 
     res = _PMD.var(pm, nw, :res, i)
-    var, res_corr = make_uniform_variable_space(pm, i; nw=nw)
+    var = make_uniform_variable_space(pm, i; nw=nw)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :setting)["weight_rescaler"]
     nph = 3
@@ -21,14 +21,14 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
         elseif typeof(dst[c]) == _DST.Normal{Float64}
             if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                 JuMP.@constraint(pm.model,
-                    res[c] == (var[c]-_DST.mean(dst[c])^res_corr)^2/(_DST.std(dst[c])*rsc)^2
+                    res[c] == (var[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
                 )
             elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                 JuMP.@constraint(pm.model,
-                    res[c] >= (var[c]-_DST.mean(dst[c])^res_corr)/(_DST.std(dst[c])*rsc)
+                    res[c] >= (var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
                 )
                 JuMP.@constraint(pm.model,
-                    res[c] >= -(var[c]-_DST.mean(dst[c])^res_corr)/(_DST.std(dst[c])*rsc)
+                    res[c] >= -(var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
                 )
             end
         else

@@ -79,3 +79,58 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
     report && _IM.sol_component_value(pm, nw, :load, :qd, _PMD.ids(pm, nw, :load), qd)
 
 end
+
+function variable_mc_load_current(pm::_PMs.IVRPowerModel; kwargs...)
+    variable_mc_load_current_real(pm; kwargs...)
+    variable_mc_load_current_imag(pm; kwargs...)
+end
+
+
+function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
+                                 nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+    cnds = _PMD.conductor_ids(pm; nw=nw)
+    ncnds = length(cnds)
+
+    if meas_start
+        start_value = Dict(i => [_PMD.ref(pm, nw, :load, i)["crd_meas"][c] for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
+    else
+        start_value =  Dict(i => [0.0 for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
+    end
+    crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
+            [c in 1:ncnds], base_name="$(nw)_crd_$(i)",
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", start_value[i][c])
+        ) for i in _PMD.ids(pm, nw, :load)
+    )
+
+    if bounded
+        for i in _PMs.ids(pm, nw, :load), c in _PMD.conductor_ids(pm; nw=nw)
+            JuMP.set_lower_bound(crd[i][c], 0.0)
+        end
+    end
+
+    _PMs.var(pm, nw)[:crd_bus] = Dict{Int, Any}()
+
+    report && _IM.sol_component_value(pm, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
+end
+
+function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+    cnds = _PMD.conductor_ids(pm; nw=nw)
+    ncnds = length(cnds)
+
+    if meas_start
+        start_value = Dict(i => [_PMD.ref(pm, nw, :load, i)["cid_meas"][c] for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
+    else
+        start_value =  Dict(i => [0.0 for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
+    end
+
+    cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
+            [c in 1:ncnds], base_name="$(nw)_cid_$(i)",
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start", start_value[i][c])
+        ) for i in _PMD.ids(pm, nw, :load)
+    )
+
+    _PMs.var(pm, nw)[:cid_bus] = Dict{Int, Any}()
+
+    report && _IM.sol_component_value(pm, nw, :load, :cid, _PMD.ids(pm, nw, :load), cid)
+
+end

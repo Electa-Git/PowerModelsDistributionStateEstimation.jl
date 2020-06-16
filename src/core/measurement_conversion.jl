@@ -4,7 +4,6 @@ function make_uniform_variable_space(pm::_PMs.AbstractPowerModel, i::Int; nw::In
     nph=3
     if no_conversion_needed(pm, msr_var)  #just creates the variable, which is naturally available in the given power model
         original_var = _PMD.var(pm, nw, msr_var, cmp_id)
-        residual_correction = 1
     else
         if haskey(_PMD.var(pm, nw), msr_var)
             push!(_PMD.var(pm, nw)[msr_var], cmp_id => JuMP.@variable(pm.model,
@@ -15,9 +14,9 @@ function make_uniform_variable_space(pm::_PMs.AbstractPowerModel, i::Int; nw::In
         end
         original_var = _PMD.var(pm, nw)[msr_var][cmp_id]
         msr_type = assign_conversion_type_to_msr(pm, i, msr_var; nw=nw)
-        residual_correction = create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw, nph=nph)
+        create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw, nph=nph)
     end
-    return original_var, residual_correction
+    return original_var
 end
 
 function no_conversion_needed(pm::_PMs.ACPPowerModel, msr_var::Symbol)
@@ -51,40 +50,41 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             push!(new_var_den, _PMD.var(pm, nw, nvd, msr.cmp_id))
         end
     end
-
-    JuMP.@NLconstraint(pm.model, [c in 1:nph],
-        original_var[msr.cmp_id][c] == sum( n[c]^2 for n in new_var_num )/
+    JuMP.@constraint(pm.model, [c in 1:nph],
+        original_var[msr.cmp_id][c]^2 == sum( n[c]^2 for n in new_var_num )/
                    sum( d[c]^2 for d in new_var_den)
         )
-
-    residual_exp = 2
-    return residual_exp
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareMultiplication; nw=nw, nph = 3)
-    display("new case")
-    display(original_var)
-    display(msr.mult1[1])
-    display(msr.cmp_id)
-    display(_PMD.var(pm, nw)[:crg])
-    display(_PMD.var(pm, nw)[:crd])
-    m1 = _PMD.var(pm, nw, msr.mult1[1], msr.cmp_id)
-    display("m1 is $m1")
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Multiplication; nw=nw, nph = 3)
+
+    m1 = []
     m2 = []
-    for m in msr.mult2
+
+    for m in msr.mult1
         if occursin("v", String(m)) && msr.cmp_type != :bus
-            push!(m2, _PMD.var(pm, nw, m, msr.bus_ind))
+            push!(m1, _PMD.var(pm, nw, m, msr.bus_ind))
         else
-            push!(m2, _PMD.var(pm, nw, m, msr.cmp_id))
+            push!(m1, _PMD.var(pm, nw, m, msr.cmp_id))
         end
     end
 
-    JuMP.@NLconstraint(pm.model, [c in 1:nph],
-        original_var[msr.cmp_id][c] == m1[c]^2*sum( m[c]^2 for m in m2 )
-        )
-
-    residual_exp = 2
-    return residual_exp
+    for mm in msr.mult2
+        if occursin("v", String(mm)) && msr.cmp_type != :bus
+            push!(m2, _PMD.var(pm, nw, mm, msr.bus_ind))
+        else
+            push!(m2, _PMD.var(pm, nw, mm, msr.cmp_id))
+        end
+    end
+    if occursin("p", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, [c in 1:nph],
+            original_var[msr.cmp_id][c] == m1[1][c]*m2[1][c]+m1[2][c]*m2[2][c]
+            )
+    elseif occursin("q", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, [c in 1:nph],
+            original_var[msr.cmp_id][c] == -m1[2][c]*m2[1][c]+m1[1][c]*m2[2][c]
+            )
+    end
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::ArcTang; nw=nw, nph=3)
@@ -94,9 +94,6 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     JuMP.@NLconstraint(pm.model, [c in 1:nph],
         original_var[c] == atan(den[c]/num[c])
         )
-
-    residual_exp = 1 #this is to be checked.. is it true for both WLAV and WLS?
-    return residual_exp
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Fraction; nw=nw, nph=3)
@@ -114,7 +111,4 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     JuMP.@constraint(pm.model, [c in 1:nph],
         original_var[c] == num[c]/den[c]
         )
-
-    residual_exp = 1
-    return residual_exp
 end

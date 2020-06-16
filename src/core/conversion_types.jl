@@ -9,7 +9,8 @@ struct SquareFraction<:ConversionType
     denominator::Array
 end
 
-struct SquareMultiplication<:ConversionType
+struct Multiplication<:ConversionType
+    msr_sym::Symbol
     msr_id::Int64
     cmp_type::Symbol
     cmp_id::Int64
@@ -125,17 +126,17 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :cad
         msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:cid], [:crd])
     elseif msr == :p
-        msr_type = SquareMultiplication(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :pg
-        msr_type = SquareMultiplication(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :pd
-        msr_type = SquareMultiplication(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     elseif msr == :q
-        msr_type = SquareMultiplication(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:ci], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :qg
-        msr_type = SquareMultiplication(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:cig], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :qd
-        msr_type = SquareMultiplication(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:cid], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp"))
             $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported")

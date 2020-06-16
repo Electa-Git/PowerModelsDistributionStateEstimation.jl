@@ -25,6 +25,23 @@ function calculate_error(se_sol::Dict, pf_sol::Dict; vm_or_va = "vm")
     return diff, maximum(diff), mean(diff)
 end
 
+function calculate_error_vr(se_sol::Dict, pf_sol::Dict)
+    if haskey(se_sol, "solution")
+        se_sol = se_sol["solution"]
+    end
+    if haskey(pf_sol, "solution")
+        pf_sol = pf_sol["solution"]
+    end
+
+    diff = []
+    for (b,bus) in pf_sol["bus"]
+        for cond in 1:length(bus["vr"])
+            push!(diff, abs(bus["vr"][cond]-se_sol["bus"][b]["vr"][cond]))
+        end
+    end
+    return diff, maximum(diff), mean(diff)
+end
+
 function convert_rectangular_to_polar!(sol::Dict{String,Any})
     for (_,bus) in sol
         bus["vm"] = sqrt.(bus["vi"].^2+bus["vr"].^2)
