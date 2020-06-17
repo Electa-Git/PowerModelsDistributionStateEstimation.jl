@@ -32,10 +32,13 @@ function no_conversion_needed(pm::_PMs.IVRPowerModel, msr_var::Symbol)
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw, nph=3)
+
     new_var_num = []
     for nvn in msr.numerator
         if occursin("v", String(nvn)) && msr.cmp_type != :bus
             push!(new_var_num, _PMD.var(pm, nw, nvn, msr.bus_ind))
+        elseif msr.cmp_type == :branch
+            push!(new_var_num, _PMD.var(pm, nw, nvn, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"])))
         else
             push!(new_var_num, _PMD.var(pm, nw, nvn, msr.cmp_id))
         end
@@ -64,6 +67,8 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     for m in msr.mult1
         if occursin("v", String(m)) && msr.cmp_type != :bus
             push!(m1, _PMD.var(pm, nw, m, msr.bus_ind))
+        elseif msr.cmp_type == :branch
+            push!(m1, _PMD.var(pm, nw, m, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
         else
             push!(m1, _PMD.var(pm, nw, m, msr.cmp_id))
         end
@@ -72,6 +77,8 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     for mm in msr.mult2
         if occursin("v", String(mm)) && msr.cmp_type != :bus
             push!(m2, _PMD.var(pm, nw, mm, msr.bus_ind))
+        elseif msr.cmp_type == :branch
+            push!(m2, _PMD.var(pm, nw, mm, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
         else
             push!(m2, _PMD.var(pm, nw, mm, msr.cmp_id))
         end
@@ -88,11 +95,16 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::ArcTang; nw=nw, nph=3)
-    num = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
-    den = _PMD.var(pm, nw, msr.denominator, msr.cmp_id)
 
+    if msr.cmp_type == :branch
+        num = _PMD.var(pm, nw, msr.numerator, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
+        den = _PMD.var(pm, nw, msr.denominator, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
+    else
+        num = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
+        den = _PMD.var(pm, nw, msr.denominator, msr.cmp_id)
+    end
     JuMP.@NLconstraint(pm.model, [c in 1:nph],
-        original_var[c] == atan(den[c]/num[c])
+        original_var[msr.cmp_id][c] == atan(den[c]/(num[c]+0.00001))
         )
 end
 
@@ -109,6 +121,17 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 
     JuMP.@constraint(pm.model, [c in 1:nph],
-        original_var[c] == num[c]/den[c]
+        original_var[msr.cmp_id][c] == num[c]/(den[c]+0.00001)
         )
 end
+
+# using Ipopt, JuMP
+# model = JuMP.Model(with_optimizer(Ipopt.Optimizer))
+# @variable(model, z)
+# @variable(model, y)
+# @variable(model, x)
+# @constraint(model, y >= 1)
+# @NLconstraint(model, x == atan(y))
+# @objective(model, Min, x-2)
+# optimize!(model)
+#

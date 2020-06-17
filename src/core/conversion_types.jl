@@ -24,8 +24,8 @@ struct ArcTang<:ConversionType
     cmp_type::Symbol
     cmp_id::Int64
     bus_ind::Int64
-    numerator::Array
-    denominator::Array
+    numerator::Symbol
+    denominator::Symbol
 end
 
 struct Fraction<:ConversionType
@@ -75,7 +75,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
     elseif msr == :va
-        msr_type = ArcTang(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi], [:vr])
+        msr_type = ArcTang(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], :vi, :vr)
     elseif msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vm])
     elseif msr == :cmg
@@ -83,11 +83,11 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vm])
     elseif msr == :ca
-        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:q], [:p])
+        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], :q, :p)
     elseif msr == :cag
-        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:qg], [:pg])
+        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], :qg, :pg)
     elseif msr == :cad
-        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:qd], [:pd])
+        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], :qd, :pd)
     elseif msr == :cr
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p], [:vr, :vi])
     elseif msr == :crg
@@ -112,19 +112,19 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
     elseif msr == :va
-        msr_type = ArcTang(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi], [:vr])
+        msr_type = ArcTang(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], :vi, :vr)
     elseif msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [[1, 1, 1]])
     elseif msr == :cmg
         msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [[1, 1, 1]])
     elseif msr == :cmd
-        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["load_bus"], [:crd, :cid], [[1, 1, 1]])
+        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [[1, 1, 1]])
     elseif msr == :ca
-        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:ci], [:cr])
+        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], :ci, :cr)
     elseif msr == :cag
-        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:cig], [:crg])
+        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], :cig, :crg)
     elseif msr == :cad
-        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:cid], [:crd])
+        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], :cid, :crd)
     elseif msr == :p
         msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :pg
