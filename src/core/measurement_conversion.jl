@@ -94,36 +94,85 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::ArcTang; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::PreProcessing; nw=nw, nph=3)
+    #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
+    for c in 1:nph
+        if _PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c] != 0.0
 
-    if msr.cmp_type == :branch
-        num = _PMD.var(pm, nw, msr.numerator, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
-        den = _PMD.var(pm, nw, msr.denominator, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
-    else
-        num = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
-        den = _PMD.var(pm, nw, msr.denominator, msr.cmp_id)
+            display("old va entry is $(_PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c])")
+
+            μ_tan = tan(_DST.mean(_PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c]))
+            σ_tan = sec(μ_tangen)*_DST.std(_PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c])
+            _PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c] = Normal( μ_tan, σ_tan )
+
+            display("new va entry is $(_PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c])")
+            if msr.cmp_type == :branch
+                num = _PMD.var(pm, nw, msr.numerator, (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
+                den = _PMD.var(pm, nw, msr.denominator, (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
+            else
+                num = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
+                den = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
+            end
+            JuMP.@constraint(pm.model,
+                original_var[msr.cmp_id][c] == msr.numerator[c]/(msr.denominator[c]+0.0000001)
+                )
+        end
     end
-    JuMP.@NLconstraint(pm.model, [c in 1:nph],
-        original_var[msr.cmp_id][c] == atan(den[c]/(num[c]+0.00001))
-        )
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Fraction; nw=nw, nph=3)
-    if occursin("v", String(msr.numerator)) && msr.cmp_type != :bus
-        num = _PMD.var(pm, nw, msr.numerator,msr.bus_ind)
-    else
-        num = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
-    end
-    if occursin("v", String(msr.denominator)) && msr.cmp_type != :bus
-        den = _PMD.var(pm, nw, msr.denominator, msr.bus_id)
-    else
-        den = _PMD.var(pm, nw, msr.denominator, msr.cmp_id)
+    num = []
+    for n in msr.numerator
+        if occursin("v", String(msr.numerator)) && msr.cmp_type != :bus
+            push!(num, _PMD.var(pm, nw, n, msr.bus_ind))
+        else
+            push!(num, _PMD.var(pm, nw, n, (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
+        end
     end
 
+    den = _PMD.var(pm, nw, msr.denominator, msr.bus_ind)
+
+    if occursin("r", String(msr.msr_type))
+        JuMP.@constraint(pm.model, [c in 1:nph],
+            original_var[msr.cmp_id][c] == (num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c]))/(den[c]+0.00001)
+            )
+    elseif occursin("i", String(msr.msr_type))
+        JuMP.@constraint(pm.model, [c in 1:nph],
+            original_var[msr.cmp_id][c] == (-num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c]))/(den[c]+0.00001)
+            )
+    else
+        error("wrong measurement association")
+    end
+end
+
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw, nph=3)
+
+    new_var_num = []
+    for nvn in msr.numerator
+        if occursin("v", String(nvn)) && msr.cmp_type != :bus
+            push!(new_var_num, _PMD.var(pm, nw, nvn, msr.bus_ind))
+        elseif msr.cmp_type == :branch
+            push!(new_var_num, _PMD.var(pm, nw, nvn, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"])))
+        else
+            push!(new_var_num, _PMD.var(pm, nw, nvn, msr.cmp_id))
+        end
+    end
+    new_var_den = []
+    for nvd in msr.denominator
+        if typeof(nvd)!=:Symbol #only case is when I have an array of ones
+            push!(new_var_den, nvd)
+        elseif occursin("v", String(nvd)) && msr.cmp_type != :bus
+            push!(new_var_den, _PMD.var(pm, nw, nvd, msr.bus_ind))
+        else
+            push!(new_var_den, _PMD.var(pm, nw, nvd, msr.cmp_id))
+        end
+    end
     JuMP.@constraint(pm.model, [c in 1:nph],
-        original_var[msr.cmp_id][c] == num[c]/(den[c]+0.00001)
+        original_var[msr.cmp_id][c]^2 == sum( n[c]^2 for n in new_var_num )/
+                   sum( d[c]^2 for d in new_var_den)
         )
 end
+
 
 # using Ipopt, JuMP
 # model = JuMP.Model(with_optimizer(Ipopt.Optimizer))

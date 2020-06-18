@@ -19,22 +19,32 @@ struct Multiplication<:ConversionType
     mult2::Array
 end
 
-struct ArcTang<:ConversionType
+struct PreProcessing<:ConversionType
     msr_id::Int64
     cmp_type::Symbol
     cmp_id::Int64
-    bus_ind::Int64
     numerator::Symbol
     denominator::Symbol
 end
 
 struct Fraction<:ConversionType
+    msr_type::Symbol
     msr_id::Int64
     cmp_type::Symbol
     cmp_id::Int64
     bus_ind::Int64
     numerator::Array
     denominator::Array
+end
+
+struct MultiplicationFraction<:ConversionType
+    msr_type::Symbol
+    msr_id::Int64
+    cmp_type::Symbol
+    cmp_id::Int64
+    bus_ind::Int64
+    power::Array
+    voltage::Array
 end
 
 function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;nw=nw)
@@ -45,24 +55,18 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;n
         msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vm])
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vm])
-    elseif msr == :ca
-        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:q], [:p])
-    elseif msr == :cag
-        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:qg], [:pg])
-    elseif msr == :cad
-        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:qd], [:pd])
     elseif msr == :cr
-        msr_type = Fraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p], [:vm])
+        msr_type = Fraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q, :va], [:vm])
     elseif msr == :crg
-        msr_type = Fraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg], [:vm])
+        msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], [:vm])
     elseif msr == :crd
-        msr_type = Fraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd], [:vm])
+        msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], [:vm])
     elseif msr == :ci
-        msr_type = Fraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:q], [:vm])
+        msr_type = Fraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q, :va], [:vm])
     elseif msr == :cig
-        msr_type = Fraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:qg], [:vm])
+        msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], [:vm])
     elseif msr == :cid
-        msr_type = Fraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:qd], [:vm])
+        msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], [:vm])
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp"))
             $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported")
@@ -75,31 +79,25 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
     elseif msr == :va
-        msr_type = ArcTang(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], :vi, :vr)
+        msr_type = PreProcessing(i, :branch, cmp_id, :vi, :vr)
     elseif msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vm])
     elseif msr == :cmg
         msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vm])
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vm])
-    elseif msr == :ca
-        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], :q, :p)
-    elseif msr == :cag
-        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], :qg, :pg)
-    elseif msr == :cad
-        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], :qd, :pd)
     elseif msr == :cr
-        msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p], [:vr, :vi])
+        msr_type = MultiplicationFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vr, :vi])
     elseif msr == :crg
-        msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg], [:vr, :vi])
+        msr_type = MultiplicationFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
     elseif msr == :crd
-        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd], [:vr, :vi])
+        msr_type = MultiplicationFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
     elseif msr == :ci
-        msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:q], [:vr, :vi])
+        msr_type = MultiplicationFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vr, :vi])
     elseif msr == :cig
-        msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:qg], [:vr, :vi])
+        msr_type = MultiplicationFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
     elseif msr == :cid
-        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:qd], [:vr, :vi])
+        msr_type = MultiplicationFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp"))
             $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported")
@@ -112,7 +110,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
     elseif msr == :va
-        msr_type = ArcTang(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], :vi, :vr)
+        msr_type = PreProcessing(i, :branch, cmp_id, :vi, :vr)
     elseif msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [[1, 1, 1]])
     elseif msr == :cmg
@@ -120,11 +118,11 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [[1, 1, 1]])
     elseif msr == :ca
-        msr_type = ArcTang(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], :ci, :cr)
+        msr_type = PreProcessing(i, :branch, cmp_id, :ci, :cr)
     elseif msr == :cag
-        msr_type = ArcTang(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], :cig, :crg)
+        msr_type = PreProcessing(i, :gen, cmp_id, :cig, :crg)
     elseif msr == :cad
-        msr_type = ArcTang(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], :cid, :crd)
+        msr_type = PreProcessing(i, :load, cmp_id, :cid, :crd)
     elseif msr == :p
         msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :pg

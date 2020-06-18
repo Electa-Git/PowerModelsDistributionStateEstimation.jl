@@ -8,7 +8,8 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
     ncnds = length(cnds)
 
     res = _PMD.var(pm, nw)[:res] = Dict(i => JuMP.@variable(pm.model,
-        [c in 1:ncnds], base_name = "$(nw)_res_$(i)"
+        [c in 1:ncnds], base_name = "$(nw)_res_$(i)",
+        start = _PMD.comp_start_value(ref(pm, nw, :meas, i), "res_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :meas)
     )
 
@@ -31,15 +32,10 @@ end
 
 
 function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
-                                 nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+                                 nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    if meas_start
-        start_value = Dict(i => [_PMD.ref(pm, nw, :load, i)["pd_meas"][c] for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    else
-        start_value =  Dict(i => [0.0 for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    end
     pd = _PMD.var(pm, nw)[:pd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_pd_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start", start_value[i][c])
@@ -58,15 +54,9 @@ function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
 end
 
 function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
-                                   nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+                                   nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
-
-    if meas_start
-        start_value = Dict(i => [_PMD.ref(pm, nw, :load, i)["qd_meas"][c] for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    else
-        start_value =  Dict(i => [0.0 for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    end
 
     qd = _PMD.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_qd_$(i)",
@@ -87,15 +77,10 @@ end
 
 
 function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
-                                 nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+                                 nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    if meas_start
-        start_value = Dict(i => [_PMD.ref(pm, nw, :load, i)["crd_meas"][c] for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    else
-        start_value =  Dict(i => [0.0 for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    end
     crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_crd_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", start_value[i][c])
@@ -116,12 +101,6 @@ end
 function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
-
-    if meas_start
-        start_value = Dict(i => [_PMD.ref(pm, nw, :load, i)["cid_meas"][c] for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    else
-        start_value =  Dict(i => [0.0 for c in 1:ncnds] for i in _PMD.ids(pm, nw, :load))
-    end
 
     cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_cid_$(i)",

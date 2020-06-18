@@ -33,14 +33,12 @@ end
 function build_mc_se(pm::_PMs.AbstractPowerModel)#works with both ACPolar and ACRectangular
 
     # Variables
-    variable_mc_load(pm; report = true, meas_start=true)
-    variable_mc_residual(pm)
     _PMD.variable_mc_bus_voltage(pm; bounded = false)
     _PMD.variable_mc_branch_power(pm; bounded = false)
     _PMD.variable_mc_transformer_power(pm; bounded = false)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = false)
-    #_PMD.variable_mc_load_setpoint(pm; bounded=false)
-    #TODO check if best to use our own load var, depends on whether I can add starting values
+    variable_mc_load(pm; report = true)
+    variable_mc_residual(pm, bounded = true)
 
     # Constraints
     for (i,load) in _PMD.ref(pm, :load)
@@ -75,12 +73,13 @@ end
 
 function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
-    variable_mc_residual(pm)
-    variable_mc_load_current(pm, bounded = false)
+
     _PMD.variable_mc_bus_voltage(pm, bounded = false)
     _PMD.variable_mc_branch_current(pm, bounded = false)
     _PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
+    variable_mc_load_current(pm, bounded = false)
+    variable_mc_residual(pm, bounded = true)
 
     # Constraints
     for (i,bus) in _PMD.ref(pm, :ref_buses)

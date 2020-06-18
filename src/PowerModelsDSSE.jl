@@ -16,6 +16,7 @@ module PowerModelsDSSE
     include("core/conversion_types.jl")
     include("core/measurement_conversion.jl")
     include("core/objective.jl")
+    include("core/start_values_methods.jl")
     include("core/variable.jl")
 
     include("io/measurement_handling.jl")
