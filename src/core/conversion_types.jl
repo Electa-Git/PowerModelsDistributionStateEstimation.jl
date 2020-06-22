@@ -34,7 +34,7 @@ struct Fraction<:ConversionType
     cmp_id::Int64
     bus_ind::Int64
     numerator::Array
-    denominator::Array
+    denominator::Symbol
 end
 
 struct MultiplicationFraction<:ConversionType
@@ -56,20 +56,19 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;n
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vm])
     elseif msr == :cr
-        msr_type = Fraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q, :va], [:vm])
+        msr_type = Fraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q, :va], :vm)
     elseif msr == :crg
-        msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], [:vm])
+        msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], :vm)
     elseif msr == :crd
-        msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], [:vm])
+        msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
     elseif msr == :ci
-        msr_type = Fraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q, :va], [:vm])
+        msr_type = Fraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q, :va], :vm)
     elseif msr == :cig
-        msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], [:vm])
+        msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], :vm)
     elseif msr == :cid
-        msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], [:vm])
+        msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp"))
-            $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
@@ -79,28 +78,27 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
     elseif msr == :va
-        msr_type = PreProcessing(i, :branch, cmp_id, :vi, :vr)
+        msr_type = PreProcessing(i, :bus, cmp_id, :vi, :vr)
     elseif msr == :cm
-        msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vm])
+        msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vi, :vr])
     elseif msr == :cmg
-        msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vm])
+        msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vi, :vr])
     elseif msr == :cmd
-        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vm])
+        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vi, :vr])
     elseif msr == :cr
-        msr_type = MultiplicationFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vr, :vi])
+        msr_type = MultiplicationFraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vr, :vi])
     elseif msr == :crg
-        msr_type = MultiplicationFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
+        msr_type = MultiplicationFraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
     elseif msr == :crd
-        msr_type = MultiplicationFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
+        msr_type = MultiplicationFraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
     elseif msr == :ci
-        msr_type = MultiplicationFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vr, :vi])
+        msr_type = MultiplicationFraction(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vr, :vi])
     elseif msr == :cig
-        msr_type = MultiplicationFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
+        msr_type = MultiplicationFraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
     elseif msr == :cid
-        msr_type = MultiplicationFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
+        msr_type = MultiplicationFraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp"))
-            $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and will be ignored")
     end
     return msr_type
 end
@@ -110,7 +108,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
     elseif msr == :va
-        msr_type = PreProcessing(i, :branch, cmp_id, :vi, :vr)
+        msr_type = PreProcessing(i, :bus, cmp_id, :vi, :vr)
     elseif msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [[1, 1, 1]])
     elseif msr == :cmg
@@ -136,8 +134,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :qd
         msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp"))
-            $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end

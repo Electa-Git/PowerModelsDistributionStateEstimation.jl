@@ -16,7 +16,7 @@ end
 
 ""
 function run_sdp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return run_mc_se(data, _PMDs.SDPUBFPowerModel, solver; kwargs...)
+    return run_mc_se(data, _PMD.SDPUBFPowerModel, solver; kwargs...)
 end
 ""
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
@@ -30,7 +30,7 @@ function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, sol
 end
 
 ""
-function build_mc_se(pm::_PMs.AbstractPowerModel)#works with both ACPolar and ACRectangular
+function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
     _PMD.variable_mc_bus_voltage(pm; bounded = false)
@@ -39,6 +39,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)#works with both ACPolar and AC
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = false)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm, bounded = true)
+    variable_mc_measurement(pm, bounded = false)
 
     # Constraints
     for (i,load) in _PMD.ref(pm, :load)
@@ -80,6 +81,7 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)
     variable_mc_residual(pm, bounded = true)
+    variable_mc_measurement(pm, bounded = false)
 
     # Constraints
     for (i,bus) in _PMD.ref(pm, :ref_buses)
@@ -106,6 +108,61 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
         _PMD.constraint_mc_current_to(pm, i)
 
         _PMD.constraint_mc_bus_voltage_drop(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+        _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    for (i,meas) in _PMD.ref(pm, :meas)
+        constraint_mc_residual(pm, i)
+    end
+
+    objective_mc_se(pm)
+
+end
+
+function build_mc_se(pm::_PMD.AbstractUBFModels)
+
+    # Variables
+    _PMD.variable_mc_bus_voltage(pm) # TODO in _PMD: should be false
+    _PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_branch_power(pm)
+    _PMD.variable_mc_transformer_power(pm; bounded=false)
+    _PMD.variable_mc_gen_power_setpoint(pm; bounded=false)
+    _PMD.variable_mc_load_setpoint(pm)
+    variable_mc_residual(pm, bounded = true)
+    variable_mc_measurement(pm, bounded = false)
+
+    # Constraints
+    _PMD.constraint_mc_model_current(pm)
+
+    for (i,bus) in _PMD.ref(pm, :ref_buses)
+        @assert bus["bus_type"] == 3
+        if !(typeof(pm)<:_PMD.LPUBFDiagPowerModel)
+            _PMD.constraint_mc_theta_ref(pm, i)
+        end
+    end
+
+    for id in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_gen_setpoint(pm, id)
+    end
+
+    for id in _PMD.ids(pm, :load)
+        _PMD.constraint_mc_load_setpoint(pm, id)
+    end
+
+    for (i,bus) in _PMD.ref(pm, :bus)
+        _PMD.constraint_mc_load_power_balance(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        _PMD.constraint_mc_model_voltage_magnitude_difference(pm, i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+
+        _PMD.constraint_mc_thermal_limit_from(pm, i)
+        _PMD.constraint_mc_thermal_limit_to(pm, i)
     end
 
     for i in _PMD.ids(pm, :transformer)

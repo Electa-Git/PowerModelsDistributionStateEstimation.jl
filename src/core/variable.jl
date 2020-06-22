@@ -9,7 +9,7 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
 
     res = _PMD.var(pm, nw)[:res] = Dict(i => JuMP.@variable(pm.model,
         [c in 1:ncnds], base_name = "$(nw)_res_$(i)",
-        start = _PMD.comp_start_value(ref(pm, nw, :meas, i), "res_start", c, 0.0)
+        start = _PMD.comp_start_value(_PMD.ref(pm, nw, :meas, i), "res_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :meas)
     )
 
@@ -23,7 +23,7 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
 end
 
 """
-    variable_mc_load
+    variable_mc_load in terms of power, for ACR and ACP
 """
 function variable_mc_load(pm::_PMs.AbstractPowerModel; kwargs...)
     variable_mc_load_active(pm; kwargs...)
@@ -38,7 +38,7 @@ function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
 
     pd = _PMD.var(pm, nw)[:pd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_pd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start", start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -60,7 +60,7 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
 
     qd = _PMD.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_qd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start", start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start",c, 0.0)#start_value[i][c])
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -70,6 +70,9 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
 
 end
 
+"""
+    variable_mc_load_current, IVR current equivalent of variable_mc_load
+"""
 function variable_mc_load_current(pm::_PMs.IVRPowerModel; kwargs...)
     variable_mc_load_current_real(pm; kwargs...)
     variable_mc_load_current_imag(pm; kwargs...)
@@ -83,7 +86,7 @@ function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
 
     crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_crd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)#start_value[i][c])
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -104,7 +107,7 @@ function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, b
 
     cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_cid_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start", start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)#start_value[i][c])
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -112,4 +115,32 @@ function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, b
 
     report && _IM.sol_component_value(pm, nw, :load, :cid, _PMD.ids(pm, nw, :load), cid)
 
+end
+
+"""
+    variable_mc_measurement, checks if the measured quantity belongs to the formulation's variable space and
+    if not, it converts it
+"""
+
+function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool=false)
+    for i in _PMD.ids(pm, nw, :meas)
+        msr_var = _PMD.ref(pm, nw, :meas, i, "var")
+        cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
+        cmp_type = _PMD.ref(pm, nw, :meas, i, "cmp")
+        nph=3
+        if no_conversion_needed(pm, msr_var)
+            #no additional variable is created, it is already by default in the formulation
+        else
+            cmp_type == :branch ? id = (cmp_id, _PMD.ref(pm,nw,:branch, cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch, cmp_id)["t_bus"]) : id = cmp_id
+            if haskey(_PMD.var(pm, nw), msr_var)
+                push!(_PMD.var(pm, nw)[msr_var], id => JuMP.@variable(pm.model,
+                    [c in 1:nph], base_name="$(nw)_$(String(msr_var))_$id"))
+            else
+                _PMD.var(pm, nw)[msr_var] = Dict(id => JuMP.@variable(pm.model,
+                    [c in 1:nph], base_name="$(nw)_$(String(msr_var))_$id"))
+            end
+            msr_type = assign_conversion_type_to_msr(pm, i, msr_var; nw=nw)
+            create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw, nph=nph)
+        end
+    end
 end
