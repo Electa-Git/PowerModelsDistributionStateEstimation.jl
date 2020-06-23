@@ -34,7 +34,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
     new_var_den = []
     for nvd in msr.denominator
-        if typeof(nvd)!=:Symbol #only case is when I have an array of ones
+        if typeof(nvd) != Symbol #only case is when I have an array of ones
             push!(new_var_den, nvd)
         elseif occursin("v", String(nvd)) && msr.cmp_type != :bus
             push!(new_var_den, _PMD.var(pm, nw, nvd, msr.bus_ind))
@@ -43,8 +43,8 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
         end
     end
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
-    JuMP.@constraint(pm.model, [c in 1:nph],
-        original_var[id][c] == sqrt(sum( n[c]^2 for n in new_var_num ))/
+    JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
                    (sum( d[c]^2 for d in new_var_den))
         )
 end
@@ -80,7 +80,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             )
     elseif occursin("q", String(msr.msr_sym))
         JuMP.@constraint(pm.model, [c in 1:nph],
-            original_var[id][c]^2 == -m1[2][c]*m2[1][c]+m1[1][c]*m2[2][c]
+            original_var[id][c] == -m1[2][c]*m2[1][c]+m1[1][c]*m2[2][c]
             )
     end
 end
@@ -137,34 +137,6 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw, nph=3)
-
-    new_var_num = []
-    for nvn in msr.numerator
-        if occursin("v", String(nvn)) && msr.cmp_type != :bus
-            push!(new_var_num, _PMD.var(pm, nw, nvn, msr.bus_ind))
-        elseif msr.cmp_type == :branch
-            push!(new_var_num, _PMD.var(pm, nw, nvn, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"])))
-        else
-            push!(new_var_num, _PMD.var(pm, nw, nvn, msr.cmp_id))
-        end
-    end
-    new_var_den = []
-    for nvd in msr.denominator
-        if typeof(nvd) != Symbol #only case is when I have an array of ones
-            push!(new_var_den, nvd)
-        elseif occursin("v", String(nvd)) && msr.cmp_type != :bus
-            push!(new_var_den, _PMD.var(pm, nw, nvd, msr.bus_ind))
-        else
-            push!(new_var_den, _PMD.var(pm, nw, nvd, msr.cmp_id))
-        end
-    end
-    msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
-    JuMP.@NLconstraint(pm.model, [c in 1:nph],
-        original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
-                   (sum( d[c]^2 for d in new_var_den))
-        )
-end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw, nph=3)
 

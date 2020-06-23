@@ -19,6 +19,7 @@ module PowerModelsDSSE
     include("core/start_values_methods.jl")
     include("core/variable.jl")
 
+    include("io/generate_meas_data_helper.jl")
     include("io/measurement_handling.jl")
     include("io/result_handling.jl")
 

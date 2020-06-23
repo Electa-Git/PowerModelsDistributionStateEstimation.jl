@@ -6,8 +6,8 @@
 
 - change ipopt settings/add derivatives?
 
-- or are there just too many measurements?
-
-- the preprocessing of va dramatically affects acr.
+- are there just too many measurements?
 
 -test on VM so we can use MA27
+
+-add measurements at transformer level?

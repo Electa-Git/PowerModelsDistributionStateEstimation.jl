@@ -1,10 +1,8 @@
-@testset "test state estimators" begin
-
-    data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
-    pmd_data = _PMD.transform_data_model(data)
+@testset "test exact state estimators" begin
 
     @testset "acp native measurements wlav" begin
-
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
+        pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
         meas = "test/data/measurement_files/case3_PQVm.csv"
 
@@ -28,6 +26,8 @@
 
     @testset "acp native measurements wls" begin
 
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
+        pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wls")
         meas = "test/data/measurement_files/case3_PQVm.csv"
 
@@ -50,7 +50,8 @@
     end
 
     @testset "ivr native measurements wlav" begin
-
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
+        pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
         meas = "test/data/measurement_files/case3_CiCrViVr.csv"
 
@@ -74,6 +75,8 @@
 
     @testset "ivr native measurements wls" begin
 
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
+        pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wls")
         meas = "test/data/measurement_files/case3_CiCrViVr.csv"
 
@@ -96,6 +99,8 @@
 
     @testset "acr native measurements wlav" begin
 
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
+        pmd_data = _PMD.transform_data_model(data)
         meas = "test/data/measurement_files/case3_PQViVr.csv"
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
 
@@ -119,6 +124,8 @@
 
     @testset "acr native measurements wls" begin
 
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
+        pmd_data = _PMD.transform_data_model(data)
         meas = "test/data/measurement_files/case3_PQViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)

@@ -65,7 +65,7 @@ end
 function convert_rectangular_to_polar!(sol::Dict{String,Any})
     for (_,bus) in sol
         bus["vm"] = sqrt.(bus["vi"].^2+bus["vr"].^2)
-        bus["va"] = [atan(bus["vi"][c]/bus["vr"][c]) for c in 1:3]
+        bus["va"] = [atan(bus["vi"][c],bus["vr"][c]) for c in 1:3]
     end
     return sol
 end
