@@ -60,7 +60,7 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
 
     qd = _PMD.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_qd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start",c, 0.0)#start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -86,7 +86,7 @@ function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
 
     crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_crd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)#start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -107,7 +107,7 @@ function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, b
 
     cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_cid_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)#start_value[i][c])
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 

@@ -103,7 +103,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             end
             msr.cmp_type == :branch ? id = (msr.cmp_id, _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
             JuMP.@NLconstraint(pm.model,
-                original_var[id][c] == num[c]/(den[c]+0.00000001)
+                original_var[id][c] == num[c]/(den[c]+1e-8)
                 )
         end
     end
@@ -126,11 +126,11 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 
     if occursin("r", String(msr.msr_type))
         JuMP.@NLconstraint(pm.model, [c in 1:nph],
-            original_var[id][c] == (num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c]))/(den[c]+0.00001)
+            original_var[id][c] == (num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c]))/(den[c]+1e-8)
             )
     elseif occursin("i", String(msr.msr_type))
         JuMP.@NLconstraint(pm.model, [c in 1:nph],
-            original_var[id][c] == (-num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c]))/(den[c]+0.00001)
+            original_var[id][c] == (-num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c]))/(den[c]+1e-8)
             )
     else
         error("wrong measurement association")

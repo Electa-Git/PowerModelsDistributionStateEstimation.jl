@@ -7,7 +7,6 @@
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
         meas = "test/data/measurement_files/case3_allACP.csv"
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         se_res = PowerModelsDSSE.run_acp_mc_se(pmd_data, ipopt_solver_se)
         pf_res = _PMD.run_mc_pf(pmd_data, _PMs.ACPPowerModel, ipopt_solver_pf)
@@ -24,7 +23,6 @@
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
         meas = "test/data/measurement_files/case3_allIVR.csv"
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         se_res = PowerModelsDSSE.run_ivr_mc_se(pmd_data, ipopt_solver_se)
         pf_res = _PMD.run_mc_pf(pmd_data, _PMs.IVRPowerModel, ipopt_solver_pf)
@@ -41,7 +39,6 @@
         pmd_data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav")
         meas_acr = "test/data/measurement_files/case3_allACR.csv"
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_acr; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas_acr)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         se_res_acr = PowerModelsDSSE.run_acr_mc_se(pmd_data, ipopt_solver_se)
         pf_res_acr = _PMD.run_mc_pf(pmd_data, _PMs.ACRPowerModel, ipopt_solver_pf)

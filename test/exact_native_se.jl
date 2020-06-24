@@ -7,7 +7,6 @@
         meas = "test/data/measurement_files/case3_PQVm.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 
         se_res = PowerModelsDSSE.run_acp_mc_se(pmd_data, ipopt_solver_se)
@@ -32,7 +31,6 @@
         meas = "test/data/measurement_files/case3_PQVm.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 
         se_res = PowerModelsDSSE.run_acp_mc_se(pmd_data, ipopt_solver_se)
@@ -56,7 +54,6 @@
         meas = "test/data/measurement_files/case3_CiCrViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 
         se_res = PowerModelsDSSE.run_ivr_mc_se(pmd_data, ipopt_solver_se)
@@ -81,7 +78,6 @@
         meas = "test/data/measurement_files/case3_CiCrViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 
         se_res = PowerModelsDSSE.run_ivr_mc_se(pmd_data, ipopt_solver_se)
@@ -105,7 +101,6 @@
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 
         se_res = PowerModelsDSSE.run_acr_mc_se(pmd_data, ipopt_solver_se)
@@ -129,7 +124,6 @@
         meas = "test/data/measurement_files/case3_PQViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-        PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wls")
 

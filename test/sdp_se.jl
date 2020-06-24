@@ -28,7 +28,6 @@
     meas = "test/data/measurement_files/case3_SDP.csv"
 
     PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
-    PowerModelsDSSE.add_measurement_id_to_load!(pmd_data, meas)
     PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 
     @testset "sdp with wlav" begin
