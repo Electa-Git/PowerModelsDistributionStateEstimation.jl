@@ -13,15 +13,14 @@ pmd_data = _PMD.transform_data_model(data) #NB the measurement dict needs to be 
 meas_file = "C:\\Users\\mvanin\\.julia\\dev\\PowerModelsDSSE\\test\\data\\measurement_files\\EULV_t1000_PQVm.csv"
 PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=true, seed=0)
 
-pf_result = _PMD.run_mc_pf(pmd_data, _PMs.ACPPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-4, "print_level"=>0))
+pf_result = _PMD.run_mc_pf(pmd_data, _PMs.IVRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-4, "max_cpu_time"=>180.0, "print_level"=>0))
 
 PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 pmd_data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav", "weight_rescaler" => 100000)
-se_result = PowerModelsDSSE.run_ivr_mc_se(pmd_data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-4,"print_level"=>2))
+se_result = PowerModelsDSSE.run_acp_mc_se(pmd_data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-4,"print_level"=>2))
 
 vm_error_array,vm_err_max,vm_err_mean = PowerModelsDSSE.calculate_error(se_result, pf_result; vm_or_va = "vm")
 va_error_array,va_err_max,va_err_mean = PowerModelsDSSE.calculate_error(se_result, pf_result; vm_or_va = "va")
-
 
 #################################################################################
 ####### TRY WITHOUT TRANSFORMER ################################

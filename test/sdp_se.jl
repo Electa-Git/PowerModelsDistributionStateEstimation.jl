@@ -38,11 +38,10 @@
         pf_res = _PMD.run_mc_pf(pmd_data, _PMD.SDPUBFPowerModel, scs_solver)
 
         vm_error_array,vm_err_max,vm_err_mean = PowerModelsDSSE.calculate_error_SDP(se_res, pf_res)
-
         @test se_res["termination_status"] == ALMOST_OPTIMAL
         @test isapprox(se_res["objective"], 29.088641229631477; atol=1e-1)
-        @test isapprox(vm_err_max, 0.0006670287380932116; atol=1e-8)
-        @test isapprox(vm_err_mean, 0.00040251513738677317; atol=1e-8)
+        @test isapprox(vm_err_max, 0.0006670287380932116; atol=1e-6)
+        @test isapprox(vm_err_mean, 0.00040251513738677317; atol=1e-6)
 
     end
 
@@ -57,8 +56,8 @@
 
         @test se_res["termination_status"] == ALMOST_OPTIMAL
         @test isapprox(se_res["objective"], 0.008889675818438202; atol=1e-5)
-        @test isapprox(vm_err_max, 0.0011589776358038595; atol=1e-8)
-        @test isapprox(vm_err_mean, 0.00040544136727201546; atol=1e-8)
+        @test isapprox(vm_err_max, 0.0011589776358038595; atol=1e-6)
+        @test isapprox(vm_err_mean, 0.00040544136727201546; atol=1e-6)
 
     end
 

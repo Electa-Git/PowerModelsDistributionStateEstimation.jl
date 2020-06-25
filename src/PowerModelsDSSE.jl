@@ -13,7 +13,6 @@ module PowerModelsDSSE
 
 
     include("core/constraint.jl")
-    include("core/conversion_types.jl")
     include("core/measurement_conversion.jl")
     include("core/objective.jl")
     include("core/start_values_methods.jl")
