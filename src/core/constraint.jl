@@ -58,18 +58,18 @@ function assign_constraint(pm, nw, c, res, var, dst, rsc)
 end
 
 function assign_nonlinear_constraint(pm, nw, c, res, var, dst, rsc)
-    weight = rsc*_DST.std.(dst)
-    meas = _DST.mean.(dst)
+    weight = rsc*_DST.std(dst[c])
+    meas = _DST.mean(dst[c])
     if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
         JuMP.@NLconstraint(pm.model,
-            res[c] == (var[c]-meas[c])^2/(weight[c])^2
+            res[c] == (var[c]-meas[c])^2/(weight)^2
         )
     elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
         JuMP.@NLconstraint(pm.model,
-            res[c] >= (var[c]-meas[c])/(weight[c])
+            res[c] >= (var[c]-meas[c])/(weight)
         )
         JuMP.@NLconstraint(pm.model,
-            res[c] >= -(var[c]-meas[c])/(weight[c])
+            res[c] >= -(var[c]-meas[c])/(weight)
         )
     end
 end
