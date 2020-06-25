@@ -2,10 +2,10 @@
     #NB -> most cases don't solve to local optimiality. This test is just to see if the measurement conversions are done smoothly
     #      or an error occurs
     @testset "acp -> allACP wlav" begin
-        data = _PMD.parse_file("test/data/opendss_feeders/case3_unbalanced.dss")
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
-        meas = "test/data/measurement_files/case3_allACP.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_allACP.csv"
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         se_res = PowerModelsDSSE.run_acp_mc_se(pmd_data, ipopt_solver_se)
@@ -18,10 +18,10 @@
         @test isapprox(va_err_mean, 8.910758438434961e-6; atol=1e-8)
     end
     @testset "ivr -> allIVR wlav" begin
-        data = _PMD.parse_file("test/data/opendss_feeders/case3_unbalanced.dss")
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
-        meas = "test/data/measurement_files/case3_allIVR.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_allIVR.csv"
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         se_res = PowerModelsDSSE.run_ivr_mc_se(pmd_data, ipopt_solver_se)
@@ -34,10 +34,10 @@
         @test isapprox(va_err_mean, 8.910928529895546e-6; atol=1e-8)
     end
     @testset "acr -> allACR wlav" begin
-        data = _PMD.parse_file("test/data/opendss_feeders/case3_unbalanced.dss")
+        data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav")
-        meas_acr = "test/data/measurement_files/case3_allACR.csv"
+        meas_acr = "$(@__DIR__)/data/measurement_files/case3_allACR.csv"
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_acr; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
         se_res_acr = PowerModelsDSSE.run_acr_mc_se(pmd_data, ipopt_solver_se)

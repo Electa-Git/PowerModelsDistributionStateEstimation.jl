@@ -4,7 +4,7 @@
         data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
-        meas = "test/data/measurement_files/case3_PQVm.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_PQVm.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
@@ -28,7 +28,7 @@
         data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wls")
-        meas = "test/data/measurement_files/case3_PQVm.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_PQVm.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
@@ -51,7 +51,7 @@
         data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
-        meas = "test/data/measurement_files/case3_CiCrViVr.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_CiCrViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
@@ -75,7 +75,7 @@
         data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wls")
-        meas = "test/data/measurement_files/case3_CiCrViVr.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_CiCrViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)
@@ -97,7 +97,7 @@
 
         data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
-        meas = "test/data/measurement_files/case3_PQViVr.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_PQViVr.csv"
         pmd_data["setting"] = Dict{String, Any}("estimation_criterion" => "wlav")
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
@@ -121,7 +121,7 @@
 
         data = _PMD.parse_file("$(@__DIR__)/data/opendss_feeders/case3_unbalanced.dss")
         pmd_data = _PMD.transform_data_model(data)
-        meas = "test/data/measurement_files/case3_PQViVr.csv"
+        meas = "$(@__DIR__)/data/measurement_files/case3_PQViVr.csv"
 
         PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
         PowerModelsDSSE.assign_start_to_variables!(pmd_data)

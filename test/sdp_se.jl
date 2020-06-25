@@ -25,7 +25,7 @@
         end
     end
 
-    meas = "test/data/measurement_files/case3_SDP.csv"
+    meas = "$(@__DIR__)/data/measurement_files/case3_SDP.csv"
 
     PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas; actual_meas=false, seed=0)
     PowerModelsDSSE.assign_start_to_variables!(pmd_data)
