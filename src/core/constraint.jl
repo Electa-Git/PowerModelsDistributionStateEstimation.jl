@@ -21,7 +21,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
             )
         elseif typeof(dst[c]) == _DST.Normal{Float64}
             if typeof(var[1]) == JuMP.NonlinearExpression
-                assign_nonlinear_constraint(pm, nw, c, res, var, dst, rsc)
+                #assign_nonlinear_constraint(pm, nw, c, res, var, dst, rsc)
             else
                 assign_constraint(pm, nw, c, res, var, dst, rsc)
             end
