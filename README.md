@@ -45,13 +45,15 @@ XXX
 
 ## Acknowledgements
 
-This code has been developed at KU Leuven (University of Leuven) and
-EnergyVille. The primary developers are Tom Van Acker (@timmyfaraday) and
-Marta Vanin (@MartaVanin) with support for the following
-contributors:
+This code has been developed at KU Leuven (University of Leuven). The primary
+developers are Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday))
+and Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) with support for
+the following contributors:
 
-- Frederik Geth (@frederikgeth) CSIRO, General PowerModelsDistribution.jl Advice.
-- Sander Claeys (@sanderclaeys) KU Leuven, General PowerModelsDistribution.jl Advice.
+- Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)) CSIRO,
+General PowerModelsDistribution.jl Advice.
+- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)) KU Leuven,
+General PowerModelsDistribution.jl Advice.
 
 ## License
 
