@@ -31,7 +31,6 @@ end
 
 ""
 function build_mc_se(pm::_PMs.AbstractPowerModel)
-
     # Variables
     _PMD.variable_mc_bus_voltage(pm; bounded = false)
     _PMD.variable_mc_branch_power(pm; bounded = false)
@@ -74,7 +73,6 @@ end
 
 function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
-
     _PMD.variable_mc_bus_voltage(pm, bounded = false)
     _PMD.variable_mc_branch_current(pm, bounded = false)
     _PMD.variable_mc_gen_power_setpoint(pm, bounded = false)

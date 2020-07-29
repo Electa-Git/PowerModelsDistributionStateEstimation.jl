@@ -7,7 +7,9 @@ const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _DST = Distributions
 
-data = _PMD.parse_file("test/data/opendss_feeders/lvtestcase_pmd_t1000.dss"; transformations=[make_lossless!])
+data_path = joinpath(BASE_DIR,"test/data/opendss_feeders/lvtestcase_pmd_t1000.dss")
+meas_path = joinpath(BASE_DIR,"test/data/measurement_files/EULV_t1000_PQw.csv")
+data = _PMD.parse_file(data_path; transformations=[make_lossless!])
 
 data["settings"]["sbase_default"] = 0.001 * 1e3
 # merge!(data["voltage_source"]["source"], Dict{String,Any}(
@@ -23,8 +25,6 @@ for (_,line) in data["line"]
 end
 
 pmd_data = _PMD.transform_data_model(data) #NB the measurement dict needs to be passed to math model, passing it to the engineering data model won't work
-meas_file = "C:\\Users\\mvanin\\.julia\\dev\\PowerModelsDSSE\\test\\data\\measurement_files\\EULV_t1000_PQw.csv"
-
 for (_,bus) in pmd_data["bus"]
     if bus["name"] != "sourcebus"
         bus["vmin"] = fill(0.8, 3)
@@ -34,7 +34,7 @@ for (_,bus) in pmd_data["bus"]
     end
 end
 
-PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=false, seed=0)
+PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_path; actual_meas=false, seed=0)
 
 PowerModelsDSSE.assign_start_to_variables!(pmd_data)
 pmd_data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav")

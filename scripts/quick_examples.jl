@@ -8,10 +8,11 @@ const _PMD = PowerModelsDistribution
 const _DST = Distributions
 
 # Read-in network data
-data = _PMD.parse_file("test/data/opendss_feeders/lvtestcase_pmd_t1000.dss")
-pmd_data = _PMD.transform_data_model(data) #NB the measurement dict needs to be passed to math model, passing it to the engineering data model won't work
-meas_file = "C:\\Users\\mvanin\\.julia\\dev\\PowerModelsDSSE\\test\\data\\measurement_files\\EULV_t1000_PQVm.csv"
-PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=true, seed=0)
+data_path = joinpath(BASE_DIR,"test/data/opendss_feeders/lvtestcase_pmd_t1000.dss")
+meas_path = joinpath(BASE_DIR,"test/data/measurement_files/EULV_t1000_PQVm.csv")
+
+pmd_data = _PMD.transform_data_model(_PMD.parse_file(data_path)) #NB the measurement dict needs to be passed to math model, passing it to the engineering data model won't work
+PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_path; actual_meas=true, seed=0)
 
 pf_result = _PMD.run_mc_pf(pmd_data, _PMs.IVRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-4, "max_cpu_time"=>180.0, "print_level"=>0))
 

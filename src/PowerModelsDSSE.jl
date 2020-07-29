@@ -11,6 +11,8 @@ module PowerModelsDSSE
     const _PMD = PowerModelsDistribution
     const _IM = InfrastructureModels
 
+    # paths
+    const BASE_DIR = dirname(@__DIR__)
 
     include("core/constraint.jl")
     include("core/measurement_conversion.jl")
@@ -24,8 +26,10 @@ module PowerModelsDSSE
 
     include("prob/se.jl")
 
+    export BASE_DIR
     export variable_mc_residual
     export constraint_mc_residual
     export objective_mc_se
     export calculate_vm_error
+
 end
