@@ -77,7 +77,8 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     _PMD.variable_mc_bus_voltage(pm, bounded = false)
     _PMD.variable_mc_branch_current(pm, bounded = false)
-    _PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
+    #_PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
+    variable_mc_gen_power_setpoint_se(pm, bounded = false)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)
     variable_mc_residual(pm, bounded = true)
@@ -91,12 +92,13 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     # gens should be constrained before KCL, or Pd/Qd undefined
     for id in _PMD.ids(pm, :gen)
-        _PMD.constraint_mc_gen_setpoint(pm, id)
+        #_PMD.constraint_mc_gen_setpoint(pm, id)
+        constraint_mc_gen_setpoint_se(pm, id)
     end
 
     # loads should be constrained before KCL, or Pd/Qd undefined
     for id in _PMD.ids(pm, :load)
-        _PMD.constraint_mc_load_setpoint(pm, id)
+        constraint_mc_load_setpoint_se(pm, id)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
@@ -149,7 +151,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     end
 
     for id in _PMD.ids(pm, :load)
-        _PMD.constraint_mc_load_setpoint(pm, id)
+        constraint_mc_load_setpoint_se(pm, id)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
