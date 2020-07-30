@@ -84,7 +84,7 @@ function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
+    crd_bus = _PMD.var(pm, nw)[:crd_bus] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_crd_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
@@ -96,24 +96,20 @@ function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
         end
     end
 
-    _PMs.var(pm, nw)[:crd_bus] = Dict{Int, Any}()
-
-    report && _IM.sol_component_value(pm, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
+    report && _IM.sol_component_value(pm, nw, :load, :crd_bus, _PMD.ids(pm, nw, :load), crd_bus)
 end
 
 function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
-    cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
+    cid_bus = _PMD.var(pm, nw)[:cid_bus] = Dict(i => JuMP.@variable(pm.model,
             [c in 1:ncnds], base_name="$(nw)_cid_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
-    _PMs.var(pm, nw)[:cid_bus] = Dict{Int, Any}()
-
-    report && _IM.sol_component_value(pm, nw, :load, :cid, _PMD.ids(pm, nw, :load), cid)
+    report && _IM.sol_component_value(pm, nw, :load, :cid_bus, _PMD.ids(pm, nw, :load), cid_bus)
 
 end
 
@@ -143,4 +139,13 @@ function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bo
             create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw, nph=nph)
         end
     end
+end
+
+function variable_mc_gen_power_setpoint_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
+
+    _PMD.variable_mc_gen_current_setpoint_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMD.variable_mc_gen_current_setpoint_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+
+    _PMs.var(pm, nw)[:crg_bus] = Dict{Int, Any}()
+    _PMs.var(pm, nw)[:cig_bus] = Dict{Int, Any}()
 end

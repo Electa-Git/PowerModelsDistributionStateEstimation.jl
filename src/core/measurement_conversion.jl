@@ -126,13 +126,13 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :pg
         msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :pd
-        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd_bus, :cid_bus], [:vr, :vi])
     elseif msr == :q
         msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :qg
         msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :qd
-        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd_bus, :cid_bus], [:vr, :vi])
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -184,6 +184,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
         end
     end
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+
     JuMP.@NLconstraint(pm.model, [c in 1:nph],
         original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
                    (sum( d[c]^2 for d in new_var_den))
@@ -215,7 +216,8 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
         end
     end
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
-    if occursin("p", String(msr.msr_sym))
+
+    if occursin("pg", String(msr.msr_sym))
         JuMP.@constraint(pm.model, [c in 1:nph],
             original_var[id][c] == m1[1][c]*m2[1][c]+m1[2][c]*m2[2][c]
             )
