@@ -29,6 +29,7 @@ SCS = "0.6.6"
 julia = "^1"
 
 [extras]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 JSONTables = "b9914132-a727-11e9-1322-f18e41205b0b"
 Mosek = "6405355b-0ac2-5fba-af84-adbd65488c0e"
 MosekTools = "1ec41992-ff65-5c91-ac43-2df89e9693a4"
