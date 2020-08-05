@@ -33,10 +33,10 @@ end
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
-    _PMD.variable_mc_bus_voltage(pm; bounded = false)
-    _PMD.variable_mc_branch_power(pm; bounded = false)
-    _PMD.variable_mc_transformer_power(pm; bounded = false)
-    _PMD.variable_mc_gen_power_setpoint(pm; bounded = false)
+    _PMD.variable_mc_bus_voltage(pm; bounded = true)
+    _PMD.variable_mc_branch_power(pm; bounded = true)
+    _PMD.variable_mc_transformer_power(pm; bounded = true)
+    _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
@@ -75,12 +75,12 @@ end
 function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
 
-    _PMD.variable_mc_bus_voltage(pm, bounded = false)
-    _PMD.variable_mc_branch_current(pm, bounded = false)
+    _PMD.variable_mc_bus_voltage(pm, bounded = true)
+    _PMD.variable_mc_branch_current(pm, bounded = true)
     #_PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
-    variable_mc_gen_power_setpoint_se(pm, bounded = false)
+    variable_mc_gen_power_setpoint_se(pm, bounded = true)#NB the difference with PMD is that I don't write a pg,qg expression. I create crg/cig vars and crg_bus/cig_bus expressions
     _PMD.variable_mc_transformer_current(pm, bounded = false)
-    variable_mc_load_current(pm, bounded = false)
+    variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
 
@@ -102,7 +102,8 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
-        _PMD.constraint_mc_load_current_balance(pm, i)
+        #_PMD.constraint_mc_load_current_balance(pm, i)
+        constraint_mc_load_current_balance_se(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
