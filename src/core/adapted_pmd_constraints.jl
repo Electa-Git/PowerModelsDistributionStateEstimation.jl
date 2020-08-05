@@ -59,12 +59,12 @@ function constraint_mc_gen_setpoint_delta_se(pm::_PMs.IVRPowerModel, nw::Int, id
     next = Dict(i=>i%nph+1 for i in 1:nph)
     vrg = JuMP.@NLexpression(pm.model, [i in 1:nph], vr[i]-vr[next[i]])
     vig = JuMP.@NLexpression(pm.model, [i in 1:nph], vi[i]-vi[next[i]])
-    # if bounded
-    #     JuMP.@NLconstraint(pm.model, [i in 1:nph], pmin[i] <= pg[i])
-    #     JuMP.@NLconstraint(pm.model, [i in 1:nph], pmax[i] >= pg[i])
-    #     JuMP.@NLconstraint(pm.model, [i in 1:nph], qmin[i] <= qg[i])
-    #     JuMP.@NLconstraint(pm.model, [i in 1:nph], qmax[i] >= qg[i])
-    # end
+    if bounded
+        JuMP.@NLconstraint(pm.model, [i in 1:nph], pmin[i] <= vrg[i]*crg[i]+vig[i]*cig[i])
+        JuMP.@NLconstraint(pm.model, [i in 1:nph], pmax[i] >= vrg[i]*crg[i]+vig[i]*cig[i])
+        JuMP.@NLconstraint(pm.model, [i in 1:nph], qmin[i] <= -vrg[i]*cig[i]+vig[i]*crg[i])
+        JuMP.@NLconstraint(pm.model, [i in 1:nph], qmax[i] >= -vrg[i]*cig[i]+vig[i]*crg[i])
+    end
     crg_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], crg[i]-crg[prev[i]])
     cig_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], cig[i]-cig[prev[i]])
      _PMD.var(pm, nw, :crg_bus)[id] = crg_bus
