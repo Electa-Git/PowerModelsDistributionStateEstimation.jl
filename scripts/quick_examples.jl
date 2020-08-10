@@ -9,7 +9,7 @@ const _DST = Distributions
 
 # Read-in network data
 pmd_data = _PMD.transform_data_model(_PMD.parse_file(joinpath(dirname(@__DIR__), "test/data/opendss_feeders/case3_unbalanced.dss"))) #NB the measurement dict needs to be passed to math model, passing it to the engineering data model won't work
-meas_file = joinpath(dirname(@__DIR__), "test/data/measurement_files/case3_working.csv")
+meas_file = joinpath(dirname(@__DIR__), "test/data/measurement_files/case3_ivrnative.csv")
 PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=true, seed=0)
 
 pf_result_ivr = _PMD.run_mc_pf(pmd_data, _PMs.IVRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-4, "max_cpu_time"=>180.0, "print_level"=>0))
