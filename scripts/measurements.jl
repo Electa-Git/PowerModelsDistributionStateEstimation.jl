@@ -25,15 +25,15 @@ function get_phases(cmp_type::String, cmp_data::Dict{String,Any})
     end
 end
 function get_measures(model::DataType, cmp_type::String)
-    if model == _PMs.ACPPowerModel
+    if model <: _PMs.AbstractACPModel
         if cmp_type == "bus"  return ["vm"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
-    elseif model == _PMs.ACRPowerModel
+    elseif model <: _PMs.AbstractACRModel
         if cmp_type == "bus"  return ["vr","vi"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
-    elseif model == _PMs.IVRPowerModel
+    elseif model  <: _PMs.AbstractIVRModel
         if cmp_type == "bus"  return ["vr","vi"] end
         if cmp_type == "gen"  return ["crg","cig"] end
         if cmp_type == "load" return ["crd_bus","cid_bus"] end

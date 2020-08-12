@@ -39,11 +39,12 @@ solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0,
 # Include the necessary functions to load the data
 include("$ntw_path/load_enwl.jl")
 include("$ntw_path/mod_enwl.jl")
+include("measurements.jl")
 
 df = _DF.DataFrame(ntw=Int64[], fdr=Int64[], solve_time=Float64[], n_bus=Int64[],
                    termination_status=String[], objective=Float64[])
 
-for ntw in 1:25 for fdr in 1:10
+for ntw in 1:1 for fdr in 1:1
     data_path = get_enwl_dss_path(ntw, fdr)
     if !isdir(dirname(data_path)) break end
 

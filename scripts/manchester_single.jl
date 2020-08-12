@@ -15,10 +15,10 @@ include("measurements.jl")
 # Input data
 ntw   = 10
 fdr   = 1
-model = _PMs.IVRPowerModel
+model = PowerModelsDSSE.ReducedACRModel#_PMs.IVRPowerModel
 
-rm_transfo = false
-rd_lines   = false
+rm_transfo = true
+rd_lines   = true
 
 season = "summer"
 time   = 144
@@ -33,7 +33,7 @@ msr_path = joinpath(BASE_DIR,"examples/data/measurements/measurement.csv")
 
 # Set solve
 solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0,
-                                                        "tol"=>1e-10,
+                                                        "tol"=>1e-5,
                                                         "print_level"=>3)
 
 # Include the necessary functions to load the data

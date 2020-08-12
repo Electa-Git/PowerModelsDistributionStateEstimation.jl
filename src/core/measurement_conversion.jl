@@ -143,7 +143,7 @@ function no_conversion_needed(pm::_PMs.ACPPowerModel, msr_var::Symbol)
   return msr_var ∈ [:vm, :va, :pd, :qd, :pg, :qg, :p, :q]
 end
 
-function no_conversion_needed(pm::_PMs.ACRPowerModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMs.AbstractACRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :pd, :qd, :pg, :qg, :p, :q]
 end
 
