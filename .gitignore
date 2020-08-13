@@ -3,6 +3,5 @@
 *.jl.mem
 .DS_Store
 deps/deps.jl
-docs/build
-
+docs/build/
 /Manifest.toml

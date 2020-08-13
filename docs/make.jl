@@ -9,6 +9,6 @@ makedocs(
     pages       = [ "Home"              => "index.md"]
 )
 
-# deploydocs(
-#      repo = "github.com/timmyfaraday/MultiStateSystems.jl.git"
-# )
+deploydocs(
+     repo = "github.com/timmyfaraday/PowerModelsDSSE.jl.git"
+)
