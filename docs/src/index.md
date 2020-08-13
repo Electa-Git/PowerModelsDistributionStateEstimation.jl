@@ -50,7 +50,7 @@ Network constraint, load and transformer models are taken from
 | 4-wire[^3]        | v0.2.0        | v0.2.0        | v0.2.0        | v0.2.0        |
 
 [^1]: The simple SE **does not include** transformer models and delta/wye loads.
-[^2]: The simple SE **includes** transformer models and delta/wye loads.
+[^2]: The advanced SE **includes** transformer models and delta/wye loads.
 [^3]: Awaiting PowerModelsDistribution v0.10.0
 
 ## Installation

@@ -45,13 +45,12 @@ Network constraint, load and transformer models are taken from
 |                   | ACP           | ACR           | IVR           | SDP           |
 | ----------------- | ------------- | ------------- | ------------- | ------------- |
 | BI/BF             | BI            | BI            | BF            | BF            |
-| Simple SE[^1]     | Available     | Available     | Available     | Available     |
-| Advanced SE[^2]   | Available     | Available     | Available     | Unavailable   |
-| 4-wire[^3]        | v0.2.0        | v0.2.0        | v0.2.0        | v0.2.0        |
+| Simple SE         | Available     | Available     | Available     | Available     |
+| Advanced SE       | Available     | Available     | Available     | Unavailable   |
+| 4-wire            | v0.2.0        | v0.2.0        | v0.2.0        | v0.2.0        |
 
-[^1]: The simple SE **does not include** transformer models and delta/wye loads.
-[^2]: The simple SE **includes** transformer models and delta/wye loads.
-[^3]: Awaiting PowerModelsDistribution v0.10.0
+- The simple SE **does not include** transformer models and delta/wye loads.
+- The advanced SE **includes** transformer models and delta/wye loads.
 
 ## Installation
 
