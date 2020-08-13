@@ -10,7 +10,7 @@ const _DST = Distributions
 # Read-in network data
 pmd_data = _PMD.transform_data_model(_PMD.parse_file(joinpath(dirname(@__DIR__), "test/data/opendss_feeders/case3_unbalanced.dss"))) #NB the measurement dict needs to be passed to math model, passing it to the engineering data model won't work
 meas_file = joinpath(dirname(@__DIR__), "test/data/measurement_files/case3_ivrnative.csv")
-PowerModelsDSSE.add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=true, seed=0)
+
 
 pf_result_ivr = _PMD.run_mc_pf(pmd_data, _PMs.IVRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-4, "max_cpu_time"=>180.0, "print_level"=>0))
 pf_result_acr = _PMD.run_mc_pf(pmd_data, _PMs.ACRPowerModel, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-4, "max_cpu_time"=>180.0, "print_level"=>0))
@@ -31,8 +31,8 @@ se_result_acp = PowerModelsDSSE.run_acp_mc_se(pmd_data, optimizer_with_attribute
 
 display("There is a result difference in pg gen between ACR and IvR SE, that amounts to: $(pf_result_acp["solution"]["gen"]["1"]["pg"] - pf_result_ivr["solution"]["gen"]["1"]["pg"])")
 
-vm_error_array,vm_err_max,vm_err_mean = PowerModelsDSSE.calculate_error(se_result_ivr, pf_result_ivr; vm_or_va = "vm")
-va_error_array,va_err_max,va_err_mean = PowerModelsDSSE.calculate_error(se_result_acp, pf_result_acp; vm_or_va = "va")
+vm_error_array,vm_err_max,vm_err_mean = PowerModelsDSSE.calculate_error(se_result_acp, pf_result_ivr; vm_or_va = "vm")
+va_error_array,va_err_max,va_err_mean = PowerModelsDSSE.calculate_error(se_result_acp, pf_result_acr; vm_or_va = "va")
 
 #################################################################################
 ####### TRY WITHOUT TRANSFORMER ################################
