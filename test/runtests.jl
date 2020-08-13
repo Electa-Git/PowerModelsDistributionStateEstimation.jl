@@ -10,8 +10,8 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
 
 @testset "PowerModelsDSSE" begin
 
-    include("sdp_se.jl")
-    include("exact_native_se.jl")
-    include("variable_conversion.jl")
+    #include("sdp_se.jl")
+    #include("exact_native_se.jl")
+    #include("variable_conversion.jl")
 
 end
