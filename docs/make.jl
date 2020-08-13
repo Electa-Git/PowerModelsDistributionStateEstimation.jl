@@ -5,7 +5,7 @@ makedocs(
     modules     = [PowerModelsDSSE],
     format      = Documenter.HTML(mathengine = Documenter.MathJax()),
     sitename    = "PowerModelsDSSE.jl",
-    authors     = ["Tom Van Acker","Marta Vanin"],
+    authors     = "Tom Van Acker, Marta Vanin",
     pages       = [ "Home"              => "index.md"]
 )
 

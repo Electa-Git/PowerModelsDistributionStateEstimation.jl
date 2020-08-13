@@ -42,8 +42,8 @@ Network constraint, load and transformer models are taken from
 
 ## Summary of State Estimation Possibilities
 
-|                   | ACP           | ACR           | IVR           | SDP           |
-| ----------------- | ------------- | ------------- | ------------- | ------------- |
+| -                 | ACP           | ACR           | IVR           | SDP           |
+| :---------------- | :------------ | :------------ | :------------ | :------------ |
 | BI/BF             | BI            | BI            | BF            | BF            |
 | Simple SE[^1]     | Available     | Available     | Available     | Available     |
 | Advanced SE[^2]   | Available     | Available     | Available     | Unavailable   |
@@ -75,10 +75,8 @@ developers are Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday))
 and Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) with support for
 the following contributors:
 
-- Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)) CSIRO,
-General PowerModelsDistribution.jl Advice.
-- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)) KU Leuven,
-General PowerModelsDistribution.jl Advice.
+- Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)), CSIRO, General PowerModelsDistribution.jl Advice.
+- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)), KU Leuven, General PowerModelsDistribution.jl Advice.
 
 ## License
 
