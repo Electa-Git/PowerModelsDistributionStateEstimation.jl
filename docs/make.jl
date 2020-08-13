@@ -1,16 +1,14 @@
 using Documenter
+using PowerModelsDSSE
 
-makedocs(sitename="PowerModelsDSSE",
-        modules="PowerModelsDSSE",
-        authors="Tom Van Acker, Marta Vanin")
-
-deploydocs(
-    repo = "github.com/Electa-Git/PowerModelsDSSE.jl.git",
+makedocs(
+    modules     = [PowerModelsDSSE],
+    format      = Documenter.HTML(mathengine = Documenter.MathJax()),
+    sitename    = "PowerModelsDSSE.jl",
+    authors     = ["Tom Van Acker","Marta Vanin"],
+    pages       = [ "Home"              => "index.md"]
 )
-#
-# makedocs(
-#     sitename    = "PowerModelsDSSE",
-#     pages       = [
-#         "Home"          => "index.md",
-#         "Formulation"   => "formulation.md"
-#     ])
+
+# deploydocs(
+#      repo = "github.com/timmyfaraday/MultiStateSystems.jl.git"
+# )

@@ -1,20 +1,21 @@
-# PowerModelsDSSE
+# PowerModelsDSSE.jl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://timmyfaraday.github.io/PowerModelsDSSE.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsDSSE.jl/dev)
 [![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/MultiStateSystems.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/MultiStateSystems-jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
 
 PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
-Static Distribution System State Estimation. A Distribution System State
-Estimator determines the *most-likely* state of distribution system given a set
-of uncertainties, e.g., measurement errors, pseudo-measurements, etc. These
-uncertainties may pertain to any quantity of any network component, e.g., :vm
-of a :bus, :pd of a :load, etc.
+Static Distribution System State Estimation.
+
+A Distribution System State Estimator determines the *most-likely* state of
+distribution system given a set of uncertainties, e.g., measurement errors,
+pseudo-measurements, etc. These uncertainties may pertain to any quantity of any
+network component, e.g., `:vm` of a `:bus`, `:pd` of a `:load`, etc.
 
 Currently, uncertainties may either be described by:
-- a deterministic value {Float64}, or
-- a continuous univariate distribution {ContinuousUnivariateDistribution}:
+- a deterministic value `Float64`, or
+- a continuous univariate distribution `ContinuousUnivariateDistribution`:
     * a normal distribution, modeled through either WLS or LAV approach, or
     * a non-normal distribution, modeled through -logpdf.
 
@@ -29,19 +30,43 @@ Currently, uncertainties may either be described by:
 - AC IV Rectangular (exact)
 - SDP (positive semi-definite relaxation)
 
-All the formulations are three-phase unbalanced and feature accurate delta/wye load models.
-The exact formulations also feature delta/wye transformer models.
-Network constraint, load and transformer models are taken from PowerModelsDistribution.jl
-You can find a quickguide here [add_hyperlink]
-
+All the formulations are three-phase unbalanced and feature accurate delta/wye
+load models. The exact formulations also feature delta/wye transformer models.
+Network constraint, load and transformer models are taken from
+[PowerModelsDistribution.jl](https://github.com/lanl-ansi/PowerModelsDistribution.jl)
 
 ## Network Data Formats
 
 - OpenDSS ".dss" files in the PowerModelsDistribution format
+- CSV ".csv" file with measurement a statistical information for state estimation
+
+## Summary of State Estimation Possibilities
+
+|                   | ACP           | ACR           | IVR           | SDP           |
+| ----------------- | ------------- | ------------- | ------------- | ------------- |
+| BI/BF             | BI            | BI            | BF            | BF            |
+| Simple SE[^1]     | Available     | Available     | Available     | Available     |
+| Advanced SE[^2]   | Available     | Available     | Available     | Unavailable   |
+| 4-wire[^3]        | v0.2.0        | v0.2.0        | v0.2.0        | v0.2.0        |
+
+[^1]: The simple SE **does not include** transformer models and delta/wye loads.
+[^2]: The simple SE **includes** transformer models and delta/wye loads.
+[^3]: Awaiting PowerModelsDistribution v0.10.0
 
 ## Installation
 
-XXX
+The latest stable release of PowerModelsDSSE can be installed using the Julia
+package manager:
+
+```
+] add https://github.com/timmyfaraday/PowerModelsDSSE.jl.git
+```
+
+In order to test whether the package works, run:
+
+```
+] test MultiStateSystems
+```
 
 ## Acknowledgements
 
@@ -57,13 +82,8 @@ General PowerModelsDistribution.jl Advice.
 
 ## License
 
-XXX
+This code is provided under a BSD license.
 
-## TODO
+## Notes
 
-- check out the NLsolve implementation in PowerModels and use it for a set of grids in order to have a sense of its speed?
-- https://github.com/lanl-ansi/PowerModels.jl/blob/master/src/prob/pf.jl line 529
-- if you could separate built and solve time that would be great no pressure if you can’t get it done!   line 654
-- maybe include a comparison between ipopt and nlsolve
-- https://lanl-ansi.github.io/PowerModels.jl/dev/power-flow/
-- if it outperforms Ipopt we might want to write a WLS and use NLSolve as solver for this subclass.
+Currently, bad data detection techniques and observability considerations are out of scope.
