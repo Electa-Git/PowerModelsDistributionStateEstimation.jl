@@ -1,0 +1,2 @@
+New Load.LOAD1 Phases=1 Bus1=57.1 kV=0.23 kW=1 PF=0.95 Daily=Shape_1
+New Load.LOAD2 Phases=1 Bus1=58.2 kV=0.23 kW=1 PF=0.95 Daily=Shape_2

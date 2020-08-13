@@ -126,13 +126,13 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :pg
         msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :pd
-        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd_bus, :cid_bus], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     elseif msr == :q
         msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :qg
         msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :qd
-        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd_bus, :cid_bus], [:vr, :vi])
+        msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -143,7 +143,7 @@ function no_conversion_needed(pm::_PMs.ACPPowerModel, msr_var::Symbol)
   return msr_var ∈ [:vm, :va, :pd, :qd, :pg, :qg, :p, :q]
 end
 
-function no_conversion_needed(pm::_PMs.ACRPowerModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMs.AbstractACRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :pd, :qd, :pg, :qg, :p, :q]
 end
 
