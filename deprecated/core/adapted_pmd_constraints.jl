@@ -40,7 +40,7 @@ function constraint_mc_gen_setpoint_wye_se(pm::_PMs.IVRPowerModel, nw::Int, id::
             end
         end
     end
-    #  _PMD.var(pm, nw, :crg_bus)[id] = crg
+     _PMD.var(pm, nw, :crg_bus)[id] = crg
      _PMD.var(pm, nw, :cig_bus)[id] = cig
     if report
         _PMD.sol(pm, nw, :gen, id)[:crg_bus] =  _PMD.var(pm, nw, :crg_bus, id)
@@ -154,13 +154,13 @@ function constraint_mc_load_setpoint_delta_se(pm::_PMs.IVRPowerModel, nw::Int, i
         pd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph],  vr[i]*crd_bus[i]+vi[i]*cid_bus[i])
         qd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], -vr[i]*cid_bus[i]+vi[i]*crd_bus[i])
 
-        _PMD.sol(pm, nw, :load, id)[:pd_bus] = pd_bus
-        _PMD.sol(pm, nw, :load, id)[:qd_bus] = qd_bus
+        sol(pm, nw, :load, id)[:pd_bus] = pd_bus
+        sol(pm, nw, :load, id)[:qd_bus] = qd_bus
 
         pd = JuMP.@NLexpression(pm.model, [i in 1:nph], a[i]*(vrd[i]^2+vid[i]^2)^(alpha[i]/2) )
         qd = JuMP.@NLexpression(pm.model, [i in 1:nph], b[i]*(vrd[i]^2+vid[i]^2)^(beta[i]/2)  )
-        _PMD.sol(pm, nw, :load, id)[:pd] = pd
-        _PMD.sol(pm, nw, :load, id)[:qd] = qd
+        sol(pm, nw, :load, id)[:pd] = pd
+        sol(pm, nw, :load, id)[:qd] = qd
     end
 end
 

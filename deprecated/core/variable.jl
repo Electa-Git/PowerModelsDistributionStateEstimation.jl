@@ -106,11 +106,11 @@ function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
-    # if bounded
-    #     for i in _PMs.ids(pm, nw, :load), c in _PMD.conductor_ids(pm; nw=nw)
-    #         JuMP.set_lower_bound(crd[i][c], 0.0)
-    #     end
-    # end
+    if bounded
+        for i in _PMs.ids(pm, nw, :load), c in _PMD.conductor_ids(pm; nw=nw)
+            JuMP.set_lower_bound(crd[i][c], 0.0)
+        end
+    end
 
     report && _IM.sol_component_value(pm, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
 end
