@@ -41,7 +41,7 @@ include("$ntw_path/load_enwl.jl")
 include("$ntw_path/mod_enwl.jl")
 
 # Load the data
-data = _PMD.parse_file(get_enwl_dss_path(ntw, fdr),data_model=_PMD.ENGINEERING);
+data = _PMD.parse_file(get_enwl_dss_path(ntw, fdr));
 if rm_transfo rm_enwl_transformer!(data) end
 if rd_lines   reduce_lines_eng!(data) end
 

@@ -53,7 +53,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
         _PMD.constraint_mc_theta_ref(pm, i)
     end
     for (i,bus) in _PMD.ref(pm, :bus)
-        PowerModelsDSSE.constraint_mc_load_power_balance(pm, i)
+        _PMD.constraint_mc_load_power_balance(pm, i)
     end
     for (i,branch) in _PMD.ref(pm, :branch)
         _PMD.constraint_mc_ohms_yt_from(pm, i)
@@ -76,8 +76,7 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
-    PowerModelsDSSE.variable_mc_branch_current(pm, bounded = true)
-    #_PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
+    _PMD.variable_mc_branch_current(pm, bounded = true)
     variable_mc_gen_power_setpoint_se(pm, bounded = true)#NB the difference with PMD is that I don't write a pg,qg expression. I create crg/cig vars and crg_bus/cig_bus expressions
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
@@ -102,15 +101,13 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
-        #_PMD.constraint_mc_load_current_balance(pm, i)
-        PowerModelsDSSE.constraint_mc_load_current_balance_se(pm, i)
+        constraint_mc_load_current_balance_se(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
-        PowerModelsDSSE.constraint_mc_current_from(pm, i)
-        PowerModelsDSSE..constraint_mc_current_to(pm, i)
-
-        PowerModelsDSSE.constraint_mc_bus_voltage_drop(pm, i)
+        _PMD.constraint_mc_current_from(pm, i)
+        _PMD.constraint_mc_current_to(pm, i)
+        _PMD.constraint_mc_bus_voltage_drop(pm, i)
     end
 
     for i in _PMD.ids(pm, :transformer)
