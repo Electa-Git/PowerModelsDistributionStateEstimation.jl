@@ -1,10 +1,12 @@
 # Quick Start Guide
 
+## Introduction
+
 Once Ipopt, PowerModelsDSSE and PowerModelsDistribution are installed, and a
 network data file (e.g. `"case3_unbalanced.dss"` in the package folder under
-`./test/data/ieee/network`) has been acquired as well as a measurement data file
+`./test/data/extra/network`) has been acquired as well as a measurement data file
 (e.g. `"case3_unbalanced.csv"` in the package folder under
-`./test/data/ieee/meas`), an unbalanced AC Static State Estimation can be
+`./test/data/extra/measurement`), an unbalanced AC Static State Estimation can be
 executed with,
 
 ```julia
