@@ -186,7 +186,7 @@
         # set model
         crit     = "wlav"
         model    = _PMs.IVRPowerModel
-        ntw, fdr = 12, 3
+        ntw, fdr = 25, 2
 
         # load data
         data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
@@ -227,7 +227,7 @@
     #     # set model
     #     crit     = "wls"
     #     model    = _PMs.IVRPowerModel
-    #     ntw, fdr = 12, 3
+    #     ntw, fdr = 25, 2
     #
     #     # load data
     #     data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
