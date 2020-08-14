@@ -1,3 +1,12 @@
+################################################################################
+#  Copyright 2020, Tom Van Acker, Marta Vanin                                  #
+################################################################################
+# PowerModelsDSSE.jl                                                           #
+# An extention package of PowerModelsDistribution.jl for Static Distribution   #
+# System State Estimation.                                                     #
+# See http://github.com/timmyfaraday/PowerModelsDSSE.jl                        #
+################################################################################
+
 module PowerModelsDSSE
 
 # import pkgs
@@ -46,7 +55,7 @@ export variable_mc_residual
 export constraint_mc_residual
 export objective_mc_se
 export rm_enwl_transformer!, reduce_enwl_lines_eng!
-export write_measurements!, add_measurements!
+export add_measurements!, write_measurements!
 export assign_start_to_variables!
 export calculate_voltage_magnitude_error
 
