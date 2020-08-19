@@ -41,8 +41,8 @@ include("core/objective.jl")
 include("core/start_values_methods.jl")
 include("core/variable.jl")
 
-include("form/no_shunt_ac.jl")
-include("form/no_shunt_ivr.jl")
+include("form/reduced_ac.jl")
+include("form/reduced_ivr.jl")
 
 include("io/measurement_parser.jl")
 include("io/network_parser.jl")
