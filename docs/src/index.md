@@ -65,7 +65,7 @@ package manager:
 In order to test whether the package works, run:
 
 ```
-] test MultiStateSystems
+] test PowerModelsDSSE
 ```
 
 ## Acknowledgements
