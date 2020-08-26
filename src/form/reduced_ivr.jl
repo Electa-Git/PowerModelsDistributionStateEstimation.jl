@@ -57,19 +57,6 @@ function constraint_mc_gen_setpoint_wye(pm::ReducedIVRPowerModel, nw::Int, id::I
             end
         end
     end
-
-    _PMD.var(pm, nw, :crg_bus)[id] = crg
-    _PMD.var(pm, nw, :cig_bus)[id] = cig
-    _PMD.var(pm, nw, :qg)[id] = qg
-    _PMD.var(pm, nw, :pg)[id] = pg
-
-    if report
-        _PMD.sol(pm, nw, :gen, id)[:crg_bus] = _PMD.var(pm, nw, :crg_bus, id)
-        _PMD.sol(pm, nw, :gen, id)[:cig_bus] = _PMD.var(pm, nw, :cig_bus, id)
-
-        _PMD.sol(pm, nw, :gen, id)[:qg] = qg
-        _PMD.sol(pm, nw, :gen, id)[:pg] = pg
-    end
 end
 
 
@@ -114,105 +101,6 @@ function constraint_mc_gen_setpoint_delta(pm::ReducedIVRPowerModel, nw::Int, id:
     end
 end
 
-"constraint_mc_load_setpoint is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
-The content of the function is otherwise identical"
-function constraint_mc_load_setpoint(pm::PowerModelsDSSE.ReducedIVRPowerModel, id::Int; nw::Int=pm.cnw, report::Bool=true)
-
-    load = _PMD.ref(pm, nw, :load, id)
-    bus = _PMD.ref(pm, nw,:bus, load["load_bus"])
-
-    conn = haskey(load, "configuration") ? load["configuration"] : _PMD.WYE
-
-    a, alpha, b, beta = _PMD._load_expmodel_params(load, bus)
-
-    if conn==_PMD.WYE
-        PowerModelsDSSE.constraint_mc_load_setpoint_wye(pm, nw, id, load["load_bus"], a, alpha, b, beta; report=report)
-    else
-        PowerModelsDSSE.constraint_mc_load_setpoint_delta(pm, nw, id, load["load_bus"], a, alpha, b, beta; report=report)
-    end
-end
-
-"constraint_mc_load_setpoint_wye is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
-The content of the function is otherwise identical"
-function constraint_mc_load_setpoint_wye(pm::PowerModelsDSSE.ReducedIVRPowerModel, nw::Int, id::Int, bus_id::Int, a::Vector{<:Real}, alpha::Vector{<:Real}, b::Vector{<:Real}, beta::Vector{<:Real}; report::Bool=true)
-
-    vr = _PMD.var(pm, nw, :vr, bus_id)
-    vi = _PMD.var(pm, nw, :vi, bus_id)
-
-    nph = 3
-
-    crd = JuMP.@NLexpression(pm.model, [i in 1:nph],
-        a[i]*vr[i]*(vr[i]^2+vi[i]^2)^(alpha[i]/2-1)
-       +b[i]*vi[i]*(vr[i]^2+vi[i]^2)^(beta[i]/2 -1)
-    )
-    cid = JuMP.@NLexpression(pm.model, [i in 1:nph],
-        a[i]*vi[i]*(vr[i]^2+vi[i]^2)^(alpha[i]/2-1)
-       -b[i]*vr[i]*(vr[i]^2+vi[i]^2)^(beta[i]/2 -1)
-    )
-
-    _PMD.var(pm, nw, :crd_bus)[id] = crd
-    _PMD.var(pm, nw, :cid_bus)[id] = cid
-
-    if report
-        pd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph],  vr[i]*crd[i]+vi[i]*cid[i])
-        qd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], -vr[i]*cid[i]+vi[i]*crd[i])
-
-        _PMD.sol(pm, nw, :load, id)[:qd_bus] = qd_bus
-        _PMD.sol(pm, nw, :load, id)[:pd_bus] = pd_bus
-
-        _PMD.sol(pm, nw, :load, id)[:crd_bus] = crd
-        _PMD.sol(pm, nw, :load, id)[:cid_bus] = cid
-
-        pd = JuMP.@NLexpression(pm.model, [i in 1:nph], a[i]*(vr[i]^2+vi[i]^2)^(alpha[i]/2) )
-        qd = JuMP.@NLexpression(pm.model, [i in 1:nph], b[i]*(vr[i]^2+vi[i]^2)^(beta[i]/2)  )
-        _PMD.sol(pm, nw, :load, id)[:pd] = pd
-        _PMD.sol(pm, nw, :load, id)[:qd] = qd
-    end
-end
-
-
-"constraint_mc_load_setpoint_delta is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
-The content of the function is otherwise identical"
-function constraint_mc_load_setpoint_delta(pm::PowerModelsDSSE.ReducedIVRPowerModel, nw::Int, id::Int, bus_id::Int, a::Vector{<:Real}, alpha::Vector{<:Real}, b::Vector{<:Real}, beta::Vector{<:Real}; report::Bool=true)
-    vi = _PMD.var(pm, nw, :vi, bus_id)
-    vr = _PMD.var(pm, nw, :vr, bus_id)
-
-    nph = 3
-    prev = Dict(i=>(i+nph-2)%nph+1 for i in 1:nph)
-    next = Dict(i=>i%nph+1 for i in 1:nph)
-
-    vrd = JuMP.@NLexpression(pm.model, [i in 1:nph], vr[i]-vr[next[i]])
-    vid = JuMP.@NLexpression(pm.model, [i in 1:nph], vi[i]-vi[next[i]])
-
-    crd = JuMP.@NLexpression(pm.model, [i in 1:nph],
-        a[i]*vrd[i]*(vrd[i]^2+vid[i]^2)^(alpha[i]/2-1)
-       +b[i]*vid[i]*(vrd[i]^2+vid[i]^2)^(beta[i]/2 -1)
-    )
-    cid = JuMP.@NLexpression(pm.model, [i in 1:nph],
-        a[i]*vid[i]*(vrd[i]^2+vid[i]^2)^(alpha[i]/2-1)
-       -b[i]*vrd[i]*(vrd[i]^2+vid[i]^2)^(beta[i]/2 -1)
-    )
-
-    crd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], crd[i]-crd[prev[i]])
-    cid_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], cid[i]-cid[prev[i]])
-
-    _PMD.var(pm, nw, :crd_bus)[id] = crd_bus
-    _PMD.var(pm, nw, :cid_bus)[id] = cid_bus
-
-    if report
-        pd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph],  vr[i]*crd_bus[i]+vi[i]*cid_bus[i])
-        qd_bus = JuMP.@NLexpression(pm.model, [i in 1:nph], -vr[i]*cid_bus[i]+vi[i]*crd_bus[i])
-
-        _PMD.sol(pm, nw, :load, id)[:pd_bus] = pd_bus
-        _PMD.sol(pm, nw, :load, id)[:qd_bus] = qd_bus
-
-        pd = JuMP.@NLexpression(pm.model, [i in 1:nph], a[i]*(vrd[i]^2+vid[i]^2)^(alpha[i]/2) )
-        qd = JuMP.@NLexpression(pm.model, [i in 1:nph], b[i]*(vrd[i]^2+vid[i]^2)^(beta[i]/2)  )
-        _PMD.sol(pm, nw, :load, id)[:pd] = pd
-        _PMD.sol(pm, nw, :load, id)[:qd] = qd
-    end
-end
-
 "Simplified version of constraint_mc_load_current_balance_se, to perform state
 estimation with the reduced IVR formulation: no shunts, no storage elements, no active switches"
 function constraint_mc_load_current_balance_se(pm::PowerModelsDSSE.ReducedIVRPowerModel, i::Int; nw::Int=pm.cnw)
@@ -223,23 +111,23 @@ function constraint_mc_load_current_balance_se(pm::PowerModelsDSSE.ReducedIVRPow
     bus_gens = _PMD.ref(pm, nw, :bus_gens, i)
     bus_loads = _PMD.ref(pm, nw, :bus_loads, i)
 
-    cr    = get(_PMD.var(pm, n),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
-    ci    = get(_PMD.var(pm, n),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
-    crd   = get(_PMD.var(pm, n),   :crd, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
-    cid   = get(_PMD.var(pm, n),   :cid, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
-    crg   = get(_PMD.var(pm, n),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
-    cig   = get(_PMD.var(pm, n),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
-    crt   = get(_PMD.var(pm, n),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
-    cit   = get(_PMD.var(pm, n),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
 
-    for c in _PMs.conductor_ids(pm; nw=n)
-        JuMP.@NLconstraint(pm.model,  sum(cr[a][c] for a in bus_arcs)
+    for c in _PMs.conductor_ids(pm; nw=nw)
+        JuMP.@constraint(pm.model,  sum(cr[a][c] for a in bus_arcs)
                                     + sum(crt[a_trans][c] for a_trans in bus_arcs_trans)
                                     ==
                                       sum(crg[g][c]         for g in bus_gens)
                                     - sum(crd[d][c]         for d in bus_loads)
                                     )
-        JuMP.@NLconstraint(pm.model, sum(ci[a][c] for a in bus_arcs)
+        JuMP.@constraint(pm.model, sum(ci[a][c] for a in bus_arcs)
                                     + sum(cit[a_trans][c] for a_trans in bus_arcs_trans)
                                     ==
                                       sum(cig[g][c]         for g in bus_gens)
@@ -258,16 +146,16 @@ function constraint_mc_load_current_balance(pm::PowerModelsDSSE.ReducedIVRPowerM
     bus_gens = _PMD.ref(pm, nw, :bus_gens, i)
     bus_loads = _PMD.ref(pm, nw, :bus_loads, i)
 
-    cr    = get(_PMD.var(pm, n),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
-    ci    = get(_PMD.var(pm, n),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
-    crd   = get(_PMD.var(pm, n),   :crd_bus, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
-    cid   = get(_PMD.var(pm, n),   :cid_bus, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
-    crg   = get(_PMD.var(pm, n),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
-    cig   = get(_PMD.var(pm, n),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
-    crt   = get(_PMD.var(pm, n),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
-    cit   = get(_PMD.var(pm, n),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd_bus, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid_bus, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
 
-    for c in _PMs.conductor_ids(pm; nw=n)
+    for c in _PMs.conductor_ids(pm; nw=nw)
         JuMP.@NLconstraint(pm.model,  sum(cr[a][c] for a in bus_arcs)
                                     + sum(crt[a_trans][c] for a_trans in bus_arcs_trans)
                                     ==
@@ -312,7 +200,7 @@ function constraint_mc_bus_voltage_drop(pm::ReducedIVRPowerModel, i::Int; nw::In
     JuMP.@constraint(pm.model, vi_to .== (vi_fr.*tr - vr_fr.*ti) - r*ci_fr - x*cr_fr)
 end
 
-"This constraint makes sure that the current entering and exiting a branch are equivalent. 
+"This constraint makes sure that the current entering and exiting a branch are equivalent.
 It is used for state estimation and power flow calculations with the ReducedIVRPowerModel."
 function constraint_current_to_from(pm::ReducedIVRPowerModel, i::Int; nw::Int=pm.cnw)
 

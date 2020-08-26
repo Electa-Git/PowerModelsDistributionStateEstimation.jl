@@ -37,7 +37,7 @@ math = transform_data_model(eng)
 
 ### Parsing ENWL files
 
-To parse a specific feeder `fdr` of a network `ntw` of the ENWL data use:
+To parse a specific feeder `fdr` of a network `ntw` of the [ENWL data](https://www.enwl.co.uk/zero-carbon/innovation/smaller-projects/low-carbon-networks-fund/low-voltage-network-solutions/) use:
 
 ```julia
 data = parse_file(get_enwl_dss_path(ntw,fdr))

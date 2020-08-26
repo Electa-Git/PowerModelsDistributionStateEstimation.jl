@@ -34,13 +34,13 @@ const _STT = Statistics
 const BASE_DIR = dirname(@__DIR__)
 
 #include
-include("core/adapted_pmd_constraints.jl")
 include("core/constraint.jl")
 include("core/measurement_conversion.jl")
 include("core/objective.jl")
 include("core/start_values_methods.jl")
 include("core/variable.jl")
 
+include("form/adapted_pmd_constraints.jl")
 include("form/reduced_ac.jl")
 include("form/reduced_ivr.jl")
 
@@ -50,7 +50,6 @@ include("io/postprocessing.jl")
 
 include("prob/se.jl")
 include("prob/reduced_pf.jl")
-include("prob/reduced_se.jl")
 
 #export
 export BASE_DIR

@@ -53,8 +53,6 @@ function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
         end
     end
 
-    _PMs.var(pm, nw)[:pd_bus] = Dict{Int, Any}()
-
     report && _IM.sol_component_value(pm, nw, :load, :pd, _PMD.ids(pm, nw, :load), pd)
 end
 
@@ -80,8 +78,6 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
         end
     end
 
-    _PMs.var(pm, nw)[:qd_bus] = Dict{Int, Any}()
-
     report && _IM.sol_component_value(pm, nw, :load, :qd, _PMD.ids(pm, nw, :load), qd)
 
 end
@@ -89,13 +85,13 @@ end
 """
     variable_mc_load_current, IVR current equivalent of variable_mc_load
 """
-function variable_mc_load_current(pm::_PMs.IVRPowerModel; kwargs...)
+function variable_mc_load_current(pm::_PMs.AbstractIVRModel; kwargs...)
     variable_mc_load_current_real(pm; kwargs...)
     variable_mc_load_current_imag(pm; kwargs...)
 end
 
 
-function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
+function variable_mc_load_current_real(pm::_PMs.AbstractIVRModel;
                                  nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
@@ -115,7 +111,7 @@ function variable_mc_load_current_real(pm::_PMs.IVRPowerModel;
     report && _IM.sol_component_value(pm, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
 end
 
-function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+function variable_mc_load_current_imag(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
     cnds = _PMD.conductor_ids(pm; nw=nw)
     ncnds = length(cnds)
 
@@ -130,8 +126,10 @@ function variable_mc_load_current_imag(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, b
 end
 
 """
-    variable_mc_measurement, checks if the measured quantity belongs to the formulation's variable space and
-    if not, it converts it
+    variable_mc_measurement checks for every measurement if the measured
+    quantity belongs to the formulation's variable space. If not, the function
+    `create_conversion_constraint' is called, that adds a constraint that
+     associates the measured quantity to the formulation's variable space.
 """
 
 function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool=false)
@@ -162,6 +160,4 @@ function variable_mc_gen_power_setpoint_se(pm::_PMs.AbstractIVRModel; nw::Int=pm
     _PMD.variable_mc_gen_current_setpoint_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_gen_current_setpoint_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
-    _PMs.var(pm, nw)[:crg_bus] = Dict{Int, Any}()
-    _PMs.var(pm, nw)[:cig_bus] = Dict{Int, Any}()
 end
