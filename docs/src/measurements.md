@@ -78,8 +78,8 @@ The conversion type `MultiplicationFraction` allows to include `crx` and `cix`
 measurements in the ACR formulation, respectively through:
 ```math
 \begin{eqnarray}
-      \text{px} &= \frac{\text{px}\cdot\text{vr}+\text{qx}\cdot\text{vi}}{\text{vr}^{2}+\text{vi}^{2}} \\
-      \text{px} &= \frac{\text{px}\cdot\text{vi}-\text{qx}\cdot\text{vr}}{\text{vr}^{2}+\text{vi}^{2}} \\
+      \text{crx} &= \frac{\text{px}\cdot\text{vr}+\text{qx}\cdot\text{vi}}{\text{vr}^{2}+\text{vi}^{2}} \\
+      \text{cix} &= \frac{\text{px}\cdot\text{vi}-\text{qx}\cdot\text{vr}}{\text{vr}^{2}+\text{vi}^{2}} \\
 \end{eqnarray}
 ```
 These are non-linear equality constraints, modeled using `@NLconstraint`.
