@@ -108,7 +108,7 @@
     #     model = _PMS.ReducedACPPowerModel
     #
     #     # solve the feeders
-    #     for (ntw,fdr) in [(1,2),(10,3)] #NB fails on (4,2)
+    #     for (ntw,fdr) in [(1,2),(4,2),(10,3)]
     #         # load data
     #         data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
     #         if rm_transfo _PMS.rm_enwl_transformer!(data) end
@@ -150,7 +150,7 @@
     #     model = _PMS.ReducedACPPowerModel
     #
     #     # solve the feeders
-    #     for (ntw,fdr) in [(1,2),(10,3)] #NB fails on (4,2)
+    #     for (ntw,fdr) in [(1,2),(4,2),(10,3)]
     #         # load data
     #         data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
     #         if rm_transfo _PMS.rm_enwl_transformer!(data) end

@@ -189,7 +189,7 @@ end
 function build_mc_se(pm::PowerModelsDSSE.AbstractReducedModel)
 
     # Variables
-    PowerModelsDSSE.variable_mc_bus_voltage(pm; bounded = true)
+    _PMD.variable_mc_bus_voltage(pm; bounded = true)
     _PMD.variable_mc_branch_power(pm; bounded = true)
     _PMD.variable_mc_transformer_power(pm; bounded = true)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)

@@ -43,12 +43,3 @@ function constraint_mc_load_power_balance(pm::AbstractReducedModel, i::Int; nw::
         )
     end
 end
-
-function variable_mc_bus_voltage(pm::ReducedACPPowerModel; bounded = true)
-    _PMD.variable_mc_bus_voltage_angle(pm; bounded = bounded)
-    _PMD.variable_mc_bus_voltage_magnitude_only(pm; bounded = bounded)
-end
-
-function variable_mc_bus_voltage(pm::ReducedACRPowerModel; bounded = true)
-    _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
-end
