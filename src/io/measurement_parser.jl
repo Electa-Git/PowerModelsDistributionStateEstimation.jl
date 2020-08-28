@@ -131,7 +131,7 @@ function reduce_name(meas_var::String)
     return meas_var
 end
 function get_sigma(meas_var::String,phases)
-    sigma = meas_var in ["vm","vr","vi"] ? 0.005 : 0.001 ;
+    sigma = meas_var in ["vm","vr","vi"] ? 0.005/3 : 0.001/3 ;
     return length(phases) == 1 ? sigma : sigma.*ones(length(phases)) ;
 end
 get_configuration(cmp_type::String, cmp_data::Dict{String,Any}) = "G"

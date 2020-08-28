@@ -22,7 +22,7 @@ const _PMD = PowerModelsDistribution
 const _PMS = PowerModelsDSSE
 
 # set solvers
-ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>100.0,
+ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                               "tol"=>1e-10,
                                                               "print_level"=>0)
 
@@ -30,5 +30,6 @@ ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>10
 
     include("power_flow.jl")
     include("mixed_measurements.jl")
+    include("with_errors.jl")
 
 end
