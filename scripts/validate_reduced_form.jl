@@ -7,7 +7,7 @@ _PMS = PowerModelsDSSE
 
 ################################################################################
 # Input data
-ntw, fdr  = 4,2
+ntw, fdr  = 10,3
 rm_transfo = true
 rd_lines   = true
 
@@ -37,7 +37,7 @@ _PMS.insert_profiles!(data, season, elm, pfs, t = time)
 # Transform data model
 data = _PMD.transform_data_model(data)
 
-data_model = _PMs.ACRPowerModel
+data_model = _PMs.ACPPowerModel
 pf_result = _PMD.run_mc_pf(data, data_model, solver)
 
 _PMS.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -50,11 +50,11 @@ _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.
 
 # Solve the power flow
 data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav", "weight_rescaler" => 1)
-se_result_acr = PowerModelsDSSE.run_acr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-4, "fixed_variable_treatment"=>"make_parameter"))
+se_result_acr = PowerModelsDSSE.run_acr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_acr, pf_result)
 
-se_result_ivr = PowerModelsDSSE.run_ivr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-4, "fixed_variable_treatment"=>"make_constraint"))
+se_result_ivr = PowerModelsDSSE.run_ivr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-8, "fixed_variable_treatment"=>"make_constraint"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_ivr, pf_result)
 
-se_result_acp = PowerModelsDSSE.run_acp_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0, "tol"=>1e-4, "fixed_variable_treatment"=>"make_parameter"))
+se_result_acp = PowerModelsDSSE.run_acp_red_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_acp, pf_result)
