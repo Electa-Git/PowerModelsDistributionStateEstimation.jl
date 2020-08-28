@@ -19,6 +19,27 @@ function run_sdp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...
     return run_mc_se(data, _PMD.SDPUBFPowerModel, solver; kwargs...)
 end
 ""
+function run_acp_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+    return run_mc_se(data, ReducedACPPowerModel, solver; kwargs...)
+end
+
+""
+function run_acr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+    return run_mc_se(data, ReducedACRPowerModel, solver; kwargs...)
+end
+
+""
+function run_ivr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+    return run_mc_se(data, ReducedIVRPowerModel, solver; kwargs...)
+end
+
+# ""
+#NB TODO
+# function run_sdpr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+#     return run_mc_se(data, _PMD.ReduceSDPUBFPowerModel, solver; kwargs...)
+# end
+# ""
+
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
     if !haskey(data["setting"], "weight_rescaler")
         data["setting"]["weight_rescaler"] = 1
@@ -42,9 +63,6 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     variable_mc_measurement(pm, bounded = false)
 
     # Constraints
-    for (i,load) in _PMD.ref(pm, :load)
-        _PMD.constraint_mc_load_setpoint(pm, i)
-    end
     for (i,gen) in _PMD.ref(pm, :gen)
         _PMD.constraint_mc_gen_setpoint(pm, i)
     end
@@ -53,7 +71,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
         _PMD.constraint_mc_theta_ref(pm, i)
     end
     for (i,bus) in _PMD.ref(pm, :bus)
-        _PMD.constraint_mc_load_power_balance(pm, i)
+        constraint_mc_load_power_balance_se(pm, i)
     end
     for (i,branch) in _PMD.ref(pm, :branch)
         _PMD.constraint_mc_ohms_yt_from(pm, i)
@@ -77,7 +95,6 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
     _PMD.variable_mc_branch_current(pm, bounded = true)
-    #_PMD.variable_mc_gen_power_setpoint(pm, bounded = false)
     variable_mc_gen_power_setpoint_se(pm, bounded = true)#NB the difference with PMD is that I don't write a pg,qg expression. I create crg/cig vars and crg_bus/cig_bus expressions
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
@@ -92,17 +109,10 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     # gens should be constrained before KCL, or Pd/Qd undefined
     for id in _PMD.ids(pm, :gen)
-        #_PMD.constraint_mc_gen_setpoint(pm, id)
         constraint_mc_gen_setpoint_se(pm, id)
     end
 
-    # loads should be constrained before KCL, or Pd/Qd undefined
-    for id in _PMD.ids(pm, :load)
-        constraint_mc_load_setpoint_se(pm, id)
-    end
-
     for (i,bus) in _PMD.ref(pm, :bus)
-        #_PMD.constraint_mc_load_current_balance(pm, i)
         constraint_mc_load_current_balance_se(pm, i)
     end
 
@@ -151,10 +161,6 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_mc_gen_setpoint(pm, id)
     end
 
-    for id in _PMD.ids(pm, :load)
-        constraint_mc_load_setpoint_se(pm, id)
-    end
-
     for (i,bus) in _PMD.ref(pm, :bus)
         _PMD.constraint_mc_load_power_balance(pm, i)
     end
@@ -166,6 +172,90 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
 
         _PMD.constraint_mc_thermal_limit_from(pm, i)
         _PMD.constraint_mc_thermal_limit_to(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+        _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    for (i,meas) in _PMD.ref(pm, :meas)
+        constraint_mc_residual(pm, i)
+    end
+
+    objective_mc_se(pm)
+
+end
+
+function build_mc_se(pm::PowerModelsDSSE.AbstractReducedModel)
+
+    # Variables
+    _PMD.variable_mc_bus_voltage(pm; bounded = true)
+    _PMD.variable_mc_branch_power(pm; bounded = true)
+    _PMD.variable_mc_transformer_power(pm; bounded = true)
+    _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
+    variable_mc_load(pm; report = true)
+    variable_mc_residual(pm, bounded = true)
+    variable_mc_measurement(pm, bounded = false)
+
+    # Constraints
+    for (i,bus) in _PMD.ref(pm, :ref_buses)
+        @assert bus["bus_type"] == 3
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    for (i,gen) in _PMD.ref(pm, :gen)
+        _PMD.constraint_mc_gen_setpoint(pm, i)
+    end
+
+    for (i,bus) in _PMD.ref(pm, :bus)
+        PowerModelsDSSE.constraint_mc_load_power_balance(pm, i)
+    end
+
+    for (i,branch) in _PMD.ref(pm, :branch)
+        _PMD.constraint_mc_ohms_yt_from(pm, i)
+        _PMD.constraint_mc_ohms_yt_to(pm,i)
+    end
+    for (i,meas) in _PMD.ref(pm, :meas)
+        constraint_mc_residual(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+        _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    # Objective
+    objective_mc_se(pm)
+
+end
+
+function build_mc_se(pm::ReducedIVRPowerModel)
+    # Variables
+    _PMD.variable_mc_bus_voltage(pm, bounded = true)
+    variable_mc_branch_current(pm, bounded = true)
+    variable_mc_gen_power_setpoint_se(pm, bounded = true)
+    _PMD.variable_mc_transformer_current(pm, bounded = false)
+    variable_mc_load_current(pm, bounded = true)#TODO bug in the bounds assignment
+    variable_mc_residual(pm, bounded = true)
+    variable_mc_measurement(pm, bounded = false)
+
+    # Constraints
+    for (i,bus) in _PMD.ref(pm, :ref_buses)
+        @assert bus["bus_type"] == 3
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    # gens should be constrained before KCL, or Pd/Qd undefined
+    for id in _PMD.ids(pm, :gen)
+        constraint_mc_gen_setpoint_se(pm, id)
+    end
+
+    for (i,bus) in _PMD.ref(pm, :bus)
+        constraint_mc_load_current_balance_se(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        constraint_current_to_from(pm, i)
+        constraint_mc_bus_voltage_drop(pm, i)
     end
 
     for i in _PMD.ids(pm, :transformer)

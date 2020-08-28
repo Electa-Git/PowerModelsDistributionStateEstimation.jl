@@ -29,6 +29,6 @@ ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>10
 @testset "PowerModelsDSSE" begin
 
     include("power_flow.jl")
-    #include("mixed_measurements.jl") # TODO: needs to be faster in order to converge in 100 sec
+    include("mixed_measurements.jl")
 
 end

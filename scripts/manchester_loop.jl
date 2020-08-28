@@ -44,7 +44,19 @@ include("measurements.jl")
 df = _DF.DataFrame(ntw=Int64[], fdr=Int64[], solve_time=Float64[], n_bus=Int64[],
                    termination_status=String[], objective=Float64[])
 
-for ntw in 1:1 for fdr in 1:1
+n_buses = []
+for ntw in 1:25 for fdr in 1:10
+   data_path = _PMS.get_enwl_dss_path(ntw, fdr)
+   if !isdir(dirname(data_path))
+       push!(n_buses, (ntw, fdr, 0))
+       break
+   end
+    data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
+   _PMS.reduce_enwl_lines_eng!(data)
+   push!(n_buses, (ntw,fdr,length(data["bus"])))
+end
+
+for ntw in 1:25 for fdr in 1:10
     data_path = get_enwl_dss_path(ntw, fdr)
     if !isdir(dirname(data_path)) break end
 
@@ -86,11 +98,3 @@ for ntw in 1:1 for fdr in 1:1
 end end
 
 CSV.write(sol_path, df)
-
-# cnd = df.termination_status.=="LOCALLY_SOLVED"
-# avg = round(sum(df.solve_time[cnd])/sum(cnd), digits=1)
-# x_values = 1:length(df.ntw)
-#
-# scatter(x_values[cnd],df.solve_time[cnd],xlim=[0,130],
-#                                          yaxis=:log10,ylim=[1e-1,1e3],
-#                                          label="ACR (avg = $avg)")

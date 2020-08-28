@@ -9,6 +9,14 @@ struct SquareFraction<:ConversionType
     denominator::Array
 end
 
+struct Square<:ConversionType
+    msr_id::Int64
+    cmp_type::Symbol
+    cmp_id::Int64
+    bus_ind::Int64
+    elements::Array
+end
+
 struct Multiplication<:ConversionType
     msr_sym::Symbol
     msr_id::Int64
@@ -76,7 +84,7 @@ end
 function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
     if msr == :vm
-        msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
+        msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
     elseif msr == :va
         msr_type = PreProcessing(i, :bus, cmp_id, :vi, :vr)
     elseif msr == :cm
@@ -106,15 +114,15 @@ end
 function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
     if msr == :vm
-        msr_type = SquareFraction(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr], [[1, 1, 1]])
+        msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
     elseif msr == :va
         msr_type = PreProcessing(i, :bus, cmp_id, :vi, :vr)
     elseif msr == :cm
-        msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [[1, 1, 1]])
+        msr_type = Square(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci])
     elseif msr == :cmg
-        msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [[1, 1, 1]])
+        msr_type = Square(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig])
     elseif msr == :cmd
-        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [[1, 1, 1]])
+        msr_type = Square(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid])
     elseif msr == :ca
         msr_type = PreProcessing(i, :branch, cmp_id, :ci, :cr)
     elseif msr == :cag
@@ -139,7 +147,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     return msr_type
 end
 
-function no_conversion_needed(pm::_PMs.ACPPowerModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMs.AbstractACPModel, msr_var::Symbol)
   return msr_var ∈ [:vm, :va, :pd, :qd, :pg, :qg, :p, :q]
 end
 
@@ -147,7 +155,7 @@ function no_conversion_needed(pm::_PMs.AbstractACRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :pd, :qd, :pg, :qg, :p, :q]
 end
 
-function no_conversion_needed(pm::_PMs.IVRPowerModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMs.AbstractIVRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :cr, :ci, :crg, :cig, :crd, :cid]
 end
 
@@ -191,6 +199,24 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
         )
 end
 
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Square; nw=nw, nph=3)
+
+    new_var = []
+    for nvn in msr.elements
+        if msr.cmp_type == :branch
+            push!(new_var, _PMD.var(pm, nw, nvn, (msr.cmp_id, _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"])))
+        else
+            push!(new_var, _PMD.var(pm, nw, nvn, msr.cmp_id))
+        end
+    end
+
+    msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+
+    JuMP.@constraint(pm.model, [c in 1:nph],
+        original_var[id][c]^2 == (sum( n[c]^2 for n in new_var ))
+        )
+end
+
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Multiplication; nw=nw, nph = 3)
 
     m1 = []
@@ -217,7 +243,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
 
-    if occursin("pg", String(msr.msr_sym))
+    if occursin("p", String(msr.msr_sym))
         JuMP.@constraint(pm.model, [c in 1:nph],
             original_var[id][c] == m1[1][c]*m2[1][c]+m1[2][c]*m2[2][c]
             )
@@ -246,7 +272,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             end
             msr.cmp_type == :branch ? id = (msr.cmp_id, _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
             JuMP.@NLconstraint(pm.model,
-                original_var[id][c] == num[c]/(den[c]+1e-8)
+                original_var[id][c]*den[c] == num[c]
                 )
         end
     end
@@ -269,11 +295,11 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 
     if occursin("r", String(msr.msr_type))
         JuMP.@NLconstraint(pm.model, [c in 1:nph],
-            original_var[id][c] == (num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c]))/(den[c]+1e-8)
+            original_var[id][c]*den[c] == num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c])
             )
     elseif occursin("i", String(msr.msr_type))
         JuMP.@NLconstraint(pm.model, [c in 1:nph],
-            original_var[id][c] == (-num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c]))/(den[c]+1e-8)
+            original_var[id][c]*den[c] == -num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c])
             )
     else
         error("wrong measurement association")
@@ -283,26 +309,27 @@ end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw, nph=3)
 
-    power_var = []
-    voltage_var = []
-    for p in msr.power
+    p = []
+    v = []
+    for pw in msr.power
         if msr.cmp_type == :branch
-            push!(power_var, _PMD.var(pm, nw, p, (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
+            push!(p, _PMD.var(pm, nw, pw, (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
         else
-            push!(power_var, _PMD.var(pm, nw, p, msr.cmp_id))
+            push!(p, _PMD.var(pm, nw, pw, msr.cmp_id))
         end
     end
-    for v in msr.voltage
-        push!(voltage_var, _PMD.var(pm, nw, v, msr.bus_ind))
+    for vl in msr.voltage
+        push!(v, _PMD.var(pm, nw, vl, msr.bus_ind))
     end
 
-    msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
-    if occursin("p", string(msr.msr_type))
-        JuMP.@constraint(pm.model, [c in 1:nph],
+    msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+
+    if occursin("cr", string(msr.msr_type))
+        JuMP.@NLconstraint(pm.model, [c in 1:nph],
             original_var[id][c] == (p[1][c]*v[1][c]+p[2][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
-    elseif occursin("q", string(msr.msr_type))
-        JuMP.@constraint(pm.model, [c in 1:nph],
+    elseif occursin("ci", string(msr.msr_type))
+        JuMP.@NLconstraint(pm.model, [c in 1:nph],
             original_var[id][c] == (-p[2][c]*v[1][c]+p[1][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
     end

@@ -14,8 +14,8 @@ Any network formulation has a specific variable space, e.g., ACP includes `vm`,
 | -         | vm  | va  | cmx | cax | crx | cix | px  | qx  | vr  | vi  |
 | :-------- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
 | **ACP**   | N   | N   | SF  | X   | F   | F   | N   | N   | X   | X   |
-| **ACR**   | SF  | PP  | SF  | X   | MF  | MF  | N   | N   | N   | N   |
-| **IVR**   | SF  | PP  | SF  | PP  | N   | N   | M   | M   | N   | N   |
+| **ACR**   | S  | PP  | SF  | X   | MF  | MF  | N   | N   | N   | N   |
+| **IVR**   | S  | PP  | S  | PP  | N   | N   | M   | M   | N   | N   |
 
 where:
 - F:  conversion of type Fraction
@@ -23,6 +23,7 @@ where:
 - MF: conversion of type MultiplicationFraction
 - N:  native to the network formulation
 - PP: conversion of type PreProcessing
+- S: conversion of type Square
 - SF: conversion of type SquareFraction
 - X:  not provided
 
@@ -65,8 +66,8 @@ The conversion type `Multiplication` allows to include `px` and `qx`
 measurements in the IVR formulation, respectively through:
 ```math
 \begin{eqnarray}
-      \text{px} &= \text{vi}\cdot\text{crx} + \text{vi}\cdot\text{cix} \\
-      \text{qx} &= \text{vi}\cdot\text{crx} - \text{vi}\cdot\text{cix}
+      \text{px} &= \text{vr}\cdot\text{crx} + \text{vi}\cdot\text{cix} \\
+      \text{qx} &= \text{vi}\cdot\text{crx} - \text{vr}\cdot\text{cix}
 \end{eqnarray}
 ```
 These are quadratic equality constraints, modeled using `@constraint`.
@@ -77,22 +78,32 @@ The conversion type `MultiplicationFraction` allows to include `crx` and `cix`
 measurements in the ACR formulation, respectively through:
 ```math
 \begin{eqnarray}
-      \text{px} &= \frac{\text{px}\cdot\text{vr}+\text{qx}\cdot\text{vi}}{\text{vr}^{2}+\text{vi}^{2}} \\
-      \text{px} &= \frac{\text{px}\cdot\text{vi}-\text{qx}\cdot\text{vr}}{\text{vr}^{2}+\text{vi}^{2}} \\
+      \text{crx} &= \frac{\text{px}\cdot\text{vr}+\text{qx}\cdot\text{vi}}{\text{vr}^{2}+\text{vi}^{2}} \\
+      \text{cix} &= \frac{\text{px}\cdot\text{vi}-\text{qx}\cdot\text{vr}}{\text{vr}^{2}+\text{vi}^{2}} \\
 \end{eqnarray}
 ```
 These are non-linear equality constraints, modeled using `@NLconstraint`.
 
 ### SquareFraction
 
-The conversion type `SquareFraction` allows to include `vm` measurements in the
-ACR and IVR formulation, and `cmx` measurements in the ACP, ACR and IVR
+The conversion type `SquareFraction` allows to include `cmx` measurements in the ACP and ACR
+formulation, through:
+```math
+\begin{equation}
+      \text{cmx}^{2}    &= \frac{\text{px}^{2} + \text{qx}^{2}}{\text{vm}^{2}}  
+\end{equation}
+```
+These are non-linear equality constraints, modeled using `@NLconstraint`.
+
+### Square
+
+The conversion type `Square` allows to include `vm` measurements in the
+ACR and IVR formulation, and `cmx` measurements in the IVR
 formulation, respectively through:
 ```math
 \begin{eqnarray}
-      \text{vm}^{2}     &= \frac{\text{vi}^{2} + \text{vr}^{2}}{1}                  \\
-      \text{cmx}^{2}    &= \frac{\text{px}^{2} + \text{qx}^{2}}{\text{vm}^{2}}      \\
-      \text{cmx}^{2}    &= \frac{\text{cix}^{2} + \text{crx}^{2}}{1}
+      \text{vm}^{2}     &= \text{vi}^{2} + \text{vr}^{2}                  \\
+      \text{cmx}^{2}    &= \text{cix}^{2} + \text{crx}^{2}    
 \end{eqnarray}
 ```
-These are non-linear equality constraints, modeled using `@NLconstraint`.
+These are quadratic equality constraints, modeled using `@constraint`.

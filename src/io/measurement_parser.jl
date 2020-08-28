@@ -185,3 +185,25 @@ function write_measurements!(model::Type, data::Dict, pf_results::Dict, path::St
     end
     _CSV.write(path, df)
 end
+
+"""
+    add_voltage_measurement!(model::Type, data::Dict, pf_results::Dict, path::String)
+
+This function can be run after add_measurements! for the cases in which only power and/or
+    current measurements are generated. It was observed that adding even only one voltage measurement
+    helps the state estimator converge.
+"""
+function add_voltage_measurement!(data::Dict, pf_result::Dict, sigma::Float64)
+
+    first_key =  first(keys(pf_result["solution"]["bus"]))
+    if haskey(pf_result["solution"]["bus"][first_key], "vm")
+        #do nothing
+    else
+        vm = sqrt.(pf_result["solution"]["bus"][first_key]["vi"].^2+pf_result["solution"]["bus"][first_key]["vr"].^2)
+        voltage_meas_idx = string(maximum(parse(Int64,i) for i in keys(data["meas"]) ) + 1)
+        bus_idx = parse(Int64, first_key)
+        data["meas"][voltage_meas_idx] = Dict{String, Any}("var"=>:vm,"cmp"=>:bus,
+                                        "dst"=>[Distributions.Normal{Float64}(vm[1], sigma), Distributions.Normal{Float64}(vm[2], sigma), Distributions.Normal{Float64}(vm[3], sigma)],
+                                        "cmp_id"=>bus_idx)
+    end
+end
