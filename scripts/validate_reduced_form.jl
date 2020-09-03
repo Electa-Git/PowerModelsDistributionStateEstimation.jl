@@ -7,7 +7,7 @@ _PMS = PowerModelsDSSE
 
 ################################################################################
 # Input data
-ntw, fdr  = 10,3
+ntw, fdr  = 1,2
 rm_transfo = true
 rd_lines   = true
 
@@ -31,10 +31,11 @@ data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr),data_model=_PMD.ENGINEER
 if rm_transfo _PMS.rm_enwl_transformer!(data) end
 if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
 
-# Insert the load profiles
+# Insert the ENWL load profiles
 _PMS.insert_profiles!(data, season, elm, pfs, t = time)
 
 # Transform data model
+#data = _PMD.parse_file("C:\\Users\\mvanin\\.julia\\dev\\PowerModelsDSSE\\test\\data\\extra\\networks\\case3_unbalanced.dss")
 data = _PMD.transform_data_model(data)
 
 data_model = _PMs.ACPPowerModel
@@ -43,13 +44,13 @@ pf_result = _PMD.run_mc_pf(data, data_model, solver)
 _PMS.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
 # read-in measurement data and set initial values
-_PMS.add_measurements!(data, msr_path, actual_meas = true)
+_PMS.add_measurements!(data, msr_path, actual_meas = false)
 _PMS.add_voltage_measurement!(data, pf_result, 0.005)
 _PMS.assign_start_to_variables!(data)
 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
 # Solve the power flow
-data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav", "weight_rescaler" => 1)
+data["setting"] = Dict{String,Any}("estimation_criterion" => "wls", "weight_rescaler" => 1000000)
 se_result_acr = PowerModelsDSSE.run_acr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_acr, pf_result)
 

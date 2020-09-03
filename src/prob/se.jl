@@ -45,7 +45,7 @@ function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, sol
         data["setting"]["weight_rescaler"] = 1
     end
     if !haskey(data["setting"], "estimation_criterion")
-        data["setting"]["estimation_criterion"] = "wls"
+        data["setting"]["estimation_criterion"] = "wlav"
     end
     return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end

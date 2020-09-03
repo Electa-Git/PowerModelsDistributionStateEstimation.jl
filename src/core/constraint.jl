@@ -10,7 +10,6 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
     var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), id)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :setting)["weight_rescaler"]
-    nph = 3
     for c in _PMD.conductor_ids(pm; nw=nw)
         if typeof(dst[c]) == Float64
             JuMP.@constraint(pm.model,
@@ -19,32 +18,30 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
             JuMP.@constraint(pm.model,
                 res[c] == 0.0
             )
-        elseif typeof(dst[c]) == _DST.Normal{Float64}
+        elseif typeof(dst[c]) == _DST.Normal{Float64} && _PMD.ref(pm, nw, :setting)["estimation_criterion"] != "mle"
             if _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wls"
                 JuMP.@constraint(pm.model,
-                    res[c] == (var[c]-_DST.mean(dst[c]))^2/(_DST.std(dst[c])*rsc)^2
+                    res[c] == (var[c]-_DST.mean(dst[c]))^2 / (_DST.std(dst[c]))^2 / rsc
                 )
             elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
                 JuMP.@constraint(pm.model,
-                    res[c] >= (var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
+                    res[c] >= (var[c]-_DST.mean(dst[c])) / _DST.std(dst[c]) / rsc
                 )
                 JuMP.@constraint(pm.model,
-                    res[c] >= -(var[c]-_DST.mean(dst[c]))/(_DST.std(dst[c])*rsc)
+                    res[c] >= -(var[c]-_DST.mean(dst[c])) / _DST.std(dst[c]) / rsc
                 )
             end
+        elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "mle" && typeof(dst[c]) != Float64
+            distr(x) = _DST.logpdf(dst[c],x)
+            grd(x) = _DST.gradlogpdf(dst[c],x)
+            hes(x) = heslogpdf(dst[c],x)
+            f = Symbol("df_",i,"_",c)
+            JuMP.register(pm.model, f,1,distr,grd,hes)
+            JuMP.add_NL_constraint(pm.model,
+                :($(res[c]) == $(f)($(var[c])))
+            )
         else
-            @warn "Currently, only Gaussian distributions are supported."
-            # JuMP.set_lower_bound(var[c],_DST.minimum(dst[c]))
-            # JuMP.set_upper_bound(var[c],_DST.maximum(dst[c]))
-            # dst(x) = -_DST.logpdf(dst[c],x)
-            # grd(x) = -_DST.gradlogpdf(dst[c],x)
-            # hes(x) = -_DST.heslogpdf(dst[c],x) # doesn't exist yet
-            # register(pm.model,Symbol("df_$(i)_$(c)"),1,dst,grd,hes)
-            # Expr(:call, :myf, [x[i] for i=1:n]...)
-            # https://stackoverflow.com/questions/44710900/juliajump-variable-number-of-arguments-to-function
-            # JuMP.@NLconstraint(pm.model,
-            #     res[c] == Expr(:call, Symbol("df_$(i)_$(c)"), var[c]
-            # )
+            error("State estimation criterion is not properly defined: wls and wlav only work with normal distribution")
         end
     end
 end

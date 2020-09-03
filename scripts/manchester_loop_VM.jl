@@ -7,7 +7,7 @@ pkg"activate ."
 
 # Load Pkgs
 using Ipopt
-using DataFrames
+using DataFrames, CSV
 using JuMP, PowerModels, PowerModelsDistribution
 using PowerModelsDSSE
 
@@ -25,18 +25,16 @@ models = [_PMs.ACPPowerModel, _PMs.ACRPowerModel, _PMs.IVRPowerModel]
 rm_transfo = false
 rd_lines   = false
 set_criterion = "wlav"
-set_rescaler = 10000
+set_rescaler = 1
 
 season = "summer"
 time   = 144
 elm    = ["load", "pv"]
 pfs    = [0.95, 0.90]
 
-const BASE_DIR = dirname(@__DIR__)
 ################################################################################
 # Set path
-ntw_path = joinpath(BASE_DIR,"examples/data/enwl")
-msr_path = joinpath(BASE_DIR,"examples/data/measurements/measurement.csv")
+msr_path = joinpath(BASE_DIR,"test/data/enwl/measurements/temp.csv")
 
 # Set solve
 linear_solver = "ma27"
@@ -44,14 +42,9 @@ tolerance = 1e-5
 solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0,
                                                         "tol"=>tolerance,
                                                         "print_level"=>0,
-                                                        "linear_solver"=>linera_solver)
+                                                        "linear_solver"=>linear_solver)
 
 display("You are launching a simulation with rm_transfo: $(string(rm_transfo)) and rd_lines: $(string(rd_lines)), criterion: $(set_criterion), rescaler: $set_rescaler, linear solver : $linear_solver")
-
-# Include the necessary functions to load the data
-include("$ntw_path/load_enwl.jl")
-include("$ntw_path/mod_enwl.jl")
-include("measurements.jl")
 
 df = _DF.DataFrame(ntw=Int64[], fdr=Int64[], solve_time=Float64[], n_bus=Int64[],
                    termination_status=String[], objective=Float64[], criterion=String[], rescaler = Float64[], eq_model = String[], linear_solver = String[], tol = Any[])
@@ -59,33 +52,34 @@ df = _DF.DataFrame(ntw=Int64[], fdr=Int64[], solve_time=Float64[], n_bus=Int64[]
 for mod in models
 
     short = string(mod)[1:3]
-    sol_path = joinpath(BASE_DIR,"examples/sol/$(short)_rmtrf_$(string(rm_transfo))_rdlines_$(string(rd_lines)).csv")
+    sol_path = joinpath(BASE_DIR,"src/io/$(short)_rmtrf_$(string(rm_transfo))_rdlines_$(string(rd_lines)).csv")
 
     for ntw in 1:25 for fdr in 1:10
 
-        data_path = get_enwl_dss_path(ntw, fdr)
+        data_path = _PMS.get_enwl_dss_path(ntw, fdr)
         if !isdir(dirname(data_path)) break end
 
         # Load the data
-        data = _PMD.parse_file(get_enwl_dss_path(ntw, fdr),data_model=_PMD.ENGINEERING);
-        if rm_transfo rm_enwl_transformer!(data) end
-        if rd_lines   reduce_lines_eng!(data) end
+        data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr),data_model=_PMD.ENGINEERING);
+        if rm_transfo _PMS.rm_enwl_transformer!(data) end
+        if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
 
         # Insert the load profiles
-        insert_profiles!(data, season, elm, pfs, t = time)
+        _PMS.insert_profiles!(data, season, elm, pfs, t = time)
 
         # Transform data model
         data = _PMD.transform_data_model(data);
 
         # Solve the power flow
-        pf_results = _PMD.run_mc_pf(data, mod, solver)
+        pf_results = _PMD.run_mc_pf(data, _PMs.ACPPowerModel, solver)
 
         # Write measurements based on power flow
-        write_measurements!(mod, data, pf_results, msr_path)
+        _PMS.write_measurements!(_PMs.ACPPowerModel, data, pf_results, msr_path)
 
         # Read-in measurement data and set initial values
-        _PMS.add_measurement_to_pmd_data!(data, msr_path, actual_meas = true)
+        _PMS.add_measurements!(data, msr_path, actual_meas = true)
         _PMS.assign_start_to_variables!(data)
+        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
         # Set se settings
         data["setting"] = Dict{String,Any}("estimation_criterion" => set_criterion,

@@ -25,6 +25,7 @@ const _CSV = CSV
 const _DFS = DataFrames
 const _DST = Distributions
 const _IM  = InfrastructureModels
+const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _RAN = Random
@@ -44,6 +45,7 @@ include("form/adapted_pmd_constraints.jl")
 include("form/reduced_ac.jl")
 include("form/reduced_ivr.jl")
 
+include("io/distributions.jl")
 include("io/measurement_parser.jl")
 include("io/network_parser.jl")
 include("io/postprocessing.jl")
@@ -58,5 +60,6 @@ export rm_enwl_transformer!, reduce_enwl_lines_eng!
 export add_measurements!, write_measurements!
 export assign_start_to_variables!
 export calculate_voltage_magnitude_error
+export heslogpdf
 
 end
