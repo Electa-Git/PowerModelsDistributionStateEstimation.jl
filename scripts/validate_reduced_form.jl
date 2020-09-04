@@ -1,3 +1,7 @@
+##NB scaling tips: https://projects.coin-or.org/Ipopt/wiki/HintsAndTricks#Scalingoftheoptimizationproblem
+##NB scaling tips: https://www.gams.com/latest/docs/S_CONOPT.html#CONOPT_SCALING
+
+
 using PowerModelsDSSE, PowerModelsDistribution, Ipopt
 using PowerModels, JuMP
 
@@ -50,7 +54,7 @@ _PMS.assign_start_to_variables!(data)
 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
 # Solve the power flow
-data["setting"] = Dict{String,Any}("estimation_criterion" => "wls", "weight_rescaler" => 1000000)
+data["setting"] = Dict{String,Any}("estimation_criterion" => "wls", "weight_rescaler" => 1000)
 se_result_acr = PowerModelsDSSE.run_acr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_acr, pf_result)
 
@@ -59,4 +63,7 @@ delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_ivr, pf_r
 
 se_result_acp = PowerModelsDSSE.run_acp_red_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_acp, pf_result)
+
+se_result_lin = PowerModelsDSSE.run_sdp_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
+delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_lin, pf_result)
 #########

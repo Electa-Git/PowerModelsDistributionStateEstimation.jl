@@ -147,6 +147,23 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     return msr_type
 end
 
+function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Symbol;nw=nw)
+    cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
+    if msr == :vm
+        msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:w])
+    elseif msr == :cm
+        msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:w])
+    elseif msr == :cmg
+        msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:w])
+    elseif msr == :cmd
+        msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:w])
+    else
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+    end
+    return msr_type
+end
+
+
 function no_conversion_needed(pm::_PMs.AbstractACPModel, msr_var::Symbol)
   return msr_var ∈ [:vm, :va, :pd, :qd, :pg, :qg, :p, :q]
 end
@@ -159,14 +176,12 @@ function no_conversion_needed(pm::_PMs.AbstractIVRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :cr, :ci, :crg, :cig, :crd, :cid]
 end
 
+function no_conversion_needed(pm::_PMD.AbstractLPUBFModel, msr_var::Symbol)
+    return msr_var ∈ [:w, :pd, :qd, :pg, :qg, :p, :q]
+end
+
 function no_conversion_needed(pm::_PMD.SDPUBFPowerModel, msr_var::Symbol)
-    #NOTE we could extend this to current values crd, cid etc. putting hands on powermodelsdistribution, like they already do for w (diag of Wr)
-    if msr_var ∈ [:w, :pd, :qd, :pg, :qg, :p, :q, :cm]
-        return msr_var ∈ [:w, :pd, :qd, :pg, :qg, :p, :q, :cm]
-    else
-        error("Currently, $msr_var is not supported in for the _PMD.SDPUBFPowerModel,
-               consider using an exact model")
-    end
+    return msr_var ∈ [:w, :pd, :qd, :pg, :qg, :p, :q, :cm]
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw, nph=3)
@@ -181,22 +196,34 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             push!(new_var_num, _PMD.var(pm, nw, nvn, msr.cmp_id))
         end
     end
-    new_var_den = []
-    for nvd in msr.denominator
-        if typeof(nvd) != Symbol #only case is when I have an array of ones
-            push!(new_var_den, nvd)
-        elseif occursin("v", String(nvd)) && msr.cmp_type != :bus
-            push!(new_var_den, _PMD.var(pm, nw, nvd, msr.bus_ind))
-        else
-            push!(new_var_den, _PMD.var(pm, nw, nvd, msr.cmp_id))
-        end
-    end
+
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
 
-    JuMP.@NLconstraint(pm.model, [c in 1:nph],
-        original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
-                   (sum( d[c]^2 for d in new_var_den))
-        )
+    if typeof(pm) <: _PMD.LinDist3FlowPowerModel
+
+        new_var_den = [_PMD.var(pm, nw, msr.denominator, msr.cmp_id)]
+
+        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+            original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
+                       (sum( d[c] for d in new_var_den))
+            )
+    else
+        new_var_den = []
+        for nvd in msr.denominator
+            if typeof(nvd) != Symbol #only case is when I have an array of ones
+                push!(new_var_den, nvd)
+            elseif occursin("v", String(nvd)) && msr.cmp_type != :bus
+                push!(new_var_den, _PMD.var(pm, nw, nvd, msr.bus_ind))
+            else
+                push!(new_var_den, _PMD.var(pm, nw, nvd, msr.cmp_id))
+            end
+        end
+
+        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+            original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
+                       (sum( d[c]^2 for d in new_var_den))
+            )
+    end
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Square; nw=nw, nph=3)
@@ -212,9 +239,15 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 
     msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
 
-    JuMP.@constraint(pm.model, [c in 1:nph],
-        original_var[id][c]^2 == (sum( n[c]^2 for n in new_var ))
-        )
+    if typeof(pm) <: _PMD.LinDist3FlowPowerModel
+        JuMP.@constraint(pm.model, [c in 1:nph],
+            original_var[id][c]^2 == (sum( n[c] for n in new_var ))
+            )
+    else
+        JuMP.@constraint(pm.model, [c in 1:nph],
+            original_var[id][c]^2 == (sum( n[c]^2 for n in new_var ))
+            )
+    end
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Multiplication; nw=nw, nph = 3)

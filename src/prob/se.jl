@@ -32,7 +32,10 @@ end
 function run_ivr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, ReducedIVRPowerModel, solver; kwargs...)
 end
-
+""
+function run_linear_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+    return run_mc_se(data, _PMD.LinDist3FlowPowerModel, solver; kwargs...)
+end
 # ""
 #NB TODO
 # function run_sdpr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
@@ -138,12 +141,11 @@ end
 function build_mc_se(pm::_PMD.AbstractUBFModels)
 
     # Variables
-    _PMD.variable_mc_bus_voltage(pm) # TODO in _PMD: should be false
-    _PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_bus_voltage(pm)
     _PMD.variable_mc_branch_power(pm)
-    _PMD.variable_mc_transformer_power(pm; bounded=false)
-    _PMD.variable_mc_gen_power_setpoint(pm; bounded=false)
-    _PMD.variable_mc_load_setpoint(pm)
+    _PMD.variable_mc_transformer_power(pm; bounded=true)
+    _PMD.variable_mc_gen_power_setpoint(pm; bounded=true)
+    variable_mc_load(pm; report = true)
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
 
@@ -152,9 +154,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
 
     for (i,bus) in _PMD.ref(pm, :ref_buses)
         @assert bus["bus_type"] == 3
-        if !(typeof(pm)<:_PMD.LPUBFDiagPowerModel)
-            _PMD.constraint_mc_theta_ref(pm, i)
-        end
+        _PMD.constraint_mc_theta_ref(pm, i)
     end
 
     for id in _PMD.ids(pm, :gen)
@@ -169,9 +169,6 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_mc_power_losses(pm, i)
         _PMD.constraint_mc_model_voltage_magnitude_difference(pm, i)
         _PMD.constraint_mc_voltage_angle_difference(pm, i)
-
-        _PMD.constraint_mc_thermal_limit_from(pm, i)
-        _PMD.constraint_mc_thermal_limit_to(pm, i)
     end
 
     for i in _PMD.ids(pm, :transformer)
@@ -229,6 +226,7 @@ function build_mc_se(pm::PowerModelsDSSE.AbstractReducedModel)
 end
 
 function build_mc_se(pm::ReducedIVRPowerModel)
+
     # Variables
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
     variable_mc_branch_current(pm, bounded = true)
