@@ -1,3 +1,5 @@
+using LinearAlgebra
+
 @enum ConnConfig WYE DELTA
 
 function constraint_mc_gen_setpoint_se(pm::_PMs.AbstractIVRModel, id::Int; nw::Int=pm.cnw, report::Bool=true, bounded::Bool=true)
@@ -243,4 +245,68 @@ function constraint_mc_load_power_balance_se(pm::_PMs.AbstractACPModel, nw::Int,
         )
         push!(cstr_q, cq)
     end
+end
+
+function constraint_mc_load_power_balance_se(pm::_PMD.SDPUBFPowerModel, i::Int; nw::Int=pm.cnw)
+    bus = _PMD.ref(pm, nw, :bus, i)
+    bus_arcs = _PMD.ref(pm, nw, :bus_arcs, i)
+    bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_sw, i)
+    bus_arcs_trans = _PMD.ref(pm, nw, :bus_arcs_trans, i)
+    bus_gens = _PMD.ref(pm, nw, :bus_gens, i)
+    bus_storage = _PMD.ref(pm, nw, :bus_storage, i)
+    bus_loads = _PMD.ref(pm, nw, :bus_loads, i)
+    bus_shunts = _PMD.ref(pm, nw, :bus_shunts, i)
+
+    bus_gs = Dict(k => _PMD.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
+    bus_bs = Dict(k => _PMD.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
+
+    constraint_mc_load_power_balance_se(pm, nw, i, bus_arcs, bus_arcs_sw, bus_arcs_trans, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+end
+
+
+function constraint_mc_load_power_balance_se(pm::_PMD.SDPUBFPowerModel, nw::Int, i, bus_arcs, bus_arcs_sw, bus_arcs_trans, bus_gens, bus_storage, bus_loads, bus_gs, bus_bs)
+    Wr = _PMD.var(pm, nw, :Wr, i)
+    Wi = _PMD.var(pm, nw, :Wi, i)
+    P = get(_PMD.var(pm, nw), :P, Dict()); _PMs._check_var_keys(P, bus_arcs, "active power", "branch")
+    Q = get(_PMD.var(pm, nw), :Q, Dict()); _PMs._check_var_keys(Q, bus_arcs, "reactive power", "branch")
+    Psw  = get(_PMD.var(pm, nw),  :Psw, Dict()); _PMs._check_var_keys(Psw, bus_arcs_sw, "active power", "switch")
+    Qsw  = get(_PMD.var(pm, nw),  :Qsw, Dict()); _PMs._check_var_keys(Qsw, bus_arcs_sw, "reactive power", "switch")
+    Pt   = get(_PMD.var(pm, nw),   :Pt, Dict()); _PMs._check_var_keys(Pt, bus_arcs_trans, "active power", "transformer")
+    Qt   = get(_PMD.var(pm, nw),   :Qt, Dict()); _PMs._check_var_keys(Qt, bus_arcs_trans, "reactive power", "transformer")
+
+    pd = get(_PMD.var(pm, nw), :pd, Dict()); _PMs._check_var_keys(pd, bus_loads, "active power", "load")
+    qd = get(_PMD.var(pm, nw), :qd, Dict()); _PMs._check_var_keys(qd, bus_loads, "reactive power", "load")
+    pg = get(_PMD.var(pm, nw), :pg, Dict()); _PMs._check_var_keys(pg, bus_gens, "active power", "generator")
+    qg = get(_PMD.var(pm, nw), :qg, Dict()); _PMs._check_var_keys(qg, bus_gens, "reactive power", "generator")
+    ps   = get(_PMD.var(pm, nw),   :ps, Dict()); _PMs._check_var_keys(ps, bus_storage, "active power", "storage")
+    qs   = get(_PMD.var(pm, nw),   :qs, Dict()); _PMs._check_var_keys(qs, bus_storage, "reactive power", "storage")
+
+    cnds = _PMD.conductor_ids(pm; nw=nw)
+    ncnds = length(cnds)
+
+    Gt = isempty(bus_gs) ? fill(0.0, ncnds, ncnds) : sum(values(bus_gs))
+    Bt = isempty(bus_bs) ? fill(0.0, ncnds, ncnds) : sum(values(bus_bs))
+
+    cstr_p = JuMP.@constraint(pm.model,
+        sum(diag(P[a]) for a in bus_arcs)
+        + sum(diag(Psw[a_sw]) for a_sw in bus_arcs_sw)
+        + sum(diag(Pt[a_trans]) for a_trans in bus_arcs_trans)
+        .==
+        sum(pg[g] for g in bus_gens)
+        - sum(ps[s] for s in bus_storage)
+        - sum(pd[d] for d in bus_loads)
+        - diag(Wr*Gt'+Wi*Bt')
+    )
+
+    cstr_q = JuMP.@constraint(pm.model,
+        sum(diag(Q[a]) for a in bus_arcs)
+        + sum(diag(Qsw[a_sw]) for a_sw in bus_arcs_sw)
+        + sum(diag(Qt[a_trans]) for a_trans in bus_arcs_trans)
+        .==
+        sum(qg[g] for g in bus_gens)
+        - sum(qs[s] for s in bus_storage)
+        - sum(qd[d] for d in bus_loads)
+        - diag(-Wr*Bt'+Wi*Gt')
+    )
+
 end

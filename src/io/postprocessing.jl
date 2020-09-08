@@ -8,10 +8,17 @@
 ################################################################################
 
 ## Error calculation
-convert_lifted_to_polar!(sol::Dict, name) =
+function convert_lifted_to_polar!(sol::Dict, name)
+    if name == "w"
         for (_,bus) in sol["bus"]
             bus["vm"] = sqrt.(bus[name])
         end
+    elseif name == "Wr"
+        for (_,bus) in sol["bus"]
+            bus["vm"] = [sqrt(bus[name][c,c]) for c in 1:size(bus[name])[1]]
+        end
+    end
+end
 
 convert_rectangular_to_polar!(sol::Dict) =
     for (_,bus) in sol["bus"]

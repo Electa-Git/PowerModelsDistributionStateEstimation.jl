@@ -36,19 +36,13 @@ end
 function run_linear_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, _PMD.LinDist3FlowPowerModel, solver; kwargs...)
 end
-# ""
-#NB TODO
-# function run_sdpr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-#     return run_mc_se(data, _PMD.ReduceSDPUBFPowerModel, solver; kwargs...)
-# end
-# ""
 
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
     if !haskey(data["setting"], "weight_rescaler")
         data["setting"]["weight_rescaler"] = 1
     end
     if !haskey(data["setting"], "estimation_criterion")
-        data["setting"]["estimation_criterion"] = "wlav"
+        data["setting"]["estimation_criterion"] = "rwlav"
     end
     return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end
@@ -142,6 +136,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
 
     # Variables
     _PMD.variable_mc_bus_voltage(pm)
+    _PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_branch_power(pm)
     _PMD.variable_mc_transformer_power(pm; bounded=true)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded=true)
@@ -149,7 +144,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
 
-    # Constraints
+    #Constraints
     _PMD.constraint_mc_model_current(pm)
 
     for (i,bus) in _PMD.ref(pm, :ref_buses)
@@ -162,7 +157,11 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
-        _PMD.constraint_mc_load_power_balance(pm, i)
+        if typeof(pm) <: _PMD.SDPUBFPowerModel
+            PowerModelsDSSE.constraint_mc_load_power_balance_se(pm,i)
+        else
+            _PMD.constraint_mc_load_power_balance(pm, i)
+        end
     end
 
     for i in _PMD.ids(pm, :branch)

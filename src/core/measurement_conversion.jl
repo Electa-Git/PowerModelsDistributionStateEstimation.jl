@@ -163,6 +163,9 @@ function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Sy
     return msr_type
 end
 
+function assign_conversion_type_to_msr(pm::_PMD.SDPUBFPowerModel,i,msr::Symbol;nw=nw)
+   error("Currently only a limited amount of measurement types is supported for the SDP model, $(msr) is not available")
+end
 
 function no_conversion_needed(pm::_PMs.AbstractACPModel, msr_var::Symbol)
   return msr_var ∈ [:vm, :va, :pd, :qd, :pg, :qg, :p, :q]
@@ -181,7 +184,7 @@ function no_conversion_needed(pm::_PMD.AbstractLPUBFModel, msr_var::Symbol)
 end
 
 function no_conversion_needed(pm::_PMD.SDPUBFPowerModel, msr_var::Symbol)
-    return msr_var ∈ [:w, :pd, :qd, :pg, :qg, :p, :q, :cm]
+    return msr_var ∈ [:w, :pd, :qd, :pg, :qg]
 end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw, nph=3)
@@ -289,6 +292,7 @@ end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::PreProcessing; nw=nw, nph=3)
     #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
+    warn("Performing a PreProcessing conversion only makes sense for Normal distributions and is in general not advised")
     for c in 1:nph
         if _PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c] != 0.0
 
