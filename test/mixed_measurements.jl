@@ -18,9 +18,9 @@
     # set measurement path
     msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
 
-    @testset "ACP-WLAV" begin
+    @testset "ACP-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.ACPPowerModel #this is going to be used for the SE
 
         for (ntw,fdr) in [(1,2),(4,2),(10,3)]
@@ -104,9 +104,9 @@
             end
         end
     end
-    @testset "ACR-WLAV" begin
+    @testset "ACR-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.ACRPowerModel
         for (ntw,fdr) in [(1,2),(4,2),(10,3)]
 
@@ -192,9 +192,9 @@
             end
         end
     end
-    @testset "IVR-WLAV" begin
+    @testset "IVR-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.IVRPowerModel
         for (ntw,fdr) in [(1,2),(4,2),(10,3)]
 

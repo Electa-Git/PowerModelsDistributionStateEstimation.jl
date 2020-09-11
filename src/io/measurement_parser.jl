@@ -179,6 +179,8 @@ function add_voltage_measurement!(data::Dict, pf_result::Dict, sigma::Float64)
     first_key =  first(keys(pf_result["solution"]["bus"]))
     if haskey(pf_result["solution"]["bus"][first_key], "vm")
         #do nothing
+    elseif haskey(pf_result["solution"]["bus"][first_key], "w")
+        #do nothing
     else
         vm = sqrt.(pf_result["solution"]["bus"][first_key]["vi"].^2+pf_result["solution"]["bus"][first_key]["vr"].^2)
         voltage_meas_idx = string(maximum(parse(Int64,i) for i in keys(data["meas"]) ) + 1)

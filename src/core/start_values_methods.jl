@@ -11,7 +11,11 @@ function assign_start_to_variables!(pmd_data::Dict{String, Any})
         msr_cmp = string(meas["cmp"])
         cmp_id = string(meas["cmp_id"])
         msr_var = string(meas["var"])
-        pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])
+        if msr_var != "w"
+            pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])
+        else
+            pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])[1]
+        end
     end
 end#assign_start_to_variables
 
@@ -21,7 +25,11 @@ function assign_start_to_variables!(pmd_data::Dict{String, Any}, start_values_so
         cmp_id = string(meas["cmp_id"])
         msr_var = string(meas["var"])
         if haskey(start_values_source["solution"][msr_cmp][cmp_id], msr_var)
-            pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var]
+            if msr_var != "w"
+                pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var]
+            else
+                pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var][1]
+            end
         else
             @warn "$(msr_var) is not in $(start_values_source), possible formulation mismatch"
         end

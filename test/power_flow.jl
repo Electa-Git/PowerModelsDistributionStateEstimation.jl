@@ -18,9 +18,9 @@
     # set measurement path
     msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
 
-    @testset "ACP-WLAV" begin
+    @testset "ACP-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMs.ACPPowerModel
 
         # solve the feeders
@@ -102,9 +102,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    # @testset "rACP-WLAV" begin
+    # @testset "rACP-rwlav" begin
     #     # set model
-    #     crit = "wlav"
+    #     crit = "rwlav"
     #     model = _PMS.ReducedACPPowerModel
     #
     #     # solve the feeders
@@ -186,9 +186,9 @@
     #         @test isapprox(avg, 0.0; atol = 1e-8)
     #     end
     # end
-    @testset "ACR-WLAV" begin
+    @testset "ACR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMs.ACRPowerModel
 
         # solve the feeders
@@ -270,9 +270,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    @testset "rACR-WLAV" begin
+    @testset "rACR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMS.ReducedACRPowerModel
 
         # solve the feeders
@@ -354,9 +354,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    @testset "IVR-WLAV" begin
+    @testset "IVR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMs.IVRPowerModel
 
         # solve the feeders
@@ -438,9 +438,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    @testset "rIVR-WLAV" begin
+    @testset "rIVR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMS.ReducedIVRPowerModel
 
         # solve the feeders

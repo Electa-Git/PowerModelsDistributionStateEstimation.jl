@@ -33,9 +33,9 @@
     # transform data model
     data = _PMD.transform_data_model(data);
 
-    @testset "ACP input-WLAV" begin
+    @testset "ACP input-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.ACPPowerModel #this is going to be used for the SE
 
         # solve the power flow
@@ -101,9 +101,9 @@
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
     end
-    @testset "ACR input-WLAV" begin
+    @testset "ACR input-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.ACRPowerModel #this is going to be used for the SE
 
         # solve the power flow
@@ -169,9 +169,9 @@
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
     end
-    @testset "IVR input-WLAV" begin
+    @testset "IVR input-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.IVRPowerModel #this is going to be used for the SE
 
         # solve the power flow
