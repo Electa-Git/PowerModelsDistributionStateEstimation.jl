@@ -44,7 +44,7 @@ end
 Add measurement data from separate CSV file to the PowerModelsDistribution data
 dictionary.
 # Arguments
--   `data`: data dictionary in a format usable with PowerModelsDistribution
+-   `data`: MATHEMATICAL data dictionary in a format usable with PowerModelsDistribution
 -   `meas_file`: path to and name of file with measurement data
 -   `actual_meas`: default is false.
     *   `false`: the "val" in meas_file are not actual measurements, e.g.,
@@ -54,7 +54,7 @@ dictionary.
         i.e., with an error. No other processing is required.
 -   `seed`: random seed value to make the results reproducible. It is an argument
     and not a fixed value inside the function to allow, e.g., the exploration of
-    different MonteCarlo scenarios
+    different Monte Carlo scenarios
 """
 function add_measurements!(data::Dict, meas_file::String; actual_meas::Bool=false, seed::Int = 0 )::Dict
     meas_df = _CSV.read(meas_file)
