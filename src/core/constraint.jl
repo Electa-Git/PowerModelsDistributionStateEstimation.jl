@@ -28,8 +28,10 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int;
                         res[c] * (_DST.std(dst[c]) * rsc)^2 >= (var[c]-_DST.mean(dst[c]))^2
                     )
             elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "wlav"
+                μ= _DST.mean(dst[c])
+                σ = _DST.std(dst[c])
                 JuMP.@NLconstraint(pm.model,
-                    res[c] == abs(var[c]-_DST.mean(dst[c])) / _DST.std(dst[c]) / rsc
+                    res[c] == abs(var[c]-μ) / σ / rsc
                 )
             elseif _PMD.ref(pm, nw, :setting)["estimation_criterion"] == "rwlav"
                 JuMP.@constraint(pm.model,
