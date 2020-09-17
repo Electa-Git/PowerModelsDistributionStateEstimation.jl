@@ -20,8 +20,8 @@ function dataString_to_array(input::String)::Array
 end
 
 function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, actual_meas, seed)::Dict
-    meas_val = dataString_to_array(meas_row[:val])
-    σ = dataString_to_array(meas_row[:sigma])
+    meas_val = dataString_to_array(meas_row[:par_1])
+    σ = dataString_to_array(meas_row[:par_2])
     if actual_meas
         data["dst"] = [_DST.Normal(meas_val[i], σ[i]) for i in 1:length(meas_val)]
     else #if it is not a real measurement
@@ -119,7 +119,7 @@ get_configuration(cmp_type::String, cmp_data::Dict{String,Any}) = "G"
 init_measurements() =
     _DFS.DataFrame(meas_id=Int64[], cmp_type=String[], cmp_id=String[],
                          meas_type=String[], meas_var=String[], phase=String[],
-                         dst=String[], val=String[], sigma=String[] )
+                         dst=String[], par_1=String[], par_2=String[] )
 function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String,
                                 cmp_type::String, cmp_data::Dict{String,Any},
                                 cmp_res::Dict{String,Any}, phases;
