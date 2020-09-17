@@ -31,11 +31,10 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
 
 @testset "PowerModelsDSSE" begin
 
-    #include("mixed_measurements.jl")
-    #include("mle.jl")
-    #include("non_exact_forms.jl")
-    #include("power_flow.jl")
+    include("estimation_criteria.jl")
+    include("mixed_measurements.jl")
+    include("non_exact_forms.jl")
+    include("power_flow.jl")
     include("with_errors.jl")
-    #include("wl_estimation_criteria.jl")
 
 end

@@ -6,6 +6,9 @@
     ######  Therefore, the example below is just a basic error check.
     ##################
 
+    # set measurement path for all cases
+    msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
+
     @testset "SDP with rwlav and rwls" begin
 
         sdp_data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
@@ -39,10 +42,10 @@
         PowerModelsDSSE.vm_to_w_conversion!(sdp_data)
         _PMS.update_voltage_bounds!(data; v_min = 0.9, v_max = 1.0)
 
-        sdp_data["setting"] = Dict{String,Any}("estimation_criterion" => "rwlav", "weight_rescaler" => 1)
+        sdp_data["se_settings"] = Dict{String,Any}("estimation_criterion" => "rwlav", "weight_rescaler" => 1)
         se_result_sdp_wlav = PowerModelsDSSE.run_sdp_mc_se(sdp_data, scs_solver)
 
-        sdp_data["setting"] = Dict{String,Any}("estimation_criterion" => "rwls", "weight_rescaler" => 1)
+        sdp_data["se_settings"] = Dict{String,Any}("estimation_criterion" => "rwls", "weight_rescaler" => 1)
         se_result_sdp_wls = PowerModelsDSSE.run_sdp_mc_se(sdp_data, scs_solver)
 
         delta_wlav, max_err_wlav, avg_wlav = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
@@ -64,9 +67,6 @@
     pfs        = [0.95, 0.90]
     rm_transfo = true
     rd_lines   = true
-
-    # set measurement path
-    msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
 
     @testset "LinDist3Flow - rwlav" begin
         crit = "rwlav"
@@ -96,7 +96,7 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                "weight_rescaler" => 100)
 
             # solve the state estimation
@@ -137,7 +137,7 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                "weight_rescaler" => 100)
 
             # solve the state estimation
@@ -177,7 +177,7 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                "weight_rescaler" => 100)
 
             # solve the state estimation

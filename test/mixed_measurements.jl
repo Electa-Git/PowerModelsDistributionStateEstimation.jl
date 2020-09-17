@@ -48,7 +48,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -91,7 +91,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -135,7 +135,7 @@
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -179,7 +179,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -222,7 +222,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -265,7 +265,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
