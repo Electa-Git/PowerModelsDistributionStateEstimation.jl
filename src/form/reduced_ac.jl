@@ -44,11 +44,21 @@ function constraint_mc_load_power_balance(pm::AbstractReducedModel, i::Int; nw::
     end
 end
 
+"If the formulation is not reduced, delegates back to PowerModelsDistribution"
+function constraint_mc_load_power_balance(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+    _PMD.constraint_mc_load_power_balance(pm, i; nw=nw)
+end
+
 function variable_mc_bus_voltage(pm::ReducedACPPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage_angle(pm; bounded = bounded)
     _PMD.variable_mc_bus_voltage_magnitude_only(pm; bounded = bounded)
 end
 
 function variable_mc_bus_voltage(pm::ReducedACRPowerModel; bounded = true)
+    _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
+end
+
+"If the formulation is not reduced, delegates back to PowerModelsDistribution"
+function variable_mc_bus_voltage(pm::_PMs.AbstractPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end

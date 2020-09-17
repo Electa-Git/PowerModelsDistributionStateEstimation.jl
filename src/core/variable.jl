@@ -150,7 +150,7 @@ function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bo
 end
 
 function variable_mc_gen_power_setpoint_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
-
+    #NB: the difference with PowerModelsDistributions is that pg and qg expressions are not created
     _PMD.variable_mc_gen_current_setpoint_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_gen_current_setpoint_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
