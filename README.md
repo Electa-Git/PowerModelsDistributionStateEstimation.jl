@@ -2,70 +2,75 @@
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsDSSE.jl/dev)
 [![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/MultiStateSystems.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/MultiStateSystems-jl)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/PowerModelsDSSE.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/PowerModelsDSSE-jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
 
-PowerModelsDSSE.jl is an extention package of PowerModelsDistribution.jl for
-Static Distribution System State Estimation.
+PowerModelsDSSE.jl is an extension package of PowerModelsDistribution.jl for three-phase
+static Distribution System State Estimation.
 
 A Distribution System State Estimator determines the *most-likely* state of
 distribution system given a set of uncertainties, e.g., measurement errors,
 pseudo-measurements, etc. These uncertainties may pertain to any quantity of any
-network component, e.g., `:vm` of a `:bus`, `:pd` of a `:load`, etc.
+network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
+This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://timmyfaraday.github.io/PowerModelsDSSE.jl/dev/).
 
-Currently, uncertainties may either be described by:
+## Modeling Uncertainties
+
+Currently, measurement uncertainties may either be described by:
 - a deterministic value `Float64`, or
 - a continuous univariate distribution `ContinuousUnivariateDistribution`:
-    * a normal distribution, modeled through either WLS or LAV approach, or
-    * a non-normal distribution, modeled through -logpdf.
+    * a Normal distribution, that can be included in a standard WLS or (W)LAV approach, or
+    * a number of other distributions, included through the concept of Maximum Likelihood Estimation.
+For details on the distributions and the state estimation problem formulation, the user is referred to the package manual.
 
 ## Core Problem Specification
 
-- State Estimation (SE) as equality constrained optimization problem
+- State Estimation (SE) as (in)equality constrained optimization problem, that can be performed according to different estimation criteria:
+    - Weighted Least Squares (WLS)
+    - Weighted Least Absolute Values (WLAV)
+    - Maximum Likelihood Estimation (MLE)
+    - It is also possible to remove the weights and perform LS and LAV
 
 ## Core Network Constraint Formulations
 
+Together with measurement values, the use power flow equations is required to derive the most likely state of a network.
+Several formulations of the power flow equations are imported from [PowerModelsDistribution.jl](https://github.com/lanl-ansi/PowerModelsDistribution.jl):
 - AC Polar (exact)
 - AC Rectangular (exact)
-- AC IV Rectangular (exact)
+- IV Rectangular (exact)
 - SDP (positive semi-definite relaxation)
+- LinDist3Flow (linear approximation)
 
-All the formulations are three-phase unbalanced and feature accurate delta/wye
-load models. The exact formulations also feature delta/wye transformer models.
-Network constraint, load and transformer models are taken from
-[PowerModelsDistribution.jl](https://github.com/lanl-ansi/PowerModelsDistribution.jl)
+The three exact formulations in general lead to non-convex state estimation, unless the network is monitored via phasor measurement units. To reduce the complexity of the formulations a bit, improving tractability, three reduced versions are provided in the present package, that are not available on PowerModelsDistribution:
 
-## Network Data Formats
+- Reduced AC Polar
+- Reduced AC Rectangular
+- Reduced IV Rectangular
 
-- OpenDSS ".dss" files in the PowerModelsDistribution format
-- CSV ".csv" file with measurement a statistical information for state estimation
+These three formulations still lead, in general, to non-convex state estimation (again depending on the measurements), but some nonlinearities are avoided with minor variable reformulations and by assuming that the shunt admittance of the cables is negligible. This is often the case in low voltage distribution network databases. If the assumption holds, the Reduced formulations are still exact, i.e., the state estimation is free of modeling errors.
 
-## Summary of State Estimation Possibilities
+All the formulations are three-phase unbalanced.
 
-|                   | ACP           | ACR           | IVR           | SDP           |
-| ----------------- | ------------- | ------------- | ------------- | ------------- |
-| BI/BF             | BI            | BI            | BF            | BF            |
-| Simple SE         | Available     | Available     | Available     | Available     |
-| Advanced SE       | Available     | Available     | Available     | Unavailable   |
-| 4-wire            | v0.2.0        | v0.2.0        | v0.2.0        | v0.2.0        |
+## Load and Transformer Models
 
-- The simple SE **does not include** transformer models and delta/wye loads.
-- The advanced SE **includes** transformer models and delta/wye loads.
+Currently, the developers' research work focuses on state estimation in low voltage distribution feeders, and therefore load measurements from the consumers are modeled as power/current injections at the bus where the measurement takes place. It is not considered whether the load is constant power, constant impedence, ZIP, etc.
+No detailed model of the transformer substation is required, either, if the interest is exclusively on the low voltage side.
+Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to include the medium voltage network in the analysis. Extending the package to host these models is future work scheduled for future releases. If you would like to use realistic load/transformer models already, you are welcome to contribute to the package. Alternatively, you can let us know of your interest; if multiple requests are received, we might consider moving up the extension.
 
-## Installation
+## Data Formats
 
-The latest stable release of PowerModelsDSSE can be installed using the Julia
-package manager:
+To use the package, two type of data inputs are required:
+- Network data (network topology, cable impedance, consumer location...)
+- Measurement data (simulated or collected from measurement devices, etc..)
 
-```
-] add https://github.com/timmyfaraday/PowerModelsDSSE.jl.git
-```
+The two are then put together in a single dictionary and used to run the state estimator.
+The network data needs to be compatible with PowerModelsDistribution, which also provides an automatic parser to read OpenDSS (".dss") data.
+PowerModelsDSSE reads measurement data from CSV (".csv") files and comes with some helping function to build these csv files from power flow results from PowerModelsDistribution or similar sources.
+More information can be found in the documentation.
 
-In order to test whether the package works, run:
+## Citing PowerModelsDSSE
 
-```
-] test MultiStateSystems
-```
+To do
 
 ## Acknowledgements
 
@@ -75,7 +80,7 @@ and Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) with support for
 the following contributors:
 
 - Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)), CSIRO, General PowerModelsDistribution.jl Advice.
-- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)), KU Leuven, General PowerModelsDistribution.jl Advice.
+- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)), KU Leuven, General PowerModelsDistribution.jl Advice, ENWL data parser.
 
 ## License
 
@@ -83,4 +88,4 @@ This code is provided under a BSD license.
 
 ## Notes
 
-Currently, bad data detection techniques and observability considerations are out of scope.
+Currently, the focus is on the state estimation model itself, and bad data detection techniques and observability considerations are not dealt with.
