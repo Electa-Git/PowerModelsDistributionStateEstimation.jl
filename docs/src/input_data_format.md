@@ -1,4 +1,4 @@
-# Data Input Format
+# Input Data Format
 
 The data input required by PowerModelsDSSE takes the form of a dictionary and can be subdivided in three parts:
 
@@ -89,7 +89,7 @@ PowerModelsDSSE.add_measurements!(data::Dict, meas_file::String; actual_meas = f
 ```
 An example of csv file in the right format can be found in PowerModelsDSSE/test/data/enwl/measurements/meas_data_example.csv and refers to network 1, feeder 1 of the ENWL data. The format of the csv input file is explained in the following subsection.
 
-Furthermore, functionality is included to write a measurement file, with the `write_measurements!` function. This is useful for quick testing or when the user has no actual measurement data, and allows to generate measurement files from the results of powerflow calculations on the same network.
+Furthermore, functionality is included to write a measurement file, with the `write_measurements!` function. This is useful for quick testing or when the user has no actual measurement data, and allows to generate measurement files from the results of powerflow calculations on the same network. It should be noted that this function sets the measurement errors so that they follow a Normal distribution. Other distributions are supported (see relative section of the manual), but currently there is not an automatic way to generate measurement data following them.
 
 ```@docs
 PowerModelsDSSE.write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String)
@@ -108,11 +108,66 @@ The required csv measurement file features the following columns:
 - meas_var: indicates which variable is measured. The entry must correspond to the variable name as defined in PowerModelsDistribution or PowerModelDSSE, e.g., pg for the injected power from a generator, vm for a bus voltage magnitude, etc.
 - phase: phase the measurement refers to, i.e., 1, 2 or 3. If it is a three-phase measurement, this can be indicated with a "[1, 2, 3]".
 - dst: type of continuous univariate distribution associated to the measurement. In the classic WLAV/WLS estimators, this is a "Normal" distribution. In this package, we allow a number of additional distributions. For details, see the manual section on "Maximum Likelihood Estimation"
-- val:
-- sigma:
+- par_1: is the first of the two parameters that define the measurement error distribution. For the Normal distribution, this is the mean.
+- par_2: second parameter of the distribution. For the Normal distribution this is the standard deviation.
 
 
-## State estimation settings
+### State estimation settings
 
+Finally, an indication on what type of state estimation needs to be performed should be provided using the "se_settings" dictionary.
+The "se_settings" dictionary contains two keys: "weight_rescaler" and "estimation_criterion".
+The "weight_rescaler" consists of one value or an array of two values used to multiply the residual constraints (and in some cases also to put an offset on them) in the state estimation problem. Depending on the case the rescaler can improve tractability, even quite significantly. For more details on the use of the rescaler, the user can refer to the "State Estimation Criteria" section of this manual.
+The "estimation_criterion" allows the user to choose the "type" of state estimation to be performed, the classic examples being weighted least squares (WLS) and weighted least absolute values (WLAV). For details on which criteria are available and how to use them, the user is again referred to the "State Estimation Criteria" section of this manual.
+
+If the user does not provide any "se_settings", this dictionary automatically created when running state estimation calculations, and set to the default rescaler value of 1 and estimation criterion of "rwlav":
+
+```julia
+"se_settings" => Dict{String,Any}(
+    "weight_rescaler" => 1,
+    "estimation_criterion" => "rwlav"
+)
+```
+
+At this point, the data dictionary should have a structure similar to this:
+
+```julia
+Dict{String,Any}(
+    "data_model" => MATHEMATICAL,
+    "component_type" => Dict{Any,Dict{String,Any}}(
+        id => Dict{String,Any}(
+            "parameter" => value,
+            ...
+        ),
+        ...
+    ),
+    "meas" => Dict{Any,Dict{String,Any}}(
+        id => Dict{String,Any}(
+            "parameter" => value,
+            ...
+        ),
+        ...
+    ),
+    "se_settings" => Dict{String,Any}(
+        "weight_rescaler" => value,
+        "estimation_criterion" => "chosen_criterion"  
+    ),
+    ...
+)
+```
+
+NB: do not confuse the "se_settings" dictionary key with the "settings" dictionary key, which is also present in the PowerModelsDistribution network data format.
 
 ## Putting everything together: complete input data
+
+The following script allows the user to visualize the various steps to build the data and display final structure:
+
+```julia
+
+data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL) #parses the network data
+msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv") # indicates the path to measurement data csv file
+_PMS.add_measurements!(data, msr_path, actual_meas = false)                  # adds the measurement data to the network data dictionary
+data["se_settings"] = Dict{String,Any}("estimation_criterion" => "rwlav", 
+                                        "weight_rescaler" => weight_rescaler)# adds the state estimation settings to the data
+display(data)                                                                # displays the first "layer" of the dictionary. The internal structure can be "navigated" like any other dictionary
+
+```
