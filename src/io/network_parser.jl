@@ -43,8 +43,9 @@ end
 
 This function adds the load profiles to the parsed ENWL ENGINEERING data `data`.
 # Arguments
+- data: ENGINEERING data model of the feeder
 - season: `"summer"`, `"winter"`
-- devices: `"load"`, `"pv"`, `"ehp"`, `"uchp"`
+- devices: `"load"`, `"pv"`, `"ev"`, `"ehp"`, `"uchp"`
 - pfs: power factor of the devices
 - t: time-step
 

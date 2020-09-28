@@ -102,12 +102,6 @@ function variable_mc_load_current_real(pm::_PMs.AbstractIVRModel;
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
-    # if bounded
-    #     for i in _PMs.ids(pm, nw, :load), c in _PMD.conductor_ids(pm; nw=nw)
-    #         JuMP.set_lower_bound(crd[i][c], 0.0)
-    #     end
-    # end
-
     report && _IM.sol_component_value(pm, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
 end
 
@@ -156,8 +150,39 @@ function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bo
 end
 
 function variable_mc_gen_power_setpoint_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
-
+    #NB: the difference with PowerModelsDistributions is that pg and qg expressions are not created
     _PMD.variable_mc_gen_current_setpoint_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_gen_current_setpoint_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
+end
+
+function update_voltage_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf)
+    for (_,bus) in data["bus"]
+        bus["vmin"] = [v_min, v_min, v_min]
+        bus["vmax"] = [v_max, v_max, v_max]
+    end
+end
+
+function update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
+    for (_,gen) in data["gen"]
+        gen["pmin"] = [p_min, p_min, p_min]
+        gen["pmax"] = [p_max, p_max, p_max]
+        gen["qmin"] = [q_min, q_min, q_min]
+        gen["qmax"] = [q_max, q_max, q_max]
+    end
+end
+
+function update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
+    for (_,load) in data["load"]
+        load["pmin"] = [p_min, p_min, p_min]
+        load["pmax"] = [p_max, p_max, p_max]
+        load["qmin"] = [q_min, q_min, q_min]
+        load["qmax"] = [q_max, q_max, q_max]
+    end
+end
+
+function update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, pg_min::Float64=0.0, pg_max::Float64=Inf, qg_min::Float64=-Inf, qg_max::Float64=Inf, pd_min::Float64=0.0, pd_max::Float64=Inf, qd_min::Float64=-Inf, qd_max::Float64=Inf)
+    update_voltage_bounds!(data; v_min=v_min, v_max=v_max)
+    update_generator_bounds!(data; p_min=pg_min, p_max=pg_max, q_min=qg_min, q_max=qg_max)
+    update_load_bounds!(data; p_min=pd_min, p_max=pd_max, q_min=qd_min, q_max=qd_max)
 end

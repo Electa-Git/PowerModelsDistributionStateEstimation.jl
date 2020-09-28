@@ -18,37 +18,10 @@ function dataString_to_array(input::String)::Array
     end
     return float_array
 end
-function update_voltage_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf)
-    for (_,bus) in data["bus"]
-        bus["vmin"] = [v_min, v_min, v_min]
-        bus["vmax"] = [v_max, v_max, v_max]
-    end
-end
-function update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
-    for (_,gen) in data["gen"]
-        gen["pmin"] = [p_min, p_min, p_min]
-        gen["pmax"] = [p_max, p_max, p_max]
-        gen["qmin"] = [q_min, q_min, q_min]
-        gen["qmax"] = [q_max, q_max, q_max]
-    end
-end
 
-function update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
-    for (_,load) in data["load"]
-        load["pmin"] = [p_min, p_min, p_min]
-        load["pmax"] = [p_max, p_max, p_max]
-        load["qmin"] = [q_min, q_min, q_min]
-        load["qmax"] = [q_max, q_max, q_max]
-    end
-end
-function update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, pg_min::Float64=0.0, pg_max::Float64=Inf, qg_min::Float64=-Inf, qg_max::Float64=Inf, pd_min::Float64=0.0, pd_max::Float64=Inf, qd_min::Float64=-Inf, qd_max::Float64=Inf)
-    update_voltage_bounds!(data; v_min=v_min, v_max=v_max)
-    update_generator_bounds!(data; p_min=pg_min, p_max=pg_max, q_min=qg_min, q_max=qg_max)
-    update_load_bounds!(data; p_min=pd_min, p_max=pd_max, q_min=qd_min, q_max=qd_max)
-end
 function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, actual_meas, seed)::Dict
-    meas_val = dataString_to_array(meas_row[:val])
-    σ = dataString_to_array(meas_row[:sigma])
+    meas_val = dataString_to_array(meas_row[:par_1])
+    σ = dataString_to_array(meas_row[:par_2])
     if actual_meas
         data["dst"] = [_DST.Normal(meas_val[i], σ[i]) for i in 1:length(meas_val)]
     else #if it is not a real measurement
@@ -71,7 +44,7 @@ end
 Add measurement data from separate CSV file to the PowerModelsDistribution data
 dictionary.
 # Arguments
--   `data`: data dictionary in a format usable with PowerModelsDistribution
+-   `data`: MATHEMATICAL data dictionary in a format usable with PowerModelsDistribution
 -   `meas_file`: path to and name of file with measurement data
 -   `actual_meas`: default is false.
     *   `false`: the "val" in meas_file are not actual measurements, e.g.,
@@ -81,7 +54,7 @@ dictionary.
         i.e., with an error. No other processing is required.
 -   `seed`: random seed value to make the results reproducible. It is an argument
     and not a fixed value inside the function to allow, e.g., the exploration of
-    different MonteCarlo scenarios
+    different Monte Carlo scenarios
 """
 function add_measurements!(data::Dict, meas_file::String; actual_meas::Bool=false, seed::Int = 0 )::Dict
     meas_df = _CSV.read(meas_file)
@@ -122,6 +95,14 @@ function get_measures(model::DataType, cmp_type::String)
         if cmp_type == "bus"  return ["vr","vi"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
+    elseif model <: _PMD.SDPUBFPowerModel
+        #if cmp_type == "bus"  return ["vr","vi"] end
+        if cmp_type == "gen"  return ["pg","qg"] end
+        if cmp_type == "load" return ["pd","qd"] end
+    elseif model <: _PMD.LinDist3FlowModel
+        if cmp_type == "bus"  return ["w"] end
+        if cmp_type == "gen"  return ["pg","qg"] end
+        if cmp_type == "load" return ["pd","qd"] end
     end
     return []
 end
@@ -138,7 +119,7 @@ get_configuration(cmp_type::String, cmp_data::Dict{String,Any}) = "G"
 init_measurements() =
     _DFS.DataFrame(meas_id=Int64[], cmp_type=String[], cmp_id=String[],
                          meas_type=String[], meas_var=String[], phase=String[],
-                         dst=String[], val=String[], sigma=String[] )
+                         dst=String[], par_1=String[], par_2=String[] )
 function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String,
                                 cmp_type::String, cmp_data::Dict{String,Any},
                                 cmp_res::Dict{String,Any}, phases;
@@ -198,6 +179,8 @@ function add_voltage_measurement!(data::Dict, pf_result::Dict, sigma::Float64)
     first_key =  first(keys(pf_result["solution"]["bus"]))
     if haskey(pf_result["solution"]["bus"][first_key], "vm")
         #do nothing
+    elseif haskey(pf_result["solution"]["bus"][first_key], "w")
+        #do nothing
     else
         vm = sqrt.(pf_result["solution"]["bus"][first_key]["vi"].^2+pf_result["solution"]["bus"][first_key]["vr"].^2)
         voltage_meas_idx = string(maximum(parse(Int64,i) for i in keys(data["meas"]) ) + 1)
@@ -205,5 +188,30 @@ function add_voltage_measurement!(data::Dict, pf_result::Dict, sigma::Float64)
         data["meas"][voltage_meas_idx] = Dict{String, Any}("var"=>:vm,"cmp"=>:bus,
                                         "dst"=>[Distributions.Normal{Float64}(vm[1], sigma), Distributions.Normal{Float64}(vm[2], sigma), Distributions.Normal{Float64}(vm[3], sigma)],
                                         "cmp_id"=>bus_idx)
+    end
+end
+
+"""
+    vm_to_w_conversion!(data::Dict)
+
+This function should be called after measurements are added to the data dictionary. It converts voltage magnitude
+    measurements into their square, so :vm is transformed into :w. It is useful when using the LinDist3Flow or SDP formulation.
+    The conversion is exact if applied to a Normal distribution, while does not necessarily apply to other distributions.
+    In the SDP case, :vm is currently not supported as input measurement, so this is necessary.
+    In the LinDist3Flow it allows to ignore the square vm conversion constraint.
+"""
+function vm_to_w_conversion!(data::Dict)
+    for (m,meas) in data["meas"]
+        if meas["var"] == :vm
+            for c in 1:length(meas["dst"])
+                if meas["dst"][c] != 0.0
+                    @assert (typeof(meas["dst"][c]) == Distributions.Normal{Float64}) "vm_to_w conversion only available for the Normal distribution"
+                    current_μ = _DST.mean(meas["dst"][c])
+                    current_σ = _DST.std(meas["dst"][c])
+                    data["meas"][m]["dst"][c] = _DST.Normal(current_μ^2, current_σ)
+                end
+            end
+            data["meas"][m]["var"] = :w
+        end
     end
 end

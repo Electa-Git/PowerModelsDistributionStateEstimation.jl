@@ -7,6 +7,11 @@ function variable_mc_branch_current(pm::ReducedIVRPowerModel; nw::Int=pm.cnw, bo
     _PMD.variable_mc_branch_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end
 
+"if the formulation is not reduced, it is delegated back to PMD"
+function variable_mc_branch_current(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
+    _PMD.variable_mc_branch_current(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+end
+
 "constraint_mc_gen_setpoint is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
 The content of the function is otherwise identical"
 function constraint_mc_gen_setpoint(pm::ReducedIVRPowerModel, id::Int; nw::Int=pm.cnw, report::Bool=true, bounded::Bool=true)

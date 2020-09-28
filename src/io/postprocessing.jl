@@ -8,10 +8,18 @@
 ################################################################################
 
 ## Error calculation
-convert_lifted_to_polar!(sol::Dict) =
-    for (_,bus) in sol["bus"]
-        bus["vm"] = sqrt.(bus["Wr"])
+function convert_lifted_to_polar!(sol::Dict, name)
+    if name == "w"
+        for (_,bus) in sol["bus"]
+            bus["vm"] = sqrt.(bus[name])
+        end
+    elseif name == "Wr"
+        for (_,bus) in sol["bus"]
+            bus["vm"] = [sqrt(bus[name][c,c]) for c in 1:size(bus[name])[1]]
+        end
     end
+end
+
 convert_rectangular_to_polar!(sol::Dict) =
     for (_,bus) in sol["bus"]
         bus["vm"] = sqrt.(bus["vi"].^2+bus["vr"].^2)
@@ -29,10 +37,12 @@ function calculate_voltage_magnitude_error(se_result::Dict, pf_result::Dict)
     pf_sol, se_sol = pf_result["solution"], se_result["solution"]
 
     # convert the voltage magnitude variable to polar space
-    if haskey(pf_sol["bus"]["1"], "Wr") convert_lifted_to_polar!(pf_sol) end
-    if haskey(se_sol["bus"]["1"], "Wr") convert_lifted_to_polar!(se_sol) end
+    if haskey(pf_sol["bus"]["1"], "Wr") convert_lifted_to_polar!(pf_sol, "Wr") end
+    if haskey(se_sol["bus"]["1"], "Wr") convert_lifted_to_polar!(se_sol, "Wr") end
     if haskey(pf_sol["bus"]["1"], "vr") convert_rectangular_to_polar!(pf_sol) end
     if haskey(se_sol["bus"]["1"], "vr") convert_rectangular_to_polar!(se_sol) end
+    if haskey(pf_sol["bus"]["1"], "w") convert_lifted_to_polar!(pf_sol, "w") end
+    if haskey(se_sol["bus"]["1"], "w") convert_lifted_to_polar!(se_sol, "w") end
 
     # determine the difference between the se and pf
     delta = Float64[]

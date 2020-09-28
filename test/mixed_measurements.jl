@@ -18,9 +18,9 @@
     # set measurement path
     msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
 
-    @testset "ACP-WLAV" begin
+    @testset "ACP-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.ACPPowerModel #this is going to be used for the SE
 
         for (ntw,fdr) in [(1,2),(4,2),(10,3)]
@@ -48,7 +48,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -91,7 +91,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -104,9 +104,9 @@
             end
         end
     end
-    @testset "ACR-WLAV" begin
+    @testset "ACR-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.ACRPowerModel
         for (ntw,fdr) in [(1,2),(4,2),(10,3)]
 
@@ -135,7 +135,7 @@
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -179,7 +179,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -192,9 +192,9 @@
             end
         end
     end
-    @testset "IVR-WLAV" begin
+    @testset "IVR-rwlav" begin
         # set model
-        crit     = "wlav"
+        crit     = "rwlav"
         model    = _PMs.IVRPowerModel
         for (ntw,fdr) in [(1,2),(4,2),(10,3)]
 
@@ -222,7 +222,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation
@@ -265,7 +265,7 @@
                 _PMS.assign_start_to_variables!(data)
                 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
                 # set se settings
-                data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
+                data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
                                                    "weight_rescaler" => 1)
 
                 # solve the state estimation

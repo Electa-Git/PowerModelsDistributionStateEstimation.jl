@@ -3,7 +3,7 @@ This is currently only used to validate the exactness of the reduced forms, but
 the power flow calculation is faster than with with the full model, so it can
 be used if faster calculations are desired.
 Reduced forms are exact for network data such as that of the ENWL database,
-where no ground admittance, no storage and no active switches are present."
+where no ground admittance, storage units or active switches are present."
 function run_reduced_pf(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
     return _PMD.run_mc_model(data, model_type, solver, build_reduced_pf; kwargs...)
 end

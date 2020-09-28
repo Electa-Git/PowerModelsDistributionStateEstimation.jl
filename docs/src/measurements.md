@@ -3,7 +3,8 @@
 ## Introduction
 
 Any network formulation has a specific variable space, e.g., ACP includes `vm`,
-`va`, `px` and `qx`[^1].
+`va`, `px` and `qx`[^1]. `w` = `vm^2` is the lifted voltage variable native to branch flow conic and linear forms.
+The conversions for the reduced formulations work identically as their non-reduced equivalent.
 
 [^1]: The **x** in `px`, `qx`, `cmx`, `cax`, `crx` and `cix`
       indicates that these variables exists for branches (~), generators (g) and
@@ -11,11 +12,13 @@ Any network formulation has a specific variable space, e.g., ACP includes `vm`,
       should be rewritten, e.g., `"px"` respectively becomes `"p"`, `"pg"` and
       `"pd"`.
 
-| -         | vm  | va  | cmx | cax | crx | cix | px  | qx  | vr  | vi  |
-| :-------- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
-| **ACP**   | N   | N   | SF  | X   | F   | F   | N   | N   | X   | X   |
-| **ACR**   | S  | PP  | SF  | X   | MF  | MF  | N   | N   | N   | N   |
-| **IVR**   | S  | PP  | S  | PP  | N   | N   | M   | M   | N   | N   |
+| -         | vm  | va  | cmx | cax | crx | cix | px  | qx  | vr  | vi  |  w  |
+| :-------- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| **ACP**   | N   | N   | SF  | X   | F   | F   | N   | N   | X   | X   | X  |
+| **ACR**   | S  | PP  | SF  | X   | MF  | MF  | N   | N   | N   | N   |  X  |
+| **IVR**   | S  | PP  | S  | PP  | N   | N   | M   | M   | N   | N   |   X  |
+| **SDP**   | X  |  X  | X | X   | X   | X   | N*   | N*   | X   | X   |  N  |
+| **LD3F**  | S  |  X  | SF | X   | X   | X   | N   | N   | X   | X   |   N  |
 
 where:
 - F:  conversion of type Fraction
@@ -26,6 +29,10 @@ where:
 - S: conversion of type Square
 - SF: conversion of type SquareFraction
 - X:  not provided
+
+The N* in the SDP formulation indicates that those variable are only native for
+generators, loads and other devices/extensions, but not for measurements that
+refer to branch flows, yet.
 
 ## Conversion
 
@@ -93,6 +100,7 @@ formulation, through:
       \text{cmx}^{2}    &= \frac{\text{px}^{2} + \text{qx}^{2}}{\text{vm}^{2}}  
 \end{equation}
 ```
+If the conversion is applied to the LinDist3Flow formulation, then vm^2 is replaced by w.
 These are non-linear equality constraints, modeled using `@NLconstraint`.
 
 ### Square

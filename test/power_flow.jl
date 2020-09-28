@@ -18,9 +18,9 @@
     # set measurement path
     msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
 
-    @testset "ACP-WLAV" begin
+    @testset "ACP-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMs.ACPPowerModel
 
         # solve the feeders
@@ -48,8 +48,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -90,8 +90,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -102,93 +102,93 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    # @testset "rACP-WLAV" begin
-    #     # set model
-    #     crit = "wlav"
-    #     model = _PMS.ReducedACPPowerModel
-    #
-    #     # solve the feeders
-    #     for (ntw,fdr) in [(1,2),(10,3)] #NB fails on (4,2)
-    #         # load data
-    #         data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
-    #         if rm_transfo _PMS.rm_enwl_transformer!(data) end
-    #         if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
-    #
-    #         # insert the load profiles
-    #         _PMS.insert_profiles!(data, season, elm, pfs, t = time)
-    #
-    #         # transform data model
-    #         data = _PMD.transform_data_model(data);
-    #
-    #         # solve the power flow
-    #         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
-    #
-    #         # write measurements based on power flow
-    #         _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
-    #
-    #         # read-in measurement data and set initial values
-    #         _PMS.add_measurements!(data, msr_path, actual_meas = true)
-    #         _PMS.assign_start_to_variables!(data)
-    #         _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
-    #
-    #         # set se settings
-    #         data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-    #                                            "weight_rescaler" => 1)
-    #
-    #         # solve the state estimation
-    #         se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-    #
-    #         # tests
-    #         delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
-    #         @test isapprox(max, 0.0; atol = 1e-6)
-    #         @test isapprox(avg, 0.0; atol = 1e-8)
-    #     end
-    # end
-    # @testset "rACP-WLS" begin
-    #     # set model
-    #     crit = "wls"
-    #     model = _PMS.ReducedACPPowerModel
-    #
-    #     # solve the feeders
-    #     for (ntw,fdr) in [(1,2),(10,3)] #NB fails on (4,2)
-    #         # load data
-    #         data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
-    #         if rm_transfo _PMS.rm_enwl_transformer!(data) end
-    #         if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
-    #
-    #         # insert the load profiles
-    #         _PMS.insert_profiles!(data, season, elm, pfs, t = time)
-    #
-    #         # transform data model
-    #         data = _PMD.transform_data_model(data);
-    #
-    #         # solve the power flow
-    #         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
-    #
-    #         # write measurements based on power flow
-    #         _PMS.write_measurements!(model, data, pf_result, msr_path)
-    #
-    #         # read-in measurement data and set initial values
-    #         _PMS.add_measurements!(data, msr_path, actual_meas = true)
-    #         _PMS.assign_start_to_variables!(data)
-    #         _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
-    #
-    #         # set se settings
-    #         data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-    #                                            "weight_rescaler" => 1)
-    #
-    #         # solve the state estimation
-    #         se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-    #
-    #         # tests
-    #         delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
-    #         @test isapprox(max, 0.0; atol = 1e-6)
-    #         @test isapprox(avg, 0.0; atol = 1e-8)
-    #     end
-    # end
-    @testset "ACR-WLAV" begin
+    @testset "rACP-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
+        model = _PMS.ReducedACPPowerModel
+
+        # solve the feeders
+        for (ntw,fdr) in [(1,2),(10,3)] #NB fails on (4,2)
+            # load data
+            data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
+            if rm_transfo _PMS.rm_enwl_transformer!(data) end
+            if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
+
+            # insert the load profiles
+            _PMS.insert_profiles!(data, season, elm, pfs, t = time)
+
+            # transform data model
+            data = _PMD.transform_data_model(data);
+
+            # solve the power flow
+            pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+
+            # write measurements based on power flow
+            _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
+
+            # read-in measurement data and set initial values
+            _PMS.add_measurements!(data, msr_path, actual_meas = true)
+            _PMS.assign_start_to_variables!(data)
+            _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+
+            # set se settings
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
+
+            # solve the state estimation
+            se_result = _PMS.run_mc_se(data, model, ipopt_solver)
+
+            # tests
+            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            @test isapprox(max, 0.0; atol = 1e-6)
+            @test isapprox(avg, 0.0; atol = 1e-8)
+        end
+    end
+    @testset "rACP-WLS" begin
+        # set model
+        crit = "wls"
+        model = _PMS.ReducedACPPowerModel
+
+        # solve the feeders
+        for (ntw,fdr) in [(1,2),(10,3)] #NB fails on (4,2)
+            # load data
+            data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
+            if rm_transfo _PMS.rm_enwl_transformer!(data) end
+            if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
+
+            # insert the load profiles
+            _PMS.insert_profiles!(data, season, elm, pfs, t = time)
+
+            # transform data model
+            data = _PMD.transform_data_model(data);
+
+            # solve the power flow
+            pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+
+            # write measurements based on power flow
+            _PMS.write_measurements!(model, data, pf_result, msr_path)
+
+            # read-in measurement data and set initial values
+            _PMS.add_measurements!(data, msr_path, actual_meas = true)
+            _PMS.assign_start_to_variables!(data)
+            _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+
+            # set se settings
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
+
+            # solve the state estimation
+            se_result = _PMS.run_mc_se(data, model, ipopt_solver)
+
+            # tests
+            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            @test isapprox(max, 0.0; atol = 1e-6)
+            @test isapprox(avg, 0.0; atol = 1e-8)
+        end
+    end
+    @testset "ACR-rwlav" begin
+        # set model
+        crit = "rwlav"
         model = _PMs.ACRPowerModel
 
         # solve the feeders
@@ -216,8 +216,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -258,8 +258,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -270,9 +270,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    @testset "rACR-WLAV" begin
+    @testset "rACR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMS.ReducedACRPowerModel
 
         # solve the feeders
@@ -300,8 +300,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -342,8 +342,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -354,9 +354,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    @testset "IVR-WLAV" begin
+    @testset "IVR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMs.IVRPowerModel
 
         # solve the feeders
@@ -384,8 +384,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -426,8 +426,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -438,9 +438,9 @@
             @test isapprox(avg, 0.0; atol = 1e-8)
         end
     end
-    @testset "rIVR-WLAV" begin
+    @testset "rIVR-rwlav" begin
         # set model
-        crit = "wlav"
+        crit = "rwlav"
         model = _PMS.ReducedIVRPowerModel
 
         # solve the feeders
@@ -468,8 +468,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
@@ -510,8 +510,8 @@
             _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
             # set se settings
-            data["setting"] = Dict{String,Any}("estimation_criterion" => crit,
-                                               "weight_rescaler" => 1)
+            data["se_settings"] = Dict{String,Any}("estimation_criterion" => crit,
+                                               "weight_rescaler" => 100)
 
             # solve the state estimation
             se_result = _PMS.run_mc_se(data, model, ipopt_solver)
