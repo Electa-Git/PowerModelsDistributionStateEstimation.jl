@@ -55,7 +55,7 @@ const PowerModelsDistribution.LinDist3FlowPowerModel = PowerModelsDistribution.L
 
 ## Details on the Formulations
 
-This sub-section reports for convenience the relevant literature for the formulations used in PowerModelsDSSE and is again a reduced version of the official PowerModelsDistribution documentation, available [here]([here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/formulation-details/).
+This sub-section reports for convenience the relevant literature for the formulations used in PowerModelsDSSE and is again a reduced version of the official PowerModelsDistribution documentation, available [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/formulation-details/).
 
 ### `AbstractACPModel`
 

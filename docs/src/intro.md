@@ -1,4 +1,6 @@
-# Overview
+# PowerModelsDSSE.jl Documentation
+
+## Overview
 
 PowerModelsDSSE.jl is an extension package of PowerModelsDistribution.jl for three-phase
 static Distribution System State Estimation.
@@ -8,7 +10,7 @@ distribution system given a set of uncertainties, e.g., measurement errors,
 pseudo-measurements, etc. These uncertainties may pertain to any quantity of any
 network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
 
-# Installation
+## Installation
 
 The latest stable release of PowerModelsDSSE can be installed using the Julia
 package manager:
