@@ -1,10 +1,9 @@
 ################################################################################
-#  Copyright 2020, Tom Van Acker, Marta Vanin                                  #
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDSSE.jl                                                           #
-# An extention package of PowerModelsDistribution.jl for Static Distribution   #
-# System State Estimation.                                                     #
-# See http://github.com/timmyfaraday/PowerModelsDSSE.jl                        #
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
 ################################################################################
 
 ## CSV to measurement parser

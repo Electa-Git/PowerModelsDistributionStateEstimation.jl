@@ -1,3 +1,10 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
 mutable struct ReducedIVRPowerModel <: _PMs.AbstractIVRModel _PMs.@pm_fields end
 
 "only total current variables defined over the bus_arcs in PMD are considered: with no shunt admittance, these are

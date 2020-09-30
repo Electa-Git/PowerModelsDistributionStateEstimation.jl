@@ -115,16 +115,16 @@ The required csv measurement file features the following columns:
 ### State estimation settings
 
 Finally, an indication on what type of state estimation needs to be performed should be provided using the "se_settings" dictionary.
-The "se_settings" dictionary contains two keys: "weight_rescaler" and "estimation_criterion".
-The "weight_rescaler" consists of one value or an array of two values used to multiply the residual constraints (and in some cases also to put an offset on them) in the state estimation problem. Depending on the case the rescaler can improve tractability, even quite significantly. For more details on the use of the rescaler, the user can refer to the "State Estimation Criteria" section of this manual.
-The "estimation_criterion" allows the user to choose the "type" of state estimation to be performed, the classic examples being weighted least squares (WLS) and weighted least absolute values (WLAV). For details on which criteria are available and how to use them, the user is again referred to the "State Estimation Criteria" section of this manual.
+The "se_settings" dictionary contains two keys: "rescaler" and "criterion".
+The "rescaler" consists of one value or an array of two values used to multiply the residual constraints (and in some cases also to put an offset on them) in the state estimation problem. Depending on the case the rescaler can improve tractability, even quite significantly. For more details on the use of the rescaler, the user can refer to the "State Estimation Criteria" section of this manual.
+The "criterion" allows the user to choose the "type" of state estimation to be performed, the classic examples being weighted least squares (WLS) and weighted least absolute values (WLAV). For details on which criteria are available and how to use them, the user is again referred to the "State Estimation Criteria" section of this manual.
 
 If the user does not provide any "se_settings", this dictionary automatically created when running state estimation calculations, and set to the default rescaler value of 1 and estimation criterion of "rwlav":
 
 ```julia
 "se_settings" => Dict{String,Any}(
-    "weight_rescaler" => 1,
-    "estimation_criterion" => "rwlav"
+    "rescaler" => 1,
+    "criterion" => "rwlav"
 )
 ```
 
@@ -148,8 +148,8 @@ Dict{String,Any}(
         ...
     ),
     "se_settings" => Dict{String,Any}(
-        "weight_rescaler" => value,
-        "estimation_criterion" => "chosen_criterion"  
+        "rescaler" => value,
+        "criterion" => "chosen_criterion"  
     ),
     ...
 )
@@ -166,8 +166,8 @@ The following script allows the user to visualize the various steps to build the
 data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL) #parses the network data
 msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv") # indicates the path to measurement data csv file
 _PMS.add_measurements!(data, msr_path, actual_meas = false)                  # adds the measurement data to the network data dictionary
-data["se_settings"] = Dict{String,Any}("estimation_criterion" => "rwlav", 
-                                        "weight_rescaler" => weight_rescaler)# adds the state estimation settings to the data
+data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", 
+                                        "rescaler" => rescaler)# adds the state estimation settings to the data
 display(data)                                                                # displays the first "layer" of the dictionary. The internal structure can be "navigated" like any other dictionary
 
 ```

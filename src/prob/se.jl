@@ -1,3 +1,10 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
 
 "solves the AC state estimation in polar coordinates (ACP formulation)"
 function run_acp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
@@ -39,11 +46,11 @@ function run_linear_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs
 end
 
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
-    if !haskey(data["se_settings"], "weight_rescaler")
-        data["se_settings"]["weight_rescaler"] = 1
+    if !haskey(data["se_settings"], "rescaler")
+        data["se_settings"]["rescaler"] = 1
     end
-    if !haskey(data["se_settings"], "estimation_criterion")
-        data["se_settings"]["estimation_criterion"] = "rwlav"
+    if !haskey(data["se_settings"], "criterion")
+        data["se_settings"]["criterion"] = "rwlav"
     end
     return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end

@@ -1,3 +1,11 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
+
 """
 This function allows to run a power flow with the reduced formulations.
 This is currently only used to validate the exactness of the reduced forms, but

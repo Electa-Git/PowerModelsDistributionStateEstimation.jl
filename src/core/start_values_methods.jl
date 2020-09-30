@@ -1,10 +1,15 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
 """
-assign_start_to_variables!(pmd_data) gives the measurement value in the pmd_data dictionary
-        as a starting value to its associated variable.
+    assign_start_to_variables!(pmd_data)
 
-assign_start_to_variables!(pmd_data, start_values_source) assigns starting values
-        to the problem variables based on a dictionary where they are collected: start_values_source.
-        This dictionary must have the form of a powerflow solution dictionary.
+This function gives the measurement value in the pmd_data dictionary
+as a starting value to its associated variable.
 """
 function assign_start_to_variables!(pmd_data::Dict{String, Any})
     for (_,meas) in pmd_data["meas"]
@@ -17,8 +22,14 @@ function assign_start_to_variables!(pmd_data::Dict{String, Any})
             pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])[1]
         end
     end
-end#assign_start_to_variables
+end
 
+"""
+    assign_start_to_variables!(pmd_data, start_values_source)
+
+This function assigns start values to the problem variables based on a dictionary where they are collected: start_values_source.
+This dictionary must have the form of a powerflow solution dictionary.
+"""
 function assign_start_to_variables!(pmd_data::Dict{String, Any}, start_values_source::Dict{String, Any})
     for (_,meas) in pmd_data["meas"]
         msr_cmp = string(meas["cmp"])
@@ -31,7 +42,7 @@ function assign_start_to_variables!(pmd_data::Dict{String, Any}, start_values_so
                 pmd_data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var][1]
             end
         else
-            @warn "$(msr_var) is not in $(start_values_source), possible formulation mismatch"
+            Memento.warn(_LOGGER, "$(msr_var) is not in $(start_values_source), possible formulation mismatch")
         end
     end
-end#assign_start_to_variables
+end

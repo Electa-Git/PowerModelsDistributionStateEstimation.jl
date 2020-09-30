@@ -11,7 +11,7 @@ _PMD = PowerModelsDistribution
 pmd_data = _PMD.parse_file("test/data/extra/networks/case3_unbalanced.dss"; data_model=MATHEMATICAL)
 meas_file = "test/data/extra/measurements/case3_meas.csv"
 add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=false, seed=0)
-pmd_data["se_settings"] = Dict{String,Any}("estimation_criterion" => "rwls",
+pmd_data["se_settings"] = Dict{String,Any}("criterion" => "rwls",
                                         "rescale_weight" => 1)
 
 run_acp_mc_se(pmd_data, optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0))

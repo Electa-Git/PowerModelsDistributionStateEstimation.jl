@@ -25,7 +25,7 @@ where:
 - M:  conversion of type Multiplication
 - MF: conversion of type MultiplicationFraction
 - N:  native to the network formulation
-- PP: conversion of type PreProcessing
+- PP: conversion of type Tangent
 - S: conversion of type Square
 - SF: conversion of type SquareFraction
 - X:  not provided
@@ -65,9 +65,9 @@ space. This is accomplished through the inclusion of an additional
 constraint(s). The different types of conversion constraints are enumerated in
 what follows.
 
-### PreProcessing
+### Tangent
 
-The conversion type `PreProcessing`  allows to include `va` measurements in the
+The conversion type `Tangent`  allows to include `va` measurements in the
 ACR and IVR formulation, and `cax` measurements in the IVR formulation,
 respectively through:
 ```math
