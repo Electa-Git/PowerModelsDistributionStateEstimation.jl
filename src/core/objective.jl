@@ -1,6 +1,10 @@
 """
     objective_mc_se
 """
+# Tom's remarks
+# 1) Is this the most general way of doing this? Because in this case a residual
+#    needs to be present for each of the conductors, which is not necessarily 
+#    the case.
 function objective_mc_se(pm::_PMs.AbstractPowerModel)
     return JuMP.@objective(pm.model, Min,
     sum(
