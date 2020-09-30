@@ -53,12 +53,12 @@
 
         @test se_result_sdp_wlav["termination_status"] == ALMOST_OPTIMAL
         @test se_result_sdp_wls["termination_status"] == OPTIMAL
-        @test isapprox(max_err_wls, 0.000767; atol=1e-3)
-        @test isapprox(avg_wls, 0.000344; atol=1e-3)
-        @test isapprox(se_result_sdp_wls["objective"], 1.56e-5; atol=1e-5)
-        @test isapprox(max_err_wlav, 0.046954; atol=1e-2)
-        @test isapprox(avg_wlav, 0.012229; atol=1e-2)
-        @test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-3)
+        @test isapprox(max_err_wls, 0.000767; atol=1e-2)
+        @test isapprox(avg_wls, 0.000344; atol=1e-2)
+        @test isapprox(se_result_sdp_wls["objective"], 1.56e-5; atol=1e-3)
+        @test isapprox(max_err_wlav, 0.046954; atol=1e-1)
+        @test isapprox(avg_wlav, 0.012229; atol=1e-1)
+        @test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-2)
     end
 
     season     = "summer"
