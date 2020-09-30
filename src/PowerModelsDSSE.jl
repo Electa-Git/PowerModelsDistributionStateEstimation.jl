@@ -65,5 +65,6 @@ export rm_enwl_transformer!, reduce_enwl_lines_eng!
 export add_measurements!, write_measurements!
 export assign_start_to_variables!
 export calculate_voltage_magnitude_error
+export update_load_bounds!, update_voltage_bounds!, update_generator_bounds!, update_all_bounds!
 
 end
