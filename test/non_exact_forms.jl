@@ -56,7 +56,7 @@
         @test isapprox(max_err_wls, 0.000767; atol=1e-2)
         @test isapprox(avg_wls, 0.000344; atol=1e-2)
         @test isapprox(se_result_sdp_wls["objective"], 1.56e-5; atol=1e-3)
-        @test isapprox(max_err_wlav, 0.046954; atol=1e-1)
+        @test isapprox(max_err_wlav, 0.046954; atol=2e-1)
         @test isapprox(avg_wlav, 0.012229; atol=1e-1)
         @test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-2)
     end

@@ -1,6 +1,6 @@
 # Input Data Format
 
-The data input required by PowerModelsDSSE takes the form of a dictionary and can be subdivided in three parts:
+The data input required by PowerModelsSE takes the form of a dictionary and can be subdivided in three parts:
 
 - Network data
 - Measurement data
@@ -13,13 +13,13 @@ More details on each of the three parts can be found in the following sections o
 
 ## Network Data Input
 
-The network data input of PowerModelsDSSE is based on that of PowerModelsDistribution (PMD).
-In the versions supported by PowerModelsDSSE, PMD allows for two input data formats:
+The network data input of PowerModelsSE is based on that of PowerModelsDistribution (PMD).
+In the versions supported by PowerModelsSE, PMD allows for two input data formats:
 - The `ENGINEERING` model (extensively documented [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/eng-data-model/))
 - The `MATHEMATICAL` model
 The idea behind offering two options is that the `ENGINEERING` model is quite intuitive and allows a non-developer to easily generate data and use the PMD package as made available. The `MATHEMATICAL` model allows developers to explore the details of the PMD package and/or add extra information that can be passed as additional input to go beyond the functionalities that are natively offered in PMD.
-Ultimately, both PMD and PowerModelsDSSE use the `MATHEMATICAL` model to build the input for the calculations, but PMD can be provided directly an `ENGINEERING` model, which is then transformed at runtime.
-This is not the case in PowerModelsDSSE, which requires measurement data and state estimation settings to perform state estimation calculations.
+Ultimately, both PMD and PowerModelsSE use the `MATHEMATICAL` model to build the input for the calculations, but PMD can be provided directly an `ENGINEERING` model, which is then transformed at runtime.
+This is not the case in PowerModelsSE, which requires measurement data and state estimation settings to perform state estimation calculations.
 These two take the form of "sub-dictionaries" that need to be appended to a PMD `MATHEMATICAL` network data model dictionary. If added to the `ENGINEERING` data model, they will be ignored in the transformation to the `MATHEMATICAL` model, returning an error.
 For additional information on the network data input, the user is referred to the [PMD manual](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/).
 The user can build the network data from scratch, for example writing a native julia parser that builds the dictionary starting from external files, or reading an otherwise created JSON file with the right dictionary structure.
@@ -43,39 +43,39 @@ using the `transform_data_model` function.
 math = PowerModelsDistribution.transform_data_model(eng)
 ```
 
-A small example of OpenDSS network data can be found in PowerModelsDSSE/test/data/extra/networks
+A small example of OpenDSS network data can be found in PowerModelsSE/test/data/extra/networks
 
 ### Parsing ENWL files
 
 [ENWL files](https://www.enwl.co.uk/zero-carbon/innovation/smaller-projects/low-carbon-networks-fund/low-voltage-network-solutions/) are a collection of 25 real low voltage distribution networks (each of the networks' feeders is also individually accessible) and realistic demand/generation profile data, made available by the Electricity North West and The University of Manchester.
 
-The data is available in OpenDSS-like format in PowerModelsDSSE/test/data/enwl/networks and can be parsed with the PowerModelsDistribution `parse_file` function.
+The data is available in OpenDSS-like format in PowerModelsSE/test/data/enwl/networks and can be parsed with the PowerModelsDistribution `parse_file` function.
 A specific feeder `fdr` of a network `ntw` should be parsed to the `ENGINEERING` model, using:
 
 ```julia
-eng_data = PowerModelsDistribution.parse_file(PowerModelsDSSE.get_enwl_dss_path(ntw,fdr),data_model=PowerModelsDistribution.ENGINEERING)
+eng_data = PowerModelsDistribution.parse_file(PowerModelsSE.get_enwl_dss_path(ntw,fdr),data_model=PowerModelsDistribution.ENGINEERING)
 ```
 
 All feeders are featured with a detailed transformer model. It might be convenient or necessary to drop the transformer model and define the source bus as a slack bus: this (slightly) improves tractability and in low voltage power flow and state estimation studies, the exact substation model is often not taken into account. The removal should happen at the `ENGINEERING` data stage:
 
 ```@docs
-PowerModelsDSSE.rm_enwl_transformer!(eng_data)
+PowerModelsSE.rm_enwl_transformer!(eng_data)
 ```
 
 The ENWL feeders feature a high number of buses that are only used to interpolate the topology layout (i.e., where the cables are) but that host no device. Function `reduce_enwl_lines_eng!` is included specifically to simplify the data and remove the nodes and lines in excess in order to (considerably) improve tractability. It is highly recommended to use it. The resulting feeder is equivalent to the original one in terms of physical properties, and the calculation results are the same. The function can be applied both to an ENGINEERING and a MATHEMATICAL data model.
 
 ```@docs
-PowerModelsDSSE.reduce_enwl_lines_eng!(eng_data)
+PowerModelsSE.reduce_enwl_lines_eng!(eng_data)
 ```
 
 ```@docs
-PowerModelsDSSE.reduce_enwl_lines_math!(math_data)
+PowerModelsSE.reduce_enwl_lines_math!(math_data)
 ```
 
 Contrary to "regular" OpenDSS files, load profile information needs to be parsed and added to the ENWL feeder ENGINEERING data obtained so far. This is accomplished using the `insert_profiles!` function:
 
 ```@docs
-PowerModelsDSSE.insert_profiles!(data, season, devices, pfs; t=missing, useactual=true)
+PowerModelsSE.insert_profiles!(data, season, devices, pfs; t=missing, useactual=true)
 ```
 
 The ENWL data set features a number of low-carbon technologies profiles: electric vehicles (EV), electric heat pumps (EHP), micro-CHP (uCHP), photovoltaic panels (PV). "load" indicates the "traditional" residential load.
@@ -85,14 +85,14 @@ The ENWL data set features a number of low-carbon technologies profiles: electri
 Measurement data must be added to a `MATHEMATICAL` data dictionary, of which they are a "sub-dictionary". The user can either create the measurement dictionary from scratch, or it can be imported from a csv file in the right format, with the `add_measurements!` function.
 
 ```@docs
-PowerModelsDSSE.add_measurements!(data::Dict, meas_file::String; actual_meas = false)
+PowerModelsSE.add_measurements!(data::Dict, meas_file::String; actual_meas = false)
 ```
-An example of csv file in the right format can be found in PowerModelsDSSE/test/data/enwl/measurements/meas_data_example.csv and refers to network 1, feeder 1 of the ENWL data. The format of the csv input file is explained in the following subsection.
+An example of csv file in the right format can be found in PowerModelsSE/test/data/enwl/measurements/meas_data_example.csv and refers to network 1, feeder 1 of the ENWL data. The format of the csv input file is explained in the following subsection.
 
 Furthermore, functionality is included to write a measurement file, with the `write_measurements!` function. This is useful for quick testing or when the user has no actual measurement data, and allows to generate measurement files from the results of powerflow calculations on the same network. It should be noted that this function sets the measurement errors so that they follow a Normal distribution. Other distributions are supported (see relative section of the manual), but currently there is not an automatic way to generate measurement data following them.
 
 ```@docs
-PowerModelsDSSE.write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String)
+PowerModelsSE.write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String)
 ```
 
 The measurement "sub-dictionary" is now incorporated in the network data dictionary, and can be showed in REPL typing data["meas"].

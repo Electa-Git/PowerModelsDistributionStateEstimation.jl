@@ -1,14 +1,12 @@
 # Quick Start Guide
 
-Once PowerModelsDSSE and PowerModelsDistribution are installed, the user should install a solver, such as Ipopt. Here, Ipopt is chosen because it can solve a large variety of problems, including non-convex ones.
-To run a simulation, a network data file (e.g. `"case3_unbalanced.dss"` in the package folder under `/test/data/extra/networks`) needs to be acquired, together with its relative measurement file (e.g. `"case3_meas.csv"` in the package folder under `/test/data/extra/measurements`). Network and measurement data will be merged and a SE example can be run as follows:
+To perform a state estimation (SE), a network data file (e.g. `"case3_unbalanced.dss"` in `../test/data/extra/networks`) needs to be acquired, together with its related measurement file (e.g. `"case3_meas.csv"` in `../test/data/extra/measurements`). Network and measurement data will be merged and a SE can be run as follows:
 
 ```julia
-using PowerModelsDSSE, PowerModelsDistribution
+using PowerModelsSE, PowerModelsDistribution
 using Ipopt
 
-_PMD = PowerModelsDistribution
-pmd_data = _PMD.parse_file("test/data/extra/networks/case3_unbalanced.dss"; data_model=MATHEMATICAL)
+pmd_data = parse_file("test/data/extra/networks/case3_unbalanced.dss"; data_model=MATHEMATICAL)
 meas_file = "test/data/extra/measurements/case3_meas.csv"
 add_measurement_to_pmd_data!(pmd_data, meas_file; actual_meas=false, seed=0)
 pmd_data["se_settings"] = Dict{String,Any}("criterion" => "rwls",
@@ -25,7 +23,7 @@ se_result = run_acp_mc_se(pmd_data, optimizer_with_attributes(Ipopt.Optimizer, "
 ## Parsing files
 
 As can be observed in the example above, the PowerModelsDistribution parser is invoke to parse the network data from an OpenDSS file.
-The function to parse measurement data from CSV files, on the other hand, is made available in PowerModelsDSSE itself.
+The function to parse measurement data from CSV files, on the other hand, is made available in PowerModelsSE itself.
 
 ## Accessing Different Formulations
 
@@ -37,7 +35,7 @@ It should be noted that not all solvers can handle all problem types. For exampl
 
 ## Providing a Warm Start
 
-Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsDSSE provides the `assign_start_to_variables!` function.
+Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsSE provides the `assign_start_to_variables!` function.
 - calling `assign_start_to_variables!(data)` takes the value of the measurement from the state estimation data dictionary and assigns them a starting value to their associated variable.
 - calling `assign_start_to_variables!(data, other_dict)` assigns starting values to the problem variables based on a dictionary where they are collected: `other_dict`. NB: This dictionary must have a form similar to that of a powerflow solution dictionary, to make sure that the right starting value is associated to the right variable.
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablename_start`. The example below shows how to do it for the `vm` and `va` variables.
@@ -47,7 +45,7 @@ data["bus"]["2"]["vm_start"] = [0.996, 0.996, 0.996]
 data["bus"]["2"]["va_start"] = [0.00, -2.0944, 2.0944]
 ```
 It should be noted that providing a bad initial value might result in longer calculation times or convergence issues, so the start value assignment should be done cautiously.
-If no initial value is provided, a flat start is assigned by default. The default initial value of each variable is indicated in the function where the variable is defined, as the last argument of the `comp_start_value` function (this is valid for both imported PowerModelsDistribution and original PowerModelsDSSE variables). In the case of `vm`, this is 1.0 (in per unit), as shown below:
+If no initial value is provided, a flat start is assigned by default. The default initial value of each variable is indicated in the function where the variable is defined, as the last argument of the `comp_start_value` function (this is valid for both imported PowerModelsDistribution and original PowerModelsSE variables). In the case of `vm`, this is 1.0 (in per unit), as shown below:
 ```julia
 vm = _PMD.var(pm, nw)[:vm] = Dict(i => JuMP.@variable(pm.model,
         [c in 1:ncnds], base_name="$(nw)_vm_$(i)",
@@ -62,7 +60,7 @@ In constrained optimization, reducing the search space might be an effective way
 This must also be done attentively, though, to make sure that the feasible space is not cut, i.e., that feasible solutions are not removed by this process.
 This can be avoided if good knowledge of the system is available or if some variable have particularly obvious bounds, e.g., voltage magnitude cannot be negative, so its lower bound can be set to 0 without risks.
 As when providing a warm start, it is to user discretion to assign meaningful and "safe" variable bounds.
-PowerModelsDSSE has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
+PowerModelsSE has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
 `update_voltage_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf)`
 `update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)`
 `update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)`

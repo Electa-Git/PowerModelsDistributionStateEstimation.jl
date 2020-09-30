@@ -1,6 +1,6 @@
 # Problem Specifications
 
-The main purpose of PowerModelsDSSE is to solve state estimation problems. For a number of purposes, it might be useful to perform power flow or OPF calculations, within the context of a state estimation study. For example, power flow calculations can be used to validate the accuracy of the state estimator, or to generate artificial measurement data, if these are not available. Power flow and OPF calculations can be accessed from PowerModelsDistribution. The description of these problems can be found in PowerModelsDistribution's [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/math-model/). On the line of the problem description of PowerModelsDistribution, PowerModelsDSSE hosts the possibility to run power flow with the reduced formulations, which are not available in PowerModelsDistribution (see section [Network Formulations](@ref) of the manual). The result of a reduced power flow is the same as a full power flow run with an exact power flow formulation (ACP, ACR or IVR) if the network does not have storage units, bus shunts, ground admittance and active switches. Else, it's a simplification.
+The main purpose of PowerModelsSE is to solve state estimation problems. For a number of purposes, it might be useful to perform power flow or OPF calculations, within the context of a state estimation study. For example, power flow calculations can be used to validate the accuracy of the state estimator, or to generate artificial measurement data, if these are not available. Power flow and OPF calculations can be accessed from PowerModelsDistribution. The description of these problems can be found in PowerModelsDistribution's [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/math-model/). On the line of the problem description of PowerModelsDistribution, PowerModelsSE hosts the possibility to run power flow with the reduced formulations, which are not available in PowerModelsDistribution (see section [Network Formulations](@ref) of the manual). The result of a reduced power flow is the same as a full power flow run with an exact power flow formulation (ACP, ACR or IVR) if the network does not have storage units, bus shunts, ground admittance and active switches. Else, it's a simplification.
 
 **Reduced power flow**
 ```@docs
@@ -10,13 +10,13 @@ run_reduced_pf
 ## State estimation problem implementation
 
 For a bus injection model, the structure of the state estimation problem is the following. See the implementation at src/prob/se.jl for all the models'  implementations and their details.
-The functions preceded by a "_PMD." are imported from PowerModelsDistributions.jl. Those without prefix are original PowerModelsDSSE functions, those preceded by a "PowerModelsDSSE." are present in both and therefore needed disambiguation.
+The functions preceded by a "_PMD." are imported from PowerModelsDistributions.jl. Those without prefix are original PowerModelsSE functions, those preceded by a "PowerModelsSE." are present in both and therefore needed disambiguation.
 
 ### Variables
 
 ```julia
 
-PowerModelsDSSE.variable_mc_bus_voltage(pm; bounded = true)
+PowerModelsSE.variable_mc_bus_voltage(pm; bounded = true)
 _PMD.variable_mc_branch_power(pm; bounded = true)
 _PMD.variable_mc_transformer_power(pm; bounded = true)
 _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
@@ -39,7 +39,7 @@ for (i,bus) in _PMD.ref(pm, :ref_buses)
     _PMD.constraint_mc_theta_ref(pm, i)
 end
 for (i,bus) in _PMD.ref(pm, :bus)
-    PowerModelsDSSE.constraint_mc_load_power_balance_se(pm, i)
+    PowerModelsSE.constraint_mc_load_power_balance_se(pm, i)
 end
 for (i,branch) in _PMD.ref(pm, :branch)
     _PMD.constraint_mc_ohms_yt_from(pm, i)
