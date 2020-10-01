@@ -163,10 +163,10 @@ The following script allows the user to visualize the various steps to build the
 
 ```julia
 
-data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL) #parses the network data
+data = parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL) #parses the network data
 msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv") # indicates the path to measurement data csv file
-_PMS.add_measurements!(data, msr_path, actual_meas = false)                  # adds the measurement data to the network data dictionary
-data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", 
+add_measurements!(data, msr_path, actual_meas = false)                  # adds the measurement data to the network data dictionary
+data["se_settings"] = Dict{String,Any}("criterion" => "rwlav",
                                         "rescaler" => rescaler)# adds the state estimation settings to the data
 display(data)                                                                # displays the first "layer" of the dictionary. The internal structure can be "navigated" like any other dictionary
 
