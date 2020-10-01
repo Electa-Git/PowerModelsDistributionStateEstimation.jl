@@ -18,7 +18,7 @@
     data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
     if rm_transfo _PMS.rm_enwl_transformer!(data) end
     if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
-å
+
     # insert the load profiles
     _PMS.insert_profiles!(data, season, elm, pfs, t = time)
 
