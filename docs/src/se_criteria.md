@@ -1,28 +1,94 @@
 # Mathematical Model of the State Estimation Criteria
 
-The user needs to indicate in input data dictionary (see [Input Data Format](@ref)) what type of state estimation criteria should be used, i.e., what is the objective to minimize.
-There are currently 5 possibilities:
-`"wlav"`: performs a weighted least absolute value (WLAV) state estimation, in its full absolute value form. The absolute value is not continuously differentiable, so this criteria might cause convergence issues.
-`"rwlav"`: is an exact linear relaxation of WLAV. It gives the same result, without computational issues
-`"wls"`: is the standard weighted least squares state estimation. It is a quadratic function.
-`"rwls"`: is a convex relaxation of WLS.
-`"mle"`: performs a maximum likelihood estimation (MLE). It is a generalization of WLS and WLAV and can be used to include non-gaussian error distributions. See the mathematical description below.
+The state of a power system can be determined based on a specific estimation criterion.
+The user has to specify the `criterion` through the `se_settings` ([Input Data Format](@ref)).
+If no criterion is specified, it will default to `rwlav`. 
 
-The choice should be made by assigning the criterion in the data dictionary, as show below:
-```julia
-data["se_settings"] = Dict{String,Any}("criterion" => "rwlav")
-```
-A rescaler should also be assigned. This rescales the residual constraints in the optimization problem and can result in faster convergence. If the rescaler is exaggeratedly high/low, however, this could affect the quality of the solution. Recommended rescaler values are between 1 and 1000, the best value is problem specific.
+Currently, the following criteria are supported:
+- `wlav`: weighted least absolute value
+- `rwlav`: relaxed weighted least absolute value
+- `wls`: weighted least square
+- `rwls`: relaxed weighted least square
+- `mle`: maximum likelihood estimation
 
-```julia
-data["se_settings"] = Dict{String,Any}("rescaler" => 100)
-```
-If criterion and/or rescaler are not provided, these default to `"rwlav"` and 1, respectively.
+The first four criteria assume that the error on a measurement follows a Gaussian
+distribution. The MLE criterion can account for any univariate continuous distribution.
+
+Furthermore, a rescaler can be introduced to improve the convergence of the state 
+estimation. The user has to specify the `rescaler` through the `se_settings` ([Input Data Format](@ref)).
+If no rescaler is specified, it will default to `1.0`.
 
 ## WLAV and rWLAV
 
+The WLAV criterion represents the absolute value norm (p=1) and is given by 
+```math
+\begin{eqnarray}
+      \rho_{m}          &= \frac{| x - \mu_{m} |}{\text{rsc} \cdot \sigma_{m}},\quad m \in \mathcal{M}: m \to x \in mathcal{X},
+\end{eqnarray}
+```
+where: 
+- $\mathcal{M}$ denotes the set of measurements,
+- $\mathcal{X}$ denotes the (extended) variable space of the OPF problem.
+
+A injective-only mapping exist between the measurement set $\mathcal{M}$ and 
+variable space $\mathcal{X}$. 
+
+Furthermore:
+
+- $\rho_{m}$ denotes the residual associated with a measurement $m$,
+- $x$ denotes the variable corresponding to a measurement $m$.
+- $\mu_{m}$ denotes the measured value,
+- $\sigma_{m}$ denotes the the measurement error, 
+- rsc denotes the rescaler.
+
+Solving a state estimation using the WLAV criterion is non-trivial as the 
+absolute value function is not continuously differentiable. This drawback is 
+lifted by its exact linear relaxation: rWLAV[^1]. The rWLAV criterion is given by
+
+```math
+\begin{eqnarray}
+      \rho_{m}          &\geq \frac{ x - \mu_{m} }{\text{rsc} \cdot \sigma_{m}},\quad m \in \mathcal{M}: m \to x \in mathcal{X},    \\
+      \rho_{m}          &\geq - \frac{ x - \mu_{m} }{\text{rsc} \cdot \sigma_{m}},\quad m \in \mathcal{M}: m \to x \in mathcal{X},    \\
+\end{eqnarray}
+```
+
+[^1]: Note that this relaxation is only exact in the context of minimization problem.
+
 ## WLS and rWLS
 
-## MLE
+The WLS criterion represents the Eucledian norm (p=2) and is given by
+```math
+\begin{eqnarray}
+      \rho_{m}          &= \frac{( x - \mu_{m} )^{2}}{\text{rsc} \cdot \sigma_{m}^{2}},\quad m \in \mathcal{M}: m \to x \in mathcal{X}.
+\end{eqnarray}
+```
+The rWLS criterion relaxes the former as a cone and is given by
+```math
+\begin{eqnarray}
+      rsc \cdot \sigma^{2} \cdot \rho_{m} &\geq ( x - \mu_{m} )^{2},\quad m \in \mathcal{M}: m \to x \in mathcal{X}.
+\end{eqnarray}
+```
 
-Mention which pdfs are supported: Weibull, Normal, LogNormal, Beta, Gamma, Exponential
+## Maximum Likelihood Estimation
+
+The maximum likelihood criterion links the measurement residual to the logpdf of
+the associated distribution and is given by
+```math
+\begin{eqnarray}
+      \rho_{m}          &= - \text{rsc} \text{logpdf}_{m}(x) + \text{shf},\quad m \in \mathcal{M}: m \to x \in mathcal{X}.
+\end{eqnarray}
+```
+where:
+- shf denotes a shift setting the minimum value of the residual to zero.
+
+Currently, the following univariate continuous distributions are supported through 
+the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
+- Exponential
+- Weibull
+- Normal
+- Log-Normal
+- Beta
+- Gamma
+
+To avoid the use of automatic differentation, the first derivative (`gradlogpdf`) 
+is provided by Distributions.jl and the second derivative (`heslogpdf`) is provided interally.
