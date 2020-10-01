@@ -1,12 +1,10 @@
 ################################################################################
-#  Copyright 2020, Tom Van Acker, Marta Vanin                                  #
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDSSE.jl                                                           #
-# An extention package of PowerModelsDistribution.jl for Static Distribution   #
-# System State Estimation.                                                     #
-# See http://github.com/timmyfaraday/PowerModelsDSSE.jl                        #
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
 ################################################################################
-
 module PowerModelsDSSE
 
 # import pkgs
@@ -15,6 +13,9 @@ import DataFrames
 import Distributions
 import InfrastructureModels
 import JuMP
+import LinearAlgebra: diag
+import Memento
+import Optim
 import PowerModels
 import PowerModelsDistribution
 import Random
@@ -34,11 +35,16 @@ const _STT = Statistics
 # paths
 const BASE_DIR = dirname(@__DIR__)
 
+#logger for errors and warnings
+const _LOGGER = Memento.getlogger(@__MODULE__)
+__init__() = Memento.register(_LOGGER)
+
 #include
 include("core/constraint.jl")
 include("core/measurement_conversion.jl")
 include("core/objective.jl")
 include("core/start_values_methods.jl")
+include("core/utils.jl")
 include("core/variable.jl")
 
 include("form/adapted_pmd_constraints.jl")
@@ -51,7 +57,6 @@ include("io/network_parser.jl")
 include("io/postprocessing.jl")
 
 include("prob/se.jl")
-include("prob/reduced_pf.jl")
 
 #export
 export BASE_DIR
@@ -60,6 +65,6 @@ export rm_enwl_transformer!, reduce_enwl_lines_eng!
 export add_measurements!, write_measurements!
 export assign_start_to_variables!
 export calculate_voltage_magnitude_error
-export heslogpdf
+export update_load_bounds!, update_voltage_bounds!, update_generator_bounds!, update_all_bounds!
 
 end

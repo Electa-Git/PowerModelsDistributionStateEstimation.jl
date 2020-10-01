@@ -82,8 +82,8 @@ for mod in models
         _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
         # Set se settings
-        data["setting"] = Dict{String,Any}("estimation_criterion" => set_criterion,
-                                           "weight_rescaler" => set_rescaler)
+        data["se_settings"] = Dict{String,Any}("criterion" => set_criterion,
+                                           "rescaler" => set_rescaler)
 
         # Solve the state estimation
         se_results = _PMS.run_mc_se(data, mod, solver)

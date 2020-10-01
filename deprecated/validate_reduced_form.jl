@@ -5,15 +5,13 @@
 using PowerModelsDSSE, PowerModelsDistribution, Ipopt
 using PowerModels, JuMP
 
-using SCS
-
 _PMD = PowerModelsDistribution
 _PMs = PowerModels
 _PMS = PowerModelsDSSE
 
 ################################################################################
 # Input data
-ntw, fdr  = 1,1
+ntw, fdr  = 4,2
 rm_transfo = true
 rd_lines   = true
 
@@ -44,7 +42,7 @@ _PMS.insert_profiles!(data, season, elm, pfs, t = time)
 #data = _PMD.parse_file("C:\\Users\\mvanin\\.julia\\dev\\PowerModelsDSSE\\test\\data\\extra\\networks\\case3_unbalanced.dss")
 data = _PMD.transform_data_model(data)
 
-data_model = _PMD.LPUBFDiagPowerModel#_PMs.ACPPowerModel
+data_model = _PMD.IVRPowerModel#_PMs.ACPPowerModel
 pf_result= _PMD.run_mc_pf(data, data_model, solver)
 
 _PMS.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -56,7 +54,7 @@ _PMS.assign_start_to_variables!(data)
 _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
 # Solve the power flow
-data["setting"] = Dict{String,Any}("estimation_criterion" => "rwlav", "weight_rescaler" => 100)
+data["se_settings"] = Dict{String,Any}("criterion" => "aaaaaa", "rescaler" => 100)
 se_result_acr = PowerModelsDSSE.run_acr_mc_se(data, optimizer_with_attributes(Ipopt.Optimizer, "max_cpu_time"=>180.0, "tol"=>1e-8))#, "fixed_variable_treatment"=>"make_parameter"))
 delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_acr, pf_result)
 

@@ -85,8 +85,8 @@ for ntw in 1:25 for fdr in 1:10
     _PMS.assign_start_to_variables!(data)
 
     # Set se settings
-    data["setting"] = Dict{String,Any}("estimation_criterion" => "wlav",
-                                       "weight_rescaler" => 1)
+    data["setting"] = Dict{String,Any}("criterion" => "wlav",
+                                       "rescaler" => 1)
 
     # Solve the state estimation
     se_results = _PMS.run_mc_se(data, model, solver)

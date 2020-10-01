@@ -1,3 +1,11 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
+
 abstract type ConversionType end
 
 struct SquareFraction<:ConversionType
@@ -27,7 +35,7 @@ struct Multiplication<:ConversionType
     mult2::Array
 end
 
-struct PreProcessing<:ConversionType
+struct Tangent<:ConversionType
     msr_id::Int64
     cmp_type::Symbol
     cmp_id::Int64
@@ -76,7 +84,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;n
     elseif msr == :cid
         msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
@@ -86,7 +94,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
     elseif msr == :va
-        msr_type = PreProcessing(i, :bus, cmp_id, :vi, :vr)
+        msr_type = Tangent(i, :bus, cmp_id, :vi, :vr)
     elseif msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vi, :vr])
     elseif msr == :cmg
@@ -106,7 +114,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     elseif msr == :cid
         msr_type = MultiplicationFraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and will be ignored")
+       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and will be ignored")
     end
     return msr_type
 end
@@ -116,7 +124,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     if msr == :vm
         msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
     elseif msr == :va
-        msr_type = PreProcessing(i, :bus, cmp_id, :vi, :vr)
+        msr_type = Tangent(i, :bus, cmp_id, :vi, :vr)
     elseif msr == :cm
         msr_type = Square(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci])
     elseif msr == :cmg
@@ -124,11 +132,11 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :cmd
         msr_type = Square(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid])
     elseif msr == :ca
-        msr_type = PreProcessing(i, :branch, cmp_id, :ci, :cr)
+        msr_type = Tangent(i, :branch, cmp_id, :ci, :cr)
     elseif msr == :cag
-        msr_type = PreProcessing(i, :gen, cmp_id, :cig, :crg)
+        msr_type = Tangent(i, :gen, cmp_id, :cig, :crg)
     elseif msr == :cad
-        msr_type = PreProcessing(i, :load, cmp_id, :cid, :crd)
+        msr_type = Tangent(i, :load, cmp_id, :cid, :crd)
     elseif msr == :p
         msr_type = Multiplication(msr, i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:cr, :ci], [:vr, :vi])
     elseif msr == :pg
@@ -142,7 +150,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :qd
         msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
@@ -158,13 +166,13 @@ function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Sy
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:w])
     else
-       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
 
 function assign_conversion_type_to_msr(pm::_PMD.SDPUBFPowerModel,i,msr::Symbol;nw=nw)
-   error("Currently only a limited amount of measurement types is supported for the SDP model, $(msr) is not available")
+   Memento.error(_LOGGER, "Currently only a limited amount of measurement types is supported for the SDP model, $(msr) is not available")
 end
 
 function no_conversion_needed(pm::_PMs.AbstractACPModel, msr_var::Symbol)
@@ -290,9 +298,9 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::PreProcessing; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Tangent; nw=nw, nph=3)
     #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
-    warn("Performing a PreProcessing conversion only makes sense for Normal distributions and is in general not advised")
+    warn("Performing a Tangent conversion only makes sense for Normal distributions and is in general not advised")
     for c in 1:nph
         if _PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c] != 0.0
 
@@ -339,7 +347,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             original_var[id][c]*den[c] == -num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c])
             )
     else
-        error("wrong measurement association")
+        Memento.error(_LOGGER, "wrong measurement association")
     end
 end
 

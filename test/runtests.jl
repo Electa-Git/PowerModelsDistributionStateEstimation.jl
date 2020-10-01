@@ -1,10 +1,9 @@
 ################################################################################
-#  Copyright 2020, Tom Van Acker, Marta Vanin                                  #
+#  Copyright 2020, Vanin Marta, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDSSE.jl                                                           #
-# An extention package of PowerModelsDistribution.jl for Static Distribution   #
-# System State Estimation.                                                     #
-# See http://github.com/timmyfaraday/PowerModelsDSSE.jl                        #
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
 ################################################################################
 
 # using pkgs
@@ -21,6 +20,9 @@ const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMS = PowerModelsDSSE
 
+#network and feeder from ENWL for tests
+ntw, fdr = 4, 2
+
 # set solvers
 ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                               "tol"=>1e-10,
@@ -28,6 +30,8 @@ ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>30
 
 scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
                                                             "alpha"=>0.4, "verbose"=>0)
+
+
 
 @testset "PowerModelsDSSE" begin
 

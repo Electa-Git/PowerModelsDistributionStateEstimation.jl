@@ -1,4 +1,10 @@
-using LinearAlgebra
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
 
 @enum ConnConfig WYE DELTA
 

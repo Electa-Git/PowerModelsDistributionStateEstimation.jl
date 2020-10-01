@@ -1,14 +1,24 @@
-"This function allows to run a power flow with the reduced formulations.
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
+
+"""
+This function allows to run a power flow with the reduced formulations.
 This is currently only used to validate the exactness of the reduced forms, but
 the power flow calculation is faster than with with the full model, so it can
 be used if faster calculations are desired.
 Reduced forms are exact for network data such as that of the ENWL database,
-where no ground admittance, storage units or active switches are present."
+where no ground admittance, bus shunts, storage units or active switches are present.
+"""
 function run_reduced_pf(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
     return _PMD.run_mc_model(data, model_type, solver, build_reduced_pf; kwargs...)
 end
 
-"Constructor for reduced Power Flow Problem"
+"""Constructor for reduced Power Flow Problem"""
 function build_reduced_pf(pm::PowerModelsDSSE.AbstractReducedModel)
     _PMD.variable_mc_bus_voltage(pm; bounded=false)
     _PMD.variable_mc_branch_power(pm; bounded=false)

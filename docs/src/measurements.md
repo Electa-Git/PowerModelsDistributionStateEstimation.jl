@@ -25,7 +25,7 @@ where:
 - M:  conversion of type Multiplication
 - MF: conversion of type MultiplicationFraction
 - N:  native to the network formulation
-- PP: conversion of type PreProcessing
+- PP: conversion of type Tangent
 - S: conversion of type Square
 - SF: conversion of type SquareFraction
 - X:  not provided
@@ -33,6 +33,29 @@ where:
 The N* in the SDP formulation indicates that those variable are only native for
 generators, loads and other devices/extensions, but not for measurements that
 refer to branch flows, yet.
+
+```math
+\begin{table*}[ht]
+\centering
+\caption{Form taken by $f_{m,c}$ depending on $z_{m,c}$ and formulation of the power flow equations. I: $z_{m,c}$ is part of the variable space, $f_{m,c}$ is the identity function, X: conversion not provided, M: conversion of type "Multiplication", F: conversion of type "Fraction", MF: conversion of type "Multiplication Fraction", PP: conversion of type "Tangent", S: conversion of type "Square", SF: conversion of type "Square Fraction".}
+\begin{tabular}{| l||c|c|c|c|c|c|c|c|c|c|c|}
+ \hline
+ \multicolumn{12}{|c|}{Form taken by the conversion function $f_{m,c}$} \\
+ \hline
+  \multicolumn{1}{|c||}{} &\multicolumn{11}{c|}{$z_{m,c}$} \\ \hline
+ Formulation & \vm & \va & \vr & \vi & \w & \px & \qx & \cmx & \ca & \crx & \cix \\
+ \hline
+ %           & vm& va & vr&vi & w & px   & qx    & cm & ci & cr & ci
+ACP          & I & I  & X & X & X & I    & I     & SF & X  & F  & F \\ \hline
+ACR          & S & T & I & I & X & I    & I     & SF & X  & MF & MF \\ \hline
+IVR          & S & T & I & I & X & M    & M     & S  & T & I  & I \\ \hline
+%SDP          & X & X  & X & X & I & I$^*$& I$^*$ & X  & X  & X  & X \\ \hline
+LinDist3Flow & S & X  & X & X & I & I    & I     & SF & X  & X  & X \\
+
+ \hline
+\end{tabular}\label{tab:variables_and_maps}
+\end{table*}
+```
 
 ## Conversion
 
@@ -42,9 +65,9 @@ space. This is accomplished through the inclusion of an additional
 constraint(s). The different types of conversion constraints are enumerated in
 what follows.
 
-### PreProcessing
+### Tangent
 
-The conversion type `PreProcessing`  allows to include `va` measurements in the
+The conversion type `Tangent`  allows to include `va` measurements in the
 ACR and IVR formulation, and `cax` measurements in the IVR formulation,
 respectively through:
 ```math
@@ -115,3 +138,10 @@ formulation, respectively through:
 \end{eqnarray}
 ```
 These are quadratic equality constraints, modeled using `@constraint`.
+
+### No conversion provided
+As displayed in the Table, some conversions are not provided. This is because the measured quantities are either unlikely to take place in practice, e.g., w, or tend to appear in pairs, e.g., cmx and cax with PMUs. In the latter case, it is more efficient to transform cax and cmx into rectangular variables a priori and then use them, for instance, with IVR.
+
+## Functions to create and edit measurements
+
+TODO!

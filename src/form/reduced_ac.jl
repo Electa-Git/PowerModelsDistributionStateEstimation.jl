@@ -1,3 +1,11 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
+
 mutable struct ReducedACPPowerModel <: _PMs.AbstractACPModel _PMs.@pm_fields end
 mutable struct ReducedACRPowerModel <: _PMs.AbstractACRModel _PMs.@pm_fields end
 

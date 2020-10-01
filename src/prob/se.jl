@@ -1,53 +1,61 @@
+################################################################################
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
+################################################################################
+# PowerModelsSE.jl                                                             #
+# An extention package of PowerModels(Distribution).jl for Static Power System #
+# State Estimation.                                                            #
+################################################################################
 
-""
+"solves the AC state estimation in polar coordinates (ACP formulation)"
 function run_acp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, _PMs.ACPPowerModel, solver; kwargs...)
 end
 
-""
+"solves the AC state estimation in rectangular coordinates (ACR formulation)"
 function run_acr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, _PMs.ACRPowerModel, solver; kwargs...)
 end
 
-""
+"solves state estimation in current and voltage rectangular coordinates (IVR formulation)"
 function run_ivr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, _PMs.IVRPowerModel, solver; kwargs...)
 end
 
-""
+"solves state estimation with a positive semi-definite fomrulation of the power flow equations (SDP formulation)"
 function run_sdp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, _PMD.SDPUBFPowerModel, solver; kwargs...)
 end
-""
+
+"solves the reduced AC state estimation in polar coordinates (ReducedACP formulation)"
 function run_acp_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, ReducedACPPowerModel, solver; kwargs...)
 end
 
-""
+"solves the reduced AC state estimation in rectangular coordinates (ReducedACR formulation)"
 function run_acr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, ReducedACRPowerModel, solver; kwargs...)
 end
 
-""
+"solves the reduced state estimation in current and voltage rectangular coordinates (ReducedIVR formulation)"
 function run_ivr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, ReducedIVRPowerModel, solver; kwargs...)
 end
-""
+"solves state estimation with a linear approximation of the power flow equations (LinDist3Flow formulation)"
 function run_linear_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     return run_mc_se(data, _PMD.LinDist3FlowPowerModel, solver; kwargs...)
 end
 
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
-    if !haskey(data["se_settings"], "weight_rescaler")
-        data["se_settings"]["weight_rescaler"] = 1
+    if !haskey(data["se_settings"], "rescaler")
+        data["se_settings"]["rescaler"] = 1
     end
-    if !haskey(data["se_settings"], "estimation_criterion")
-        data["se_settings"]["estimation_criterion"] = "rwlav"
+    if !haskey(data["se_settings"], "criterion")
+        data["se_settings"]["criterion"] = "rwlav"
     end
     return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end
 
-""
+"specification of the state estimation problem for a bus injection model - ACP and ACR formulations"
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
@@ -87,6 +95,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
 
 end
 
+"specification of the state estimation problem for the IVR Flow formulation"
 function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
 
@@ -138,6 +147,7 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
 end
 
+"specification of the state estimation problem for a branch flow model - SDP and LinDist3Flow formulations"
 function build_mc_se(pm::_PMD.AbstractUBFModels)
 
     # Variables
