@@ -1,18 +1,18 @@
-# PowerModelsDSSE.jl
+# PowerModelsSE.jl
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsDSSE.jl/dev)
-[![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsDSSE.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/PowerModelsDSSE.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/PowerModelsDSSE-jl)
-[![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsDSSE.jl)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsSE.jl/dev)
+[![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsSE.jl)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/PowerModelsSE.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/PowerModelsSE-jl)
+[![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsSE.jl)
 
-PowerModelsDSSE.jl is an extension package of PowerModelsDistribution.jl for three-phase
+PowerModelsSE.jl is an extension package of PowerModelsDistribution.jl for three-phase
 static Distribution System State Estimation.
 
 A Distribution System State Estimator determines the *most-likely* state of
 distribution system given a set of uncertainties, e.g., measurement errors,
 pseudo-measurements, etc. These uncertainties may pertain to any quantity of any
 network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
-This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://timmyfaraday.github.io/PowerModelsDSSE.jl/dev/).
+This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://timmyfaraday.github.io/PowerModelsSE.jl/dev/).
 
 ## Modeling Uncertainties
 
@@ -65,10 +65,10 @@ To use the package, two type of data inputs are required:
 
 The two are then put together in a single dictionary and used to run the state estimator.
 The network data needs to be compatible with PowerModelsDistribution, which also provides an automatic parser to read OpenDSS (".dss") data.
-PowerModelsDSSE reads measurement data from CSV (".csv") files and comes with some helping function to build these csv files from power flow results from PowerModelsDistribution or similar sources.
+PowerModelsSE reads measurement data from CSV (".csv") files and comes with some helping function to build these csv files from power flow results from PowerModelsDistribution or similar sources.
 More information can be found in the documentation.
 
-## Citing PowerModelsDSSE
+## Citing PowerModelsSE
 
 To do
 

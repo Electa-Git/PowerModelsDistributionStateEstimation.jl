@@ -39,14 +39,14 @@
         _PMS.write_measurements!(_PMD.SDPUBFPowerModel, sdp_data, pf_result, msr_path, exclude = ["vi","vr"])
         _PMS.add_measurements!(sdp_data, msr_path, actual_meas = true)
         _PMS.assign_start_to_variables!(sdp_data)
-        PowerModelsDSSE.vm_to_w_conversion!(sdp_data)
+        PowerModelsSE.vm_to_w_conversion!(sdp_data)
         _PMS.update_voltage_bounds!(data; v_min = 0.9, v_max = 1.0)
 
         sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
-        se_result_sdp_wlav = PowerModelsDSSE.run_sdp_mc_se(sdp_data, scs_solver)
+        se_result_sdp_wlav = PowerModelsSE.run_sdp_mc_se(sdp_data, scs_solver)
 
         sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1)
-        se_result_sdp_wls = PowerModelsDSSE.run_sdp_mc_se(sdp_data, scs_solver)
+        se_result_sdp_wls = PowerModelsSE.run_sdp_mc_se(sdp_data, scs_solver)
 
         delta_wlav, max_err_wlav, avg_wlav = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
         delta_wls, max_err_wls, avg_wls = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)

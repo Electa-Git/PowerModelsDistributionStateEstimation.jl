@@ -1,11 +1,3 @@
-################################################################################
-#  Copyright 2020, Tom Van Acker, Marta Vanin                                  #
-################################################################################
-# PowerModelsDSSE.jl                                                           #
-# An extention package of PowerModelsDistribution.jl for Static Distribution   #
-# System State Estimation.                                                     #
-# See http://github.com/timmyfaraday/PowerModelsDSSE.jl                        #
-################################################################################
 
 #The scope of this test set is to check if all formulations provide the same result
 #if errors are added on the measurements. We only try the full formulations, not
@@ -26,7 +18,7 @@
     data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
     if rm_transfo _PMS.rm_enwl_transformer!(data) end
     if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
-
+å
     # insert the load profiles
     _PMS.insert_profiles!(data, season, elm, pfs, t = time)
 

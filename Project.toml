@@ -1,7 +1,7 @@
-name = "PowerModelsDSSE"
+name = "PowerModelsSE"
 uuid = "d0713e65-ce0c-4a8e-a1da-2ed737d217c4"
-authors = ["Tom Van Acker", "Marta Vanin"]
-version = "0.1.1"
+authors = ["Marta Vanin", "Tom Van Acker"]
+version = "0.1.2"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

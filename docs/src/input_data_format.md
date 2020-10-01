@@ -105,7 +105,7 @@ The required csv measurement file features the following columns:
 - cmp_type: indicates which component the measurement refers to: bus, load, gen, branch, etc.
 - cmp_id: integer that indicates the index of the above component.
 - meas_type: this is "G" if the measured quantity is between phase and neutral, "P" if between phases.
-- meas_var: indicates which variable is measured. The entry must correspond to the variable name as defined in PowerModelsDistribution or PowerModelDSSE, e.g., pg for the injected power from a generator, vm for a bus voltage magnitude, etc.
+- meas_var: indicates which variable is measured. The entry must correspond to the variable name as defined in PowerModelsDistribution or PowerModelSE, e.g., pg for the injected power from a generator, vm for a bus voltage magnitude, etc.
 - phase: phase the measurement refers to, i.e., 1, 2 or 3. If it is a three-phase measurement, this can be indicated with a "[1, 2, 3]".
 - dst: type of continuous univariate distribution associated to the measurement. In the classic WLAV/WLS estimators, this is a "Normal" distribution. In this package, we allow a number of additional distributions. For details, see the manual section on "Maximum Likelihood Estimation"
 - par_1: is the first of the two parameters that define the measurement error distribution. For the Normal distribution, this is the mean.

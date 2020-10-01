@@ -5,7 +5,7 @@
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
-module PowerModelsDSSE
+module PowerModelsSE
 
 # import pkgs
 import CSV

@@ -11,14 +11,14 @@ using Ipopt, SCS
 using JuMP
 using PowerModels
 using PowerModelsDistribution
-using PowerModelsDSSE
+using PowerModelsSE
 using Test
 
 # pkg const
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
-const _PMS = PowerModelsDSSE
+const _PMS = PowerModelsSE
 
 #network and feeder from ENWL for tests
 ntw, fdr = 4, 2
@@ -33,7 +33,7 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
 
 
 
-@testset "PowerModelsDSSE" begin
+@testset "PowerModelsSE" begin
 
     include("estimation_criteria.jl")
     include("mixed_measurements.jl")

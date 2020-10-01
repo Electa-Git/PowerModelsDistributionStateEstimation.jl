@@ -1,12 +1,12 @@
-using Documenter, PowerModelsDSSE
+using Documenter, PowerModelsSE
 
 makedocs(
-    modules     = [PowerModelsDSSE],
+    modules     = [PowerModelsSE],
     format      = Documenter.HTML(mathengine = Documenter.MathJax()),
-    sitename    = "PowerModelsDSSE.jl",
+    sitename    = "PowerModelsSE.jl",
     authors     = "Tom Van Acker, Marta Vanin",
     pages       = [
-              "Home"    => "intro.md",
+              "Home"    => "index.md",
               "Manual"  => [
                             "Getting Started"                => "quickguide.md",
                             "Input Data Format"              => "input_data_format.md",
@@ -22,5 +22,5 @@ makedocs(
 )
 
 deploydocs(
-     repo = "github.com/timmyfaraday/PowerModelsDSSE.jl.git"
+     repo = "github.com/timmyfaraday/PowerModelsSE.jl.git"
 )

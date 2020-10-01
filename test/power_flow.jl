@@ -1,11 +1,3 @@
-################################################################################
-#  Copyright 2020, Tom Van Acker, Marta Vanin                                  #
-################################################################################
-# PowerModelsDSSE.jl                                                           #
-# An extention package of PowerModelsDistribution.jl for Static Distribution   #
-# System State Estimation.                                                     #
-# See http://github.com/timmyfaraday/PowerModelsDSSE.jl                        #
-################################################################################
 
 @testset "Benchmark vs power flow" begin
     season     = "summer"
