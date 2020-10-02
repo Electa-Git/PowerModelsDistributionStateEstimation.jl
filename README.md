@@ -1,6 +1,6 @@
 # PowerModelsSE.jl
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsSE.jl/dev)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Electa-Git.github.io/PowerModelsSE.jl/dev)
 [![Build Status](https://travis-ci.com/Electa-Git/PowerModelsSE.jl.svg?branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
 [![codecov](https://codecov.io/gh/Electa-Git/PowerModelsSE.jl/branch/master/graph/badge.svg?token=vATNv5wVsp)](https://codecov.io/gh/Electa-Git/PowerModelsSE.jl)
 
