@@ -61,17 +61,17 @@ This can be avoided if good knowledge of the system is available or if some vari
 Similar to providing a warm start, it is to user discretion to assign meaningful and "safe" variable bounds.
 PowerModelsSE has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
 ```@docs
-update_voltage_bounds!(data; v_min, v_max)
+update_voltage_bounds!()
 ```
 ```@docs
-update_generator_bounds!(data; p_min, p_max, q_min, q_max)
+update_generator_bounds!()
 ```
 ```@docs
-update_load_bounds!(data; p_min, p_max, q_min, q_max)
+update_load_bounds!()
 ```
 or, alternatively, all the above at once:
 ```@docs
-update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
+update_all_bounds!()
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablenamemin`/`variablenamemax`. The example below shows how to do it for the active power.
 ```julia
