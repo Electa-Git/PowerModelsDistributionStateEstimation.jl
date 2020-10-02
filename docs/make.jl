@@ -10,7 +10,6 @@ makedocs(
               "Manual"  => [
                             "Getting Started"                => "quickguide.md",
                             "Input Data Format"              => "input_data_format.md",
-                            "Mathematical Model "            => "math_model.md",
                             "Measurements and Conversions"   => "measurements.md",
                             "State Estimation Criteria"      => "se_criteria.md",
                             ],

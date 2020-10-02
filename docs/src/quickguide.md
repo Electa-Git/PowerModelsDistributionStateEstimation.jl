@@ -17,14 +17,14 @@ data = parse_file(ntw_path; data_model=MATHEMATICAL)
 add_measurements!(data, msr_path, actual_meas = true)
 
 #set state estimation settings
-pmd_data["se_settings"] = Dict{String,Any}("criterion" => "rwlav",
+data["se_settings"] = Dict{String,Any}("criterion" => "rwlav",
                                            "rescaler" => 1)
 
 #set solver parameters
 slv = optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 #run state estimation
-se_result = run_acp_mc_se(pmd_data, slv)
+se_result = run_acp_mc_se(data, slv)
 ```
 The run commands return detailed results in the form of a dictionary, following PowerModels format, and can be saved for future processing, like in `se_result` above.
 
@@ -39,8 +39,12 @@ It should be noted that not all solvers can handle all problem types. For exampl
 ## Providing a Warm Start
 
 Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsSE provides the `assign_start_to_variables!` function.
-- calling `assign_start_to_variables!(data)` takes the value of the measurement from the state estimation data dictionary and assigns them a starting value to their associated variable.
-- calling `assign_start_to_variables!(data, other_dict)` assigns starting values to the problem variables based on a dictionary where they are collected: `other_dict`. NB: This dictionary must have a form similar to that of a powerflow solution dictionary, to make sure that the right starting value is associated to the right variable.
+```@docs
+assign_start_to_variables!(data)
+```
+```@docs
+assign_start_to_variables!(data, start_values_source)
+```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablename_start`. The example below shows how to do it for the `vm` and `va` variables.
 ```julia
 data = parse_file("case3_unbalanced.dss"; data_model=MATHEMATICAL)
@@ -57,11 +61,19 @@ This must also be done attentively, though, to make sure that the feasible space
 This can be avoided if good knowledge of the system is available or if some variable have particularly obvious bounds, e.g., voltage magnitude cannot be negative, so its lower bound can be set to 0 without risk.
 Similar to providing a warm start, it is to user discretion to assign meaningful and "safe" variable bounds.
 PowerModelsSE has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
-`update_voltage_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf)`
-`update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)`
-`update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)`
+```@docs
+update_voltage_bounds!(data; v_min, v_max)
+```
+```@docs
+update_generator_bounds!(data; p_min, p_max, q_min, q_max)
+```
+```@docs
+update_load_bounds!(data; p_min, p_max, q_min, q_max)
+```
 or, alternatively, all the above at once:
-`update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, pg_min::Float64=0.0, pg_max::Float64=Inf, qg_min::Float64=-Inf, qg_max::Float64=Inf, pd_min::Float64=0.0, pd_max::Float64=Inf, qd_min::Float64=-Inf, qd_max::Float64=Inf)`.
+```@docs
+update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
+```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablenamemin`/`variablenamemax`. The example below shows how to do it for the active power.
 ```julia
 data["load"]["1"]["pmax"] = [1.0, 1.0, 1.0]
