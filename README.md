@@ -5,13 +5,11 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/PowerModelsSE.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/PowerModelsSE-jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsSE.jl)
 
-PowerModelsSE.jl is an extension package of PowerModelsDistribution.jl for three-phase
-static Distribution System State Estimation.
+PowerModelsSE.jl is an extension package of PowerModels(Distribution).jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation.
 
-A Distribution System State Estimator determines the *most-likely* state of
-distribution system given a set of uncertainties, e.g., measurement errors,
-pseudo-measurements, etc. These uncertainties may pertain to any quantity of any
-network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
+A State Estimator determines the *most-likely* state of power system given a set of uncertainties, e.g., measurement errors,
+pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
+
 This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://timmyfaraday.github.io/PowerModelsSE.jl/dev/).
 
 ## Modeling Uncertainties
@@ -75,8 +73,7 @@ To do
 ## Acknowledgements
 
 This code has been developed at KU Leuven (University of Leuven). The primary
-developers are Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday))
-and Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) with support for
+developers are Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) and Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday)) with support for
 the following contributors:
 
 - Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)), CSIRO, General PowerModelsDistribution.jl Advice.
