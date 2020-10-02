@@ -9,7 +9,7 @@ PowerModelsSE.jl is an extension package of PowerModels(Distribution).jl for Sta
 A State Estimator determines the *most-likely* state of power system given a set of uncertainties, e.g., measurement errors,
 pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
 
-This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://timmyfaraday.github.io/PowerModelsSE.jl/dev/).
+This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://Electa-Git.github.io/PowerModelsSE.jl/dev/).
 
 ## Modeling Uncertainties
 
