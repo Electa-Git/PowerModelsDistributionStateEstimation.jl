@@ -16,7 +16,7 @@ The latest stable release of PowerModelsSE can be installed using the Julia
 package manager:
 
 ```
-] add https://github.com/timmyfaraday/PowerModelsSE.jl.git
+] add https://github.com/Electa-Git/PowerModelsSE.jl.git
 ```
 
 To be able to use PowerModelsSE, at least one solver is required. For our package tests, we rely on Ipopt and SCS solvers, since they do not have license restrictions. Both solvers can be installed using the package manager:
