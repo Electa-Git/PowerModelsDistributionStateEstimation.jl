@@ -17,8 +17,7 @@ data = parse_file(ntw_path; data_model=MATHEMATICAL)
 add_measurements!(data, msr_path, actual_meas = true)
 
 #set state estimation settings
-data["se_settings"] = Dict{String,Any}("criterion" => "rwlav",
-                                           "rescaler" => 1)
+data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
 
 #set solver parameters
 slv = optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
@@ -40,10 +39,10 @@ It should be noted that not all solvers can handle all problem types. For exampl
 
 Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsSE provides the `assign_start_to_variables!` function.
 ```@docs
-assign_start_to_variables!(data)
+assign_start_to_variables!()
 ```
 ```@docs
-assign_start_to_variables!(data, start_values_source)
+assign_start_to_variables!()
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablename_start`. The example below shows how to do it for the `vm` and `va` variables.
 ```julia
