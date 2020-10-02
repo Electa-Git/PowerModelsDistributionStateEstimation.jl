@@ -1,7 +1,7 @@
 # PowerModelsSE.jl
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Electa-Git.github.io/PowerModelsSE.jl/dev)
-[![Build Status](https://travis-ci.com/Electa-Git/PowerModelsSE.jl.svg?branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
+[![Build Status](https://travis-ci.com/Electa-Git/PowerModelsSE.jl.svg?token=wBsNbd12XnPoP4bx78Cy&branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
 [![codecov](https://codecov.io/gh/Electa-Git/PowerModelsSE.jl/branch/master/graph/badge.svg?token=vATNv5wVsp)](https://codecov.io/gh/Electa-Git/PowerModelsSE.jl)
 
 PowerModelsSE.jl is an extension package of PowerModels(Distribution).jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation. Furthermore, this package is flexible design tool, enabling benchmarks between different power flow formulations, rather then providing the most tractable state estimator.
