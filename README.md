@@ -1,8 +1,7 @@
 # PowerModelsSE.jl
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://timmyfaraday.github.io/PowerModelsSE.jl/dev)
-[![Build Status](https://travis-ci.com/timmyfaraday/PowerModelsSE.jl.svg?branch=master)](https://travis-ci.com/timmyfaraday/PowerModelsSE.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/timmyfaraday/PowerModelsSE.jl?svg=true)](https://ci.appveyor.com/project/timmyfaraday/PowerModelsSE-jl)
+[![Build Status](https://travis-ci.com/Electa-Git/PowerModelsSE.jl.svg?branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
 [![Codecov](https://codecov.io/gh/timmyfaraday/PowerModelsSE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/timmyfaraday/PowerModelsSE.jl)
 
 PowerModelsSE.jl is an extension package of PowerModels(Distribution).jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation.
