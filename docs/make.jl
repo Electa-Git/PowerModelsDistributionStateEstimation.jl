@@ -22,5 +22,5 @@ makedocs(
 )
 
 deploydocs(
-     repo = "github.com/timmyfaraday/PowerModelsSE.jl.git"
+     repo = "github.com/Electa-Git/PowerModelsSE.jl.git"
 )
