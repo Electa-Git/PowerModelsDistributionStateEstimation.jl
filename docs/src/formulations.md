@@ -1,6 +1,6 @@
 # Network Formulations
 
-This section gives an overview of the three-phase power flow formulations that are available to perform state estimation in PowerModelsSE. All formulations except the Reduced ones are imported from PowerModels or PowerModelsDistribution. These are only a subset of the formulations available in these two packages. For further information please refer to their official documentation[here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/formulations/).
+This section gives an overview of the three-phase power flow formulations that are available to perform state estimation in PowerModelsSE. All formulations except the Reduced ones are imported from PowerModels or PowerModelsDistribution. These are only a subset of the formulations available in these two packages. For further information please refer to their official [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/formulations/).
 
 ## Type Hierarchy
 
@@ -55,7 +55,7 @@ const PowerModelsDistribution.LinDist3FlowPowerModel = PowerModelsDistribution.L
 
 ## Details on the Formulations
 
-This sub-section reports for convenience the relevant literature for the formulations used in PowerModelsSE and is again a reduced version of the official PowerModelsDistribution documentation, available [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/formulation-details/).
+This sub-section reports for convenience the relevant literature for the formulations used in PowerModelsSE and is again a reduced version of the official PowerModelsDistribution documentation, available [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/formulation-details/).
 
 ### `AbstractACPModel`
 
