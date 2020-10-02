@@ -1,11 +1,6 @@
 # Problem Specifications
 
-The main purpose of PowerModelsSE is to solve state estimation problems. For a number of purposes, it might be useful to perform power flow or OPF calculations, within the context of a state estimation study. For example, power flow calculations can be used to validate the accuracy of the state estimator, or to generate artificial measurement data, if these are not available. Power flow and OPF calculations can be accessed from PowerModelsDistribution. The description of these problems can be found in PowerModelsDistribution's [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/latest/math-model/). On the line of the problem description of PowerModelsDistribution, PowerModelsSE hosts the possibility to run power flow with the reduced formulations, which are not available in PowerModelsDistribution (see section [Network Formulations](@ref) of the manual). The result of a reduced power flow is the same as a full power flow run with an exact power flow formulation (ACP, ACR or IVR) if the network does not have storage units, bus shunts, ground admittance and active switches. Else, it's a simplification.
-
-**Reduced power flow**
-```@docs
-run_reduced_pf
-```
+The main purpose of PowerModelsSE is to solve state estimation problems. For a number of purposes, it might be useful to perform power flow or OPF calculations, within the context of a state estimation study. For example, power flow calculations can be used to validate the accuracy of the state estimator, or to generate artificial measurement data, if these are not available. Power flow and OPF calculations can be accessed from PowerModelsDistribution. The description of these problems can be found in PowerModelsDistribution's [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/math-model/). 
 
 ## State estimation problem implementation
 
@@ -73,10 +68,10 @@ In the mathematical description below, the following sets are used,
 \mbox{sets:} & \nonumber \\
 & \mathcal{N} \mbox{ - buses}\nonumber \\
 & \mathcal{R} \mbox{ - references buses}\nonumber \\
-& \mathcal{E}, \mathcal{E}$_i$  \mbox{ - branches, branches to and from bus $i$} \nonumber \\
-& \mathcal{G}, \mathcal{G}$_i$ \mbox{ - generators and generators at bus $i$} \nonumber \\
-& \mathcal{L}, \mathcal{L}$_i$ \mbox{ - loads and loads at bus $i$} \nonumber \\
-& \mathcal{S}, \mathcal{S}$_i$ \mbox{ - shunts and shunts at bus $i$} \nonumber \\
+& \mathcal{E}, \mathcal{E}_i  \mbox{ - branches, branches to and from bus $i$} \nonumber \\
+& \mathcal{G}, \mathcal{G}_i \mbox{ - generators and generators at bus $i$} \nonumber \\
+& \mathcal{L}, \mathcal{L}_i \mbox{ - loads and loads at bus $i$} \nonumber \\
+& \mathcal{S}, \mathcal{S}_i \mbox{ - shunts and shunts at bus $i$} \nonumber \\
 & \Phi. \Phi_{ij} \mbox{ - conductors, conductors of branch $(ij)$} \nonumber \\
 %
 \end{align}
@@ -84,19 +79,19 @@ In the mathematical description below, the following sets are used,
 
 - Bold characters indicate vectors and matrices
 - The $\text{diag}(\cdot)$ operator takes the diagonal (vector) from a matrix
-- $(\cdot)^H$ indicates the conjugate transpose of a matrix
+- The $(\cdot)^H$ indicates the conjugate transpose of a matrix
 
 The julia problem above, can be associated to the following mathematical description
 
+Variables:
 ```math
-\textbf{Variables:}
 
 \begin{align}
   &\mathbf{S}^g_{k}, \mathbf{S}^d_{k}, \mathbf{U}_{i}   \;\; \forall k \in \mathcal{G}, k \in \mathcal{L}, i \in \mathcal{N}, \nonumber \\     & \mathbf{S}_{ij}, \boldsymbol{\rho}_m \;\; \forall (i,j) \in \mathcal{E}, m \in \mathcal{M} \nonumber.
 \end{align}
-
-\textbf{Constraints:}
-
+```
+Constraints:
+```math
 \begin{align}
 &\mathbf{\angle {U}}_{r} = [0, -120, 120] \deg  \;\; \forall r \in \mathcal{R}, \\
 \begin{split}
@@ -109,16 +104,15 @@ The julia problem above, can be associated to the following mathematical descrip
 & \boldsymbol{\rho}_m = r_m(\mathbf{f}_m(\mathbf{x}), \mathbf{z}_m, \boldsymbol{\sigma}_m)
 %\| \mathbf{f}_m(\mathbf{x}) - \mathbf{z}_m \|_p/\boldsymbol{\sigma}^p_m \;\; \forall m \in \mathcal{M}, \mathbf{x} \in \mathcal{X}.
 \end{align}
-
-\textbf{Objective:}
-
+```
+Objective:
+```math
 \begin{equation}\label{eq:objective}
   \text{minimize} \; \; \sum_{\substack{m \in \measm}} \boldsymbol{\rho}_{m}.
 \end{equation}
-
  ```
 The residual $\rho_{m, \phi}$ is a function that allows to represent the uncertainty on a given measurement $m$, performed on conductor $\phi$. In the mathematical description above, it is identified as the function $r$, which is depending on the measurement $\mathbf{z}$, and another function: $f$.
 
-The function $f_{m,\phi}$ are used to handle measurements $z_{m,\phi}$ that are performed on quantities that do not refer to the problems' variable space. There are the measurements conversions described in the [Measurements and Conversions](@ref) section of this manual.
+The function $f_{m,\phi}$ are used to handle measurements $z_{m,\phi}$ that are performed on quantities that do not refer to the problems' variable space. There are the measurements conversions described in the ([Measurements And Conversions](@ref)) section of this manual.
 
-Function $r_{m,\phi}$, on the other hand, depends on what state estimation criterion is chosen, e.g., WLS, WLAV, MLE. The form that $r_{m,\phi}$ takes in the various cases is defined in the section [State Estimation Criteria](@ref) of this manual.
+Function $r_{m,\phi}$, on the other hand, depends on what state estimation criterion is chosen, e.g., WLS, WLAV, MLE. The form that $r_{m,\phi}$ takes in the various cases is defined in the section ([State Estimation Criteria](@ref)) of this manual.
