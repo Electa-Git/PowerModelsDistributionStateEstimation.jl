@@ -10,7 +10,7 @@ module PowerModelsSE
 # import pkgs
 import CSV
 import DataFrames
-import Distributions
+import Distributions: pdflog, gradpdflog
 import InfrastructureModels
 import JuMP
 import LinearAlgebra: diag

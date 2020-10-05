@@ -78,9 +78,6 @@ ExtendedBeta(α::Real, β::Real) = ExtendedBeta(α, β, 0.0, 1.0)
 # functions
 scale(dst::ExtendedBeta) = (dst.α, dst.β)
 params(dst::ExtendedBeta) = (dst.α, dst.β, dst.min, dst.max)
-
-minimum(dst::ExtendedBeta) = dst.min
-maximum(dst::ExtendedBeta) = dst.max
 insupport(dst::ExtendedBeta, x::Real) = dst.min ≤ x ≤ dst.max
 
 mean(dst::ExtendedBeta) = min + dst.α * (dst.max - dst.min) / (dst.α + dst.β) 
