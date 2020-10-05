@@ -11,6 +11,7 @@ module PowerModelsSE
 import CSV
 import DataFrames
 import Distributions
+import Distributions: logpdf, gradlogpdf
 import InfrastructureModels
 import JuMP
 import LinearAlgebra: diag
@@ -19,6 +20,7 @@ import Optim
 import PowerModels
 import PowerModelsDistribution
 import Random
+import SpecialFunctions
 import Statistics
 
 # pkg const
@@ -30,16 +32,17 @@ const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _RAN = Random
+const _SF  = SpecialFunctions
 const _STT = Statistics
 
 # paths
 const BASE_DIR = dirname(@__DIR__)
 
-#logger for errors and warnings
+# logger for errors and warnings
 const _LOGGER = Memento.getlogger(@__MODULE__)
 __init__() = Memento.register(_LOGGER)
 
-#include
+# include
 include("core/constraint.jl")
 include("core/measurement_conversion.jl")
 include("core/objective.jl")
@@ -58,7 +61,7 @@ include("io/postprocessing.jl")
 
 include("prob/se.jl")
 
-#export
+# export
 export BASE_DIR
 export run_mc_se, run_acp_mc_se, run_acr_mc_se, run_ivr_mc_se
 export rm_enwl_transformer!, reduce_enwl_lines_eng!
@@ -66,5 +69,6 @@ export add_measurements!, write_measurements!
 export assign_start_to_variables!
 export calculate_voltage_magnitude_error
 export update_load_bounds!, update_voltage_bounds!, update_generator_bounds!, update_all_bounds!
+export ExtendedBeta
 
 end
