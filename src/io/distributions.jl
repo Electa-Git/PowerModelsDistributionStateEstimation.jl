@@ -70,9 +70,6 @@ struct ExtendedBeta{T<:Real} <: _DST.ContinuousUnivariateDistribution
     β::T
     min::T
     max::T
-
-    # main constructor
-    ExtendedBeta{T}(α::T, β::T, min::T, max::T) where {T} = new{T}(α, β, min, max)
 end
 
 # additional constructors
