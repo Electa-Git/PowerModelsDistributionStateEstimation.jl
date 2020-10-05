@@ -19,6 +19,7 @@ import Optim
 import PowerModels
 import PowerModelsDistribution
 import Random
+import SpecialFunctions
 import Statistics
 
 # pkg const
@@ -30,6 +31,7 @@ const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _RAN = Random
+const _SF  = SpecialFunctions
 const _STT = Statistics
 
 # paths
