@@ -10,7 +10,8 @@ module PowerModelsSE
 # import pkgs
 import CSV
 import DataFrames
-import Distributions: pdflog, gradpdflog
+import Distributions
+import Distributions: logpdf, gradlogpdf
 import InfrastructureModels
 import JuMP
 import LinearAlgebra: diag
@@ -37,11 +38,11 @@ const _STT = Statistics
 # paths
 const BASE_DIR = dirname(@__DIR__)
 
-#logger for errors and warnings
+# logger for errors and warnings
 const _LOGGER = Memento.getlogger(@__MODULE__)
 __init__() = Memento.register(_LOGGER)
 
-#include
+# include
 include("core/constraint.jl")
 include("core/measurement_conversion.jl")
 include("core/objective.jl")
@@ -60,7 +61,7 @@ include("io/postprocessing.jl")
 
 include("prob/se.jl")
 
-#export
+# export
 export BASE_DIR
 export run_mc_se, run_acp_mc_se, run_acr_mc_se, run_ivr_mc_se
 export rm_enwl_transformer!, reduce_enwl_lines_eng!

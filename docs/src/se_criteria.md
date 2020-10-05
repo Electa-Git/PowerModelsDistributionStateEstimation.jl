@@ -87,8 +87,12 @@ the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 - Weibull
 - Normal
 - Log-Normal
-- Beta
 - Gamma
+- Beta
+- Extended Beta
+```@docs
+ExtendedBeta
+```
 
 To avoid the use of automatic differentation, the first derivative (`gradlogpdf`) 
 is provided by Distributions.jl and the second derivative (`heslogpdf`) is provided interally.
