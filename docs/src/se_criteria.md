@@ -27,19 +27,19 @@ The WLAV criterion represents the absolute value norm (p=1) and is given by
 \end{eqnarray}
 ```
 where: 
-* $\mathcal{M}$ denotes the set of measurements,
-* $\mathcal{X}$ denotes the (extended) variable space of the OPF problem.
+* `𝓜` denotes the set of measurements,
+* `𝓧` denotes the (extended) variable space of the OPF problem.
 
-A injective-only mapping exist between the measurement set $\mathcal{M}$ and 
-variable space $\mathcal{X}$. 
+A injective-only mapping exist between the measurement set `𝓜` and 
+variable space `𝓧`. 
 
 Furthermore:
 
-* $\rho_{m}$ denotes the residual associated with a measurement $m$,
-* $x$ denotes the variable corresponding to a measurement $m$.
-* $\mu_{m}$ denotes the measured value,
-* $\sigma_{m}$ denotes the the measurement error, 
-* rsc denotes the rescaler.
+* `ρₘ` denotes the residual associated with a measurement $m$,
+* `x` denotes the variable corresponding to a measurement $m$.
+* `μₘ` denotes the measured value,
+* `σₘ` denotes the the measurement error, 
+* `rsc` denotes the rescaler.
 
 Solving a state estimation using the WLAV criterion is non-trivial as the 
 absolute value function is not continuously differentiable. This drawback is 
@@ -65,7 +65,7 @@ The WLS criterion represents the Eucledian norm (p=2) and is given by
 The rWLS criterion relaxes the former as a cone and is given by
 ```math
 \begin{eqnarray}
-      rsc \cdot \sigma^{2} \cdot \rho_{m} &\geq ( x - \mu_{m} )^{2},\quad m \in \mathcal{M}: m \to x \in \mathcal{X}.
+      rsc \cdot \sigma_{m}^{2} \cdot \rho_{m} &\geq ( x - \mu_{m} )^{2},\quad m \in \mathcal{M}: m \to x \in \mathcal{X}.
 \end{eqnarray}
 ```
 
@@ -78,8 +78,7 @@ the associated distribution and is given by
       \rho_{m}          &= - \text{rsc} \cdot \text{logpdf}_{m}(x) + \text{shf},\quad m \in \mathcal{M}: m \to x \in \mathcal{X}.
 \end{eqnarray}
 ```
-where:
-- shf denotes a shift setting the minimum value of the residual to zero.
+where `shf` denotes a shift setting the minimum value of the residual to zero.
 
 Currently, the following univariate continuous distributions are supported through 
 the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
