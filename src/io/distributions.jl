@@ -93,9 +93,7 @@ function mode(dst::ExtendedBeta)
 end
 skewness(dst::ExtendedBeta) = 
     2 * (dst.β - dst.α) / (dst.α + dst.β + 2) * sqrt((dst.α + dst.β + 1) / (dst.α * dst.β))
-kurtosis(dst::ExtendedBeta) = 
-    3 * (dst.α + dst.β + 1) * (2 * (dst.α + dst.β)^2 + dst.α * dst.β * (dst.α + dst.β - 6)) / (dst.α * dst.β * (dst.α + dst.β + 2) * (dst.α + dst.β + 3))
-
+    
 function pdf(dst::ExtendedBeta{T}, x::Real) where T<:Real
     α, β, min, max = params(dst)
     if insupport(dst, x)
