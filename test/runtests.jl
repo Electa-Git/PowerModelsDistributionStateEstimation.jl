@@ -7,14 +7,17 @@
 ################################################################################
 
 # using pkgs
-using Ipopt, SCS
+using Distributions
+using Ipopt
 using JuMP
 using PowerModels
 using PowerModelsDistribution
 using PowerModelsSE
+using SCS
 using Test
 
 # pkg const
+const _DST = Distributions
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
