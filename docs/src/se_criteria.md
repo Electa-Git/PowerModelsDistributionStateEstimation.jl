@@ -35,10 +35,10 @@ variable space `𝓧`.
 
 Furthermore:
 
-* `ρₘ` denotes the residual associated with a measurement $m$,
+* `ρ` denotes the residual associated with a measurement $m$,
 * `x` denotes the variable corresponding to a measurement $m$.
-* `μₘ` denotes the measured value,
-* `σₘ` denotes the the measurement error, 
+* `μ` denotes the measured value,
+* `σ` denotes the the measurement error, 
 * `rsc` denotes the rescaler.
 
 Solving a state estimation using the WLAV criterion is non-trivial as the 
