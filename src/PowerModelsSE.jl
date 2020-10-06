@@ -31,6 +31,7 @@ const _IM  = InfrastructureModels
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
+const _PMS = PowerModelsSE
 const _RAN = Random
 const _SF  = SpecialFunctions
 const _STT = Statistics

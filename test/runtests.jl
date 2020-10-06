@@ -40,5 +40,6 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
     include("non_exact_forms.jl")
     include("power_flow.jl")
     include("with_errors.jl")
+    include("distributions.jl")
 
 end

@@ -13,9 +13,9 @@ heslogpdf(d::_DST.Exponential{T}, x::Real) where T<:Real = 0
 ## Weibull
 # functions
 function heslogpdf(d::_DST.Weibull{T}, x::Real) where T<:Real
-    if _DST.insupport(Weibull, x)
+    if _DST.insupport(_DST.Weibull, x)
         α, θ = _DST.params(d)
-        - (α - 1) / x^2 - (α - 1)* α * x^(α - 2) / θ^(α)
+        - (α - 1) / x^2 - (α - 1) * α * x^(α - 2) / θ^(α)
     else
         zero(T)
     end
@@ -28,7 +28,7 @@ heslogpdf(d::_DST.Normal{T}, x::Real) where T<:Real = -1/_DST.std(d)^2
 ## LogNormal
 # functions
 function heslogpdf(d::_DST.LogNormal{T}, x::Real) where T<:Real
-    if _DST.insupport(LogNormal, x)
+    if _DST.insupport(_DST.LogNormal, x)
         μ, σ = _DST.params(d)
         ( log(x) - μ + σ^2 -1 ) / ( σ^2 * x^2 )
     else
@@ -39,9 +39,9 @@ end
 ## Beta
 # functions
 function heslogpdf(d::_DST.Beta{T}, x::Real) where T<:Real
-    if _DST.insupport(Beta, x)
-        α, θ = _DST.params(d)
-        - (α - 1) / x^2 - (θ - 1) / (1 - x^2)
+    if _DST.insupport(_DST.Beta, x)
+        α, β = _DST.params(d)
+        - (α - 1) / x^2 - (β - 1) / (1 - x)^2
     else
         zero(T)
     end
@@ -80,7 +80,7 @@ scale(dst::ExtendedBeta) = (dst.α, dst.β)
 params(dst::ExtendedBeta) = (dst.α, dst.β, dst.min, dst.max)
 insupport(dst::ExtendedBeta, x::Real) = dst.min ≤ x ≤ dst.max
 
-mean(dst::ExtendedBeta) = min + dst.α * (dst.max - dst.min) / (dst.α + dst.β) 
+mean(dst::ExtendedBeta) = dst.min + dst.α * (dst.max - dst.min) / (dst.α + dst.β) 
 function mode(dst::ExtendedBeta)
     α, β, min, max = params(dst)
     if α > 1 && β > 1       return min + (α - 1) * (max - min) / (α + β - 2)
@@ -91,8 +91,6 @@ function mode(dst::ExtendedBeta)
     elseif α ≤ 1  && β ≤ 1  Memento.error(_LOGGER, "mode is defined only when α > 1 and/or β > 1")
     end 
 end
-variance(dst::ExtendedBeta) =
-    dst.α * dst.β * (dst.max - dst.min)^2 / (dst.α + dst.β)^2 / (dst.α + dst.β + 1)
 skewness(dst::ExtendedBeta) = 
     2 * (dst.β - dst.α) / (dst.α + dst.β + 2) * sqrt((dst.α + dst.β + 1) / (dst.α * dst.β))
 kurtosis(dst::ExtendedBeta) = 
@@ -134,7 +132,7 @@ end
 ## Gamma
 # functions
 function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
-    if _DST.insupport(Gamma, x)
+    if _DST.insupport(_DST.Gamma, x)
         α, θ = _DST.params(d)
         - (α - 1) / x^2
     else
