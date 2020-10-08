@@ -10,11 +10,11 @@
 
 - [ ] investigate techniques to speed up code
 
-- [ ] code beta distribution with 4 parameters
+- [x] code beta distribution with 4 parameters
 
 - [ ] automated non gaussian measurement creation
 
-- [ ] increase code coverage for distributions
+- [x] increase code coverage for distributions
 
 ## TODO before 0.X
 
