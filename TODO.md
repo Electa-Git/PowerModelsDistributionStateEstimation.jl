@@ -1,5 +1,7 @@
 ## A list of things to do before v0.2.0
 
+- [ ] update code for PMD v0.10.0
+
 - [ ] relaxations of measurement conversions
 
 - [ ] individual SE criterion per measurement ("mixed" criterion)
@@ -10,9 +12,9 @@
 
 - [ ] investigate techniques to speed up code
 
-- [x] code beta distribution with 4 parameters
-
 - [ ] automated non gaussian measurement creation
+
+- [x] code beta distribution with 4 parameters
 
 - [x] increase code coverage for distributions
 
