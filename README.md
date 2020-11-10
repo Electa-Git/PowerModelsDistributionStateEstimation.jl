@@ -67,7 +67,16 @@ More information can be found in the documentation.
 
 ## Citing PowerModelsSE
 
-To do
+If you find PowerModelsSE.jl useful for your work, we kindly invite you to cite our [work](https://lirias.kuleuven.be/handle/123456789/662982):
+
+```bibtex
+@misc{vanin2021,
+author = {Vanin, M and Van Acker, T and D'hulst, R and Van Hertem, D},
+title = {A framework for constrained static state estimation in unbalanced distribution networks},
+publicationstatus = {in-preparation},
+}
+
+```
 
 ## Acknowledgements
 
