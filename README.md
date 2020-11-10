@@ -1,15 +1,15 @@
 # PowerModelsStateEstimation.jl
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Electa-Git.github.io/PowerModelsSE.jl/dev)
-[![Build Status](https://travis-ci.com/Electa-Git/PowerModelsSE.jl.svg?token=wBsNbd12XnPoP4bx78Cy&branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
-[![codecov](https://codecov.io/gh/Electa-Git/PowerModelsSE.jl/branch/master/graph/badge.svg?token=vATNv5wVsp)](https://codecov.io/gh/Electa-Git/PowerModelsSE.jl)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Electa-Git.github.io/PowerModelsStateEstimation.jl/dev)
+[![Build Status](https://travis-ci.com/Electa-Git/PowerModelsStateEstimation.jl.svg?token=wBsNbd12XnPoP4bx78Cy&branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
+[![codecov](https://codecov.io/gh/Electa-Git/PowerModelsStateEstimation.jl/branch/master/graph/badge.svg?token=vATNv5wVsp)](https://codecov.io/gh/Electa-Git/PowerModelsStateEstimation.jl)
 
 PowerModelsStateEstimation.jl is an extension package of PowerModels(Distribution).jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation. Furthermore, this package is flexible design tool, enabling benchmarks between different power flow formulations, rather then providing the most tractable state estimator.
 
 A State Estimator determines the *most-likely* state of power system given a set of uncertainties, e.g., measurement errors,
 pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
 
-This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://Electa-Git.github.io/PowerModelsSE.jl/dev/).
+This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://Electa-Git.github.io/PowerModelsStateEstimation.jl/dev/).
 
 ## Modeling Uncertainties
 
@@ -62,12 +62,12 @@ To use the package, two type of data inputs are required:
 
 The two are then put together in a single dictionary and used to run the state estimator.
 The network data needs to be compatible with PowerModelsDistribution, which also provides an automatic parser to read OpenDSS (".dss") data.
-PowerModelsSE reads measurement data from CSV (".csv") files and comes with some helping function to build these csv files from power flow results from PowerModelsDistribution or similar sources.
+PowerModelsStateEstimation reads measurement data from CSV (".csv") files and comes with some helping function to build these csv files from power flow results from PowerModelsDistribution or similar sources.
 More information can be found in the documentation.
 
-## Citing PowerModelsSE
+## Citing PowerModelsStateEstimation
 
-If you find PowerModelsSE.jl useful for your work, we kindly invite you to cite our [work](https://lirias.kuleuven.be/handle/123456789/662982):
+If you find PowerModelsStateEstimation.jl useful for your work, we kindly invite you to cite our [work](https://lirias.kuleuven.be/handle/123456789/662982):
 
 ```bibtex
 @misc{vanin2021,
