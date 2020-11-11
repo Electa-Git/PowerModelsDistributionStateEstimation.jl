@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.com/Electa-Git/PowerModelsStateEstimation.jl.svg?token=wBsNbd12XnPoP4bx78Cy&branch=master)](https://travis-ci.com/Electa-Git/PowerModelsSE.jl)
 [![codecov](https://codecov.io/gh/Electa-Git/PowerModelsStateEstimation.jl/branch/master/graph/badge.svg?token=vATNv5wVsp)](https://codecov.io/gh/Electa-Git/PowerModelsStateEstimation.jl)
 
-PowerModelsStateEstimation.jl is an extension package of PowerModels(Distribution).jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation. Furthermore, this package is flexible design tool, enabling benchmarks between different power flow formulations, rather then providing the most tractable state estimator.
+PowerModelsStateEstimation.jl is an extension package of PowerModels(Distribution).jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation. Furthermore, this package is flexible design tool, enabling benchmarks between different state estimation models, rather then providing the fastest state estimator. Different state estimation models can be built by using different power flow formulations, state estimation criteria, (in)equality constraints, and so forth.
 
 A State Estimator determines the *most-likely* state of power system given a set of uncertainties, e.g., measurement errors,
 pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
