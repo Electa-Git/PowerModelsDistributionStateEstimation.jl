@@ -38,9 +38,9 @@ To use the package, two type of data inputs are required:
 - Network data: OpenDSS “.dss” files
 - Measurement data: CSV “.csv” files
 
-[//]: <> ## Examples
+## Examples (Coming Soon)
 
-[//]: <> Examples on how to use PowerModelsDistributionStateEstimation can be found in Pluto Notebooks inside the `/examples` directory.
+Examples on how to use PowerModelsDistributionStateEstimation can be found in Pluto Notebooks inside the `/examples` directory.
 
 ## Acknowledgements
 
