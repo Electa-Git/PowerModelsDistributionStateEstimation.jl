@@ -18,8 +18,8 @@ A state estimator determines the *most-likely* state of power distribution netwo
 - Measurement Uncertainties:
 	- a deterministic value `Float64`, or
 	- a continuous univariate distribution `ContinuousUnivariateDistribution`:
-    		* Normal distribution, included through (W)LS or (W)LAV approach, or
-    		* Non-normal distributions, included through MLE.
+    		- Normal distribution, included through (W)LS or (W)LAV approach, or
+    		- Non-normal distributions, included through MLE.
 
 ## Core Network Constraint Formulations
 
