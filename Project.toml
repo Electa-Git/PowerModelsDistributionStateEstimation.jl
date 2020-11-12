@@ -1,4 +1,4 @@
-name = "PowerModelsSE"
+name = "PowerModelsDistributionStateEstimation"
 uuid = "d0713e65-ce0c-4a8e-a1da-2ed737d217c4"
 authors = ["Marta Vanin", "Tom Van Acker"]
 version = "0.1.2"
