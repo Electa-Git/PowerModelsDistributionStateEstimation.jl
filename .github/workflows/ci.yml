@@ -15,6 +15,4 @@ jobs:
         with: 
             version: '1.5'
       - uses: julia-actions/julia-buildpkg@master
-      - run: julia --project=@. -e 'using Pkg; Pkg.test("PowerModelsDistributionStateEstimation")'
-      - uses: actions/checkout@master
-      - uses: codecov/codecov-action@v1
+      - run: julia --project=@. -e 'using Pkg; Pkg.test("PowerModelsDistributionStateEstimation", coverage=true)'
