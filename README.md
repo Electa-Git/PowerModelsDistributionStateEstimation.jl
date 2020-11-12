@@ -17,9 +17,9 @@ Estimation Criteria:
 
 Measurement Uncertainties:
 - a deterministic value `Float64`, or
-- a continuous univariate distribution `ContinuousUnivariateDistribution`:
-	- Normal distribution, included through (W)LS or (W)LAV approach, or
-    	- Non normal distributions, included through MLE.
+- a continuous univariate distribution `ContinuousUnivariateDistribution`
+	- Normal distribution, included through (W)LS or (W)LAV
+    	- Non-normal distributions, included through MLE
 
 ## Core Network Constraint Formulations
 
