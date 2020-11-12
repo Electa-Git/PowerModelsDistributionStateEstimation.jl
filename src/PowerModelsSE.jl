@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsSE.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                                             #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -31,7 +31,7 @@ const _IM  = InfrastructureModels
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
-const _PMS = PowerModelsSE
+const _PMS = PowerModelsDistributionStateEstimation
 const _RAN = Random
 const _SF  = SpecialFunctions
 const _STT = Statistics
