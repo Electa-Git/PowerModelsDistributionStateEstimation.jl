@@ -1,6 +1,6 @@
 # PowerModelsDistributionStateEstimation.jl
 
-https://github.com/Electa-Git/PowerModelsDistributionStateEstimation/workflows/CI/badge.svg
+[![CI](https://github.com/Electa-Git/PowerModelsDistributionStateEstimation/workflows/CI/badge.svg)
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Electa-Git.github.io/PowerModelsDistributionStateEstimation.jl/dev)
 [![Build Status](https://travis-ci.com/Electa-Git/PowerModelsStateEstimation.jl.svg?token=wBsNbd12XnPoP4bx78Cy&branch=master)](https://travis-ci.com/Electa-Git/PowerModelsDistributionStateEstimation.jl)
