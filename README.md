@@ -10,16 +10,16 @@ A state estimator determines the *most-likely* state of power distribution netwo
 
 ## Core Problem Specification
 
-- Estimation Criteria:
-    - (Weighted) Least Squares ((W)LS)
-    - (Weighted) Least Absolute Values ((W)LAV)
-    - Maximum Likelihood Estimation (MLE)
+Estimation Criteria:
+- (Weighted) Least Squares ((W)LS)
+- (Weighted) Least Absolute Values ((W)LAV)
+- Maximum Likelihood Estimation (MLE)
 
-- Measurement Uncertainties:
-	- a deterministic value `Float64`, or
-	- a continuous univariate distribution `ContinuousUnivariateDistribution`:
-    		- Normal distribution, included through (W)LS or (W)LAV approach, or
-    		- Non-normal distributions, included through MLE.
+Measurement Uncertainties:
+- a deterministic value `Float64`, or
+- a continuous univariate distribution `ContinuousUnivariateDistribution`:
+	- Normal distribution, included through (W)LS or (W)LAV approach, or
+    	- Non-normal distributions, included through MLE.
 
 ## Core Network Constraint Formulations
 
