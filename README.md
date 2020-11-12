@@ -19,7 +19,7 @@ Measurement Uncertainties:
 - a deterministic value `Float64`, or
 - a continuous univariate distribution `ContinuousUnivariateDistribution`
 	- normal distribution, included through (W)LS or (W)LAV
-    	- non-normal distributions, included through MLE
+	- non-normal distributions, included through MLE
 
 ## Core Network Constraint Formulations
 
