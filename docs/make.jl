@@ -1,7 +1,7 @@
-using Documenter, PowerModelsSE
+using Documenter, PowerModelsDistributionStateEstimation
 
 makedocs(
-    modules     = [PowerModelsSE],
+    modules     = [PowerModelsDistributionStateEstimation],
     format      = Documenter.HTML(mathengine = Documenter.MathJax()),
     sitename    = "PowerModelsSE.jl",
     authors     = "Marta Vanin, and Tom Van Acker",
@@ -21,5 +21,5 @@ makedocs(
 )
 
 deploydocs(
-     repo = "github.com/Electa-Git/PowerModelsSE.jl.git"
+     repo = "github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl.git"
 )
