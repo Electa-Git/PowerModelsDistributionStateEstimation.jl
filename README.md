@@ -18,8 +18,8 @@ Estimation Criteria:
 Measurement Uncertainties:
 - a deterministic value `Float64`, or
 - a continuous univariate distribution `ContinuousUnivariateDistribution`
-	- Normal distribution, included through (W)LS or (W)LAV
-    	- Non-normal distributions, included through MLE
+	- normal distribution, included through (W)LS or (W)LAV
+    	- non-normal distributions, included through MLE
 
 ## Core Network Constraint Formulations
 
@@ -38,9 +38,9 @@ To use the package, two type of data inputs are required:
 - Network data: OpenDSS “.dss” files
 - Measurement data: CSV “.csv” files
 
-%## Examples
+<> ## Examples
 
-%Examples on how to use PowerModelsDistributionStateEstimation can be found in Pluto Notebooks inside the `/examples` directory.
+<> Examples on how to use PowerModelsDistributionStateEstimation can be found in Pluto Notebooks inside the `/examples` directory.
 
 ## Acknowledgements
 
