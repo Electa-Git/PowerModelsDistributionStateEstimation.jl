@@ -1,5 +1,7 @@
 # PowerModelsDistributionStateEstimation.jl
 
+<a href="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/actions?query=workflow%3ATest+branch%3Adev"><img src="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/workflows/CI/badge.svg"></img></a>
+
 [![CI](https://github.com/Electa-Git/PowerModelsDistributionStateEstimation/workflows/CI/badge.svg)
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Electa-Git.github.io/PowerModelsDistributionStateEstimation.jl/dev)
