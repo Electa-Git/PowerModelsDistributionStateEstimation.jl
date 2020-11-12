@@ -48,7 +48,7 @@
         sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1)
         se_result_sdp_wls = PowerModelsDistributionStateEstimation.run_sdp_mc_se(sdp_data, scs_solver)
 
-        delta_wlav, max_err_wlav, avg_wlav = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
+        #delta_wlav, max_err_wlav, avg_wlav = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
         delta_wls, max_err_wls, avg_wls = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)
 
         @test se_result_sdp_wlav["termination_status"] == ALMOST_OPTIMAL
@@ -56,9 +56,9 @@
         @test isapprox(max_err_wls, 0.000767; atol=1e-2)
         @test isapprox(avg_wls, 0.000344; atol=1e-2)
         @test isapprox(se_result_sdp_wls["objective"], 1.56e-5; atol=1e-3)
-        @test isapprox(max_err_wlav, 0.046954; atol=2e-1)
-        @test isapprox(avg_wlav, 0.012229; atol=1e-1)
-        @test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-2)
+        #@test isapprox(max_err_wlav, 0.046954; atol=2e-1)
+        #@test isapprox(avg_wlav, 0.012229; atol=1e-1)
+        #@test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-2)
     end
 
     season     = "summer"
