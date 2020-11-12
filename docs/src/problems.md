@@ -1,17 +1,17 @@
 # Problem Specifications
 
-The main purpose of PowerModelsSE is to solve state estimation problems. For a number of purposes, it might be useful to perform power flow or OPF calculations, within the context of a state estimation study. For example, power flow calculations can be used to validate the accuracy of the state estimator, or to generate artificial measurement data, if these are not available. Power flow and OPF calculations can be accessed from PowerModelsDistribution. The description of these problems can be found in PowerModelsDistribution's [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/math-model/). 
+The main purpose of PowerModelsDistributionStateEstimation is to solve state estimation problems. For a number of purposes, it might be useful to perform power flow or OPF calculations, within the context of a state estimation study. For example, power flow calculations can be used to validate the accuracy of the state estimator, or to generate artificial measurement data, if these are not available. Power flow and OPF calculations can be accessed from PowerModelsDistribution. The description of these problems can be found in PowerModelsDistribution's [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/math-model/). 
 
 ## State estimation problem implementation
 
 For a bus injection model, the structure of the state estimation problem is the following. See the implementation at src/prob/se.jl for all the models'  implementations and their details.
-The functions preceded by a "_PMD." are imported from PowerModelsDistributions.jl. Those without prefix are original PowerModelsSE functions, those preceded by a "PowerModelsSE." are present in both and therefore needed disambiguation.
+The functions preceded by a "_PMD." are imported from PowerModelsDistributions.jl. Those without prefix are original PowerModelsDistributionStateEstimation functions, those preceded by a "PowerModelsDistributionStateEstimation." are present in both and therefore needed disambiguation.
 
 ### Variables
 
 ```julia
 
-PowerModelsSE.variable_mc_bus_voltage(pm; bounded = true)
+PowerModelsDistributionStateEstimation.variable_mc_bus_voltage(pm; bounded = true)
 _PMD.variable_mc_branch_power(pm; bounded = true)
 _PMD.variable_mc_transformer_power(pm; bounded = true)
 _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
@@ -34,7 +34,7 @@ for (i,bus) in _PMD.ref(pm, :ref_buses)
     _PMD.constraint_mc_theta_ref(pm, i)
 end
 for (i,bus) in _PMD.ref(pm, :bus)
-    PowerModelsSE.constraint_mc_load_power_balance_se(pm, i)
+    PowerModelsDistributionStateEstimation.constraint_mc_load_power_balance_se(pm, i)
 end
 for (i,branch) in _PMD.ref(pm, :branch)
     _PMD.constraint_mc_ohms_yt_from(pm, i)
