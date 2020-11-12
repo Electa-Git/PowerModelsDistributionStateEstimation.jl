@@ -4,68 +4,52 @@
 [![Build Status](https://travis-ci.com/Electa-Git/PowerModelsStateEstimation.jl.svg?token=wBsNbd12XnPoP4bx78Cy&branch=master)](https://travis-ci.com/Electa-Git/PowerModelsDistributionStateEstimation.jl)
 [![codecov](https://codecov.io/gh/Electa-Git/PowerModelsStateEstimation.jl/branch/master/graph/badge.svg?token=vATNv5wVsp)](https://codecov.io/gh/Electa-Git/PowerModelsDistributionStateEstimation.jl)
 
-:warning: This package was previously called PowerModelsDistributionStateEstimation and PowerModelsStateEstimation. Some pages might not be updated to the new name yet. The current name is intended to be the final name of the package. We apologize for the confusion. If you cannot access the docs from the link above, you can find still find them in the docs folder. The link will be restored asap.
+PowerModelsDistributionStateEstimation.jl is an extension package of PowerModelsDistribution.jl for Static Power Distribution Network State Estimation. The package is a flexible design tool, enabling benchmarks between different state estimation models. Different state estimation models can be built by using different power flow formulations, state estimation criteria, (in)equality constraints, etc.
 
-PowerModelsDistributionStateEstimation.jl is an extension package of PowerModelsDistribution.jl for Static Power System State Estimation. Currently, the package focusses on Distribution System State Estimation, although in principle the package can be used for the transmission system as well. The package is a flexible design tool, enabling benchmarks between different state estimation models, rather then providing the fastest state estimator. Different state estimation models can be built by using different power flow formulations, state estimation criteria, (in)equality constraints, and so forth.
-
-A State Estimator determines the *most-likely* state of power system given a set of uncertainties, e.g., measurement errors,
-pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
-
-This README file is just a quick introduction. If you are interested in using the package, you can find more information in the [documentation](https://Electa-Git.github.io/PowerModelsDistributionStateEstimation.jl/dev/).
-
-## Modeling Uncertainties
-
-Currently, measurement uncertainties may either be described by:
-- a deterministic value `Float64`, or
-- a continuous univariate distribution `ContinuousUnivariateDistribution`:
-    * a Normal distribution, that can be included in a standard WLS or (W)LAV approach, or
-    * a number of other distributions, included through the concept of Maximum Likelihood Estimation.
-For details on the distributions and the state estimation problem formulation, the user is referred to the package manual.
+A state estimator determines the *most-likely* state of power distribution networks given a set of uncertainties, e.g., measurement errors, pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
 
 ## Core Problem Specification
 
-- State Estimation (SE) as (in)equality constrained optimization problem, that can be performed according to different estimation criteria:
-    - Weighted Least Squares (WLS)
-    - Weighted Least Absolute Values (WLAV)
+- Estimation Criteria:
+    - (Weighted) Least Squares ((W)LS)
+    - (Weighted) Least Absolute Values ((W)LAV)
     - Maximum Likelihood Estimation (MLE)
-    - It is also possible to remove the weights and perform LS and LAV
+
+- Measurement Uncertainties:
+	- a deterministic value `Float64`, or
+	- a continuous univariate distribution `ContinuousUnivariateDistribution`:
+    		* Normal distribution, included through (W)LS or (W)LAV approach, or
+    		* Non-normal distributions, included through MLE.
 
 ## Core Network Constraint Formulations
 
-Together with measurement values, the use power flow equations is required to derive the most likely state of a network.
-Several formulations of the power flow equations are imported from [PowerModelsDistribution.jl](https://github.com/lanl-ansi/PowerModelsDistribution.jl):
-- AC Polar (exact)
-- AC Rectangular (exact)
-- IV Rectangular (exact)
-- SDP (positive semi-definite relaxation)
-- LinDist3Flow (linear approximation)
-
-The three exact formulations in general lead to non-convex state estimation, unless the network is monitored via phasor measurement units. To reduce the complexity of the formulations a bit, improving tractability, three reduced versions are provided in the present package, that are not available on PowerModelsDistribution:
-
-- Reduced AC Polar
-- Reduced AC Rectangular
-- Reduced IV Rectangular
-
-These three formulations still lead, in general, to non-convex state estimation (again depending on the measurements), but some nonlinearities are avoided with minor variable reformulations and by assuming that the shunt admittance of the cables is negligible. This is often the case in low voltage distribution network databases. If the assumption holds, the Reduced formulations are still exact, i.e., the state estimation is free of modeling errors.
-
-All the formulations are three-phase unbalanced.
-
-## Load and Transformer Models
-
-Currently, the developers' research work focuses on state estimation in low voltage distribution feeders, and therefore load measurements from the consumers are modeled as power/current injections at the bus where the measurement takes place. It is not considered whether the load is constant power, constant impedence, ZIP, etc.
-No detailed model of the transformer substation is required, either, if the interest is exclusively on the low voltage side.
-Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to include the medium voltage network in the analysis. Extending the package to host these models is future work scheduled for future releases. If you would like to use realistic load/transformer models already, you are welcome to contribute to the package. Alternatively, you can let us know of your interest; if multiple requests are received, we might consider moving up the extension.
+- Exact
+	- (reduced) ACP
+	- (reduced) ACR
+	- (reduced) IVR
+- Relaxations
+	- SDP 
+- Linear Approximations 
+	- LinDist3Flow
 
 ## Data Formats
 
 To use the package, two type of data inputs are required:
-- Network data (network topology, cable impedance, consumer location...)
-- Measurement data (simulated or collected from measurement devices, etc..)
+- Network data: OpenDSS “.dss” files
+- Measurement data: CSV “.csv” files
 
-The two are then put together in a single dictionary and used to run the state estimator.
-The network data needs to be compatible with PowerModelsDistribution, which also provides an automatic parser to read OpenDSS (".dss") data.
-PowerModelsDistributionStateEstimation reads measurement data from CSV (".csv") files and comes with some helping function to build these csv files from power flow results from PowerModelsDistribution or similar sources.
-More information can be found in the documentation.
+## Examples
+
+Examples on how to use PowerModelsDistributionStateEstimation can be found in Pluto Notebooks inside the `/examples` directory.
+
+## Acknowledgements
+
+This code has been developed at KU Leuven (University of Leuven). The primary
+developers are Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) and Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday)) with support for
+the following contributors:
+
+- Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)), CSIRO, General PowerModelsDistribution.jl Advice.
+- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)), KU Leuven, General PowerModelsDistribution.jl Advice, ENWL data parser.
 
 ## Citing PowerModelsDistributionStateEstimation
 
@@ -80,19 +64,11 @@ publicationstatus = {in-preparation},
 
 ```
 
-## Acknowledgements
-
-This code has been developed at KU Leuven (University of Leuven). The primary
-developers are Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) and Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday)) with support for
-the following contributors:
-
-- Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)), CSIRO, General PowerModelsDistribution.jl Advice.
-- Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)), KU Leuven, General PowerModelsDistribution.jl Advice, ENWL data parser.
-
 ## License
 
 This code is provided under a BSD license.
 
 ## Notes
 
-Currently, the focus is on the state estimation model itself, and bad data detection techniques and observability considerations are not dealt with.
+- The focus is on the state estimation model itself, and bad data detection techniques and observability considerations are not dealt with.
+- Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to include the medium voltage network in the analysis. Extending the package to host these models is scheduled for future releases. If you would like to use realistic load/transformer models already, you are welcome to contribute to the package.
