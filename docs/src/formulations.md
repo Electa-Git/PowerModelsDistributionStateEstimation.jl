@@ -1,6 +1,6 @@
 # Network Formulations
 
-This section gives an overview of the three-phase power flow formulations that are available to perform state estimation in PowerModelsSE. All formulations except the Reduced ones are imported from PowerModels or PowerModelsDistribution. These are only a subset of the formulations available in these two packages. For further information please refer to their official [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/formulations/).
+This section gives an overview of the three-phase power flow formulations that are available to perform state estimation in PowerModelsDistributionStateEstimation. All formulations except the Reduced ones are imported from PowerModels or PowerModelsDistribution. These are only a subset of the formulations available in these two packages. For further information please refer to their official [documentation](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/formulations/).
 
 ## Type Hierarchy
 
@@ -21,18 +21,18 @@ mutable struct PowerModels.ACRPowerModel <: PowerModels.AbstractACRModel PowerMo
 mutable struct PowerModels.IVRPowerModel <: PowerModels.AbstractIVRModel PowerModels.@pm_fields end
 ```
 
-A "reduced" version of each of the three formulations above is derived in PowerModelsSE:
+A "reduced" version of each of the three formulations above is derived in PowerModelsDistributionStateEstimation:
 
 ```julia
-mutable struct PowerModelsSE.ReducedACPPowerModel <: PowerModels.AbstractACPModel PowerModels.@pm_fields end
-mutable struct PowerModelsSE.ReducedACRPowerModel <: PowerModels.AbstractACRModel PowerModels.@pm_fields end
-mutable struct PowerModelsSE.ReducedIVRPowerModel <: PowerModels.AbstractIVRModel PowerModels.@pm_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACPPowerModel <: PowerModels.AbstractACPModel PowerModels.@pm_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACRPowerModel <: PowerModels.AbstractACRModel PowerModels.@pm_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedIVRPowerModel <: PowerModels.AbstractIVRModel PowerModels.@pm_fields end
 
 AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
 ```
 
 The reduced models are still exact for networks like those made available in the ENWL database, where there are no cable ground admittance, storage elements and active switches.
-A positive semi-definite (SDP) relaxation is also made available for state estimation in PowerModelsSE. The SDP model belongs to the following categories: conic models and branch flow (BF) models, and there relevant type structure is the following:
+A positive semi-definite (SDP) relaxation is also made available for state estimation in PowerModelsDistributionStateEstimation. The SDP model belongs to the following categories: conic models and branch flow (BF) models, and there relevant type structure is the following:
 
 ```julia
 abstract type PowerModels.AbstractBFModel <: PowerModels.AbstractPowerModel end
@@ -55,7 +55,7 @@ const PowerModelsDistribution.LinDist3FlowPowerModel = PowerModelsDistribution.L
 
 ## Details on the Formulations
 
-This sub-section reports for convenience the relevant literature for the formulations used in PowerModelsSE and is again a reduced version of the official PowerModelsDistribution documentation, available [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/formulation-details/).
+This sub-section reports for convenience the relevant literature for the formulations used in PowerModelsDistributionStateEstimation and is again a reduced version of the official PowerModelsDistribution documentation, available [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/formulation-details/).
 
 ### `AbstractACPModel`
 
