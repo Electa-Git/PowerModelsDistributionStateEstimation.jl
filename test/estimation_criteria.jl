@@ -10,10 +10,10 @@ pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
     rescaler = 1
 
     data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-    se_result_rwls = PowerModelsSE.run_acp_red_mc_se(data, ipopt_solver)
+    se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
 
     data["se_settings"] = Dict{String,Any}("criterion" => "wls", "rescaler" => rescaler)
-    se_result_wls = PowerModelsSE.run_acp_red_mc_se(data, ipopt_solver)
+    se_result_wls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
 
     @test isapprox(se_result_rwls["objective"]-se_result_wls["objective"], 0.0; atol = 1e-4)
 
@@ -24,11 +24,11 @@ end
     rescaler = 1
 
     data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-    se_result_rwls = PowerModelsSE.run_acp_red_mc_se(data, ipopt_solver)
+    se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
     delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
     data["se_settings"] = Dict{String,Any}("criterion" => "mle", "rescaler" => rescaler)
-    se_result_mle = PowerModelsSE.run_acp_red_mc_se(data, ipopt_solver)
+    se_result_mle = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
     delta, max_err_mle, avg_mle = _PMS.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
     @test se_result_mle["termination_status"] ∈ [LOCALLY_SOLVED, ALMOST_LOCALLY_SOLVED]
@@ -46,11 +46,11 @@ _PMS.add_measurements!(data, msr_path, actual_meas = false)
     pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
 
     data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-    se_result_rwls = PowerModelsSE.run_acp_red_mc_se(data, ipopt_solver)
+    se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
     delta, max_err, avg = _PMS.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
     data["se_settings"] = Dict{String,Any}("criterion" => "mle", "rescaler" => rescaler)
-    se_result_mle = PowerModelsSE.run_acp_red_mc_se(data, ipopt_solver)
+    se_result_mle = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
     delta, max_err_mle, avg_mle = _PMS.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
     @test se_result_mle["termination_status"] == LOCALLY_SOLVED

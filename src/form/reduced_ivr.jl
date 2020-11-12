@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsSE.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                                             #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -33,9 +33,9 @@ function constraint_mc_gen_setpoint(pm::ReducedIVRPowerModel, id::Int; nw::Int=p
     qmax = get(generator, "qmax", fill( Inf, N))
 
     if get(generator, "configuration", _PMD.WYE) == _PMD.WYE
-        PowerModelsSE.constraint_mc_gen_setpoint_wye(pm, nw, id, bus["index"], pmin, pmax, qmin, qmax; report=report, bounded=bounded)
+        PowerModelsDistributionStateEstimation.constraint_mc_gen_setpoint_wye(pm, nw, id, bus["index"], pmin, pmax, qmin, qmax; report=report, bounded=bounded)
     else
-        PowerModelsSE.constraint_mc_gen_setpoint_delta(pm, nw, id, bus["index"], pmin, pmax, qmin, qmax; report=report, bounded=bounded)
+        PowerModelsDistributionStateEstimation.constraint_mc_gen_setpoint_delta(pm, nw, id, bus["index"], pmin, pmax, qmin, qmax; report=report, bounded=bounded)
     end
 end
 
@@ -115,7 +115,7 @@ end
 
 "Simplified version of constraint_mc_load_current_balance_se, to perform state
 estimation with the reduced IVR formulation: no shunts, no storage elements, no active switches"
-function constraint_mc_load_current_balance_se(pm::PowerModelsSE.ReducedIVRPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_load_current_balance_se(pm::PowerModelsDistributionStateEstimation.ReducedIVRPowerModel, i::Int; nw::Int=pm.cnw)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs, i)
@@ -150,7 +150,7 @@ end
 
 "Simplified version of constraint_mc_load_current_balance, to perform power flow
 calculations with the reduced IVR formulation: no shunts, no storage elements, no active switches"
-function constraint_mc_load_current_balance(pm::PowerModelsSE.ReducedIVRPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_load_current_balance(pm::PowerModelsDistributionStateEstimation.ReducedIVRPowerModel, i::Int; nw::Int=pm.cnw)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs, i)

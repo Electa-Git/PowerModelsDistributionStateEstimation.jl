@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Vanin Marta, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsSE.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                                             #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -12,7 +12,7 @@ using Ipopt
 using JuMP
 using PowerModels
 using PowerModelsDistribution
-using PowerModelsSE
+using PowerModelsDistributionStateEstimation
 using SCS
 using Test
 
@@ -21,7 +21,7 @@ const _DST = Distributions
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
-const _PMS = PowerModelsSE
+const _PMS = PowerModelsDistributionStateEstimation
 
 #network and feeder from ENWL for tests
 ntw, fdr = 4, 2
@@ -36,7 +36,7 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
 
 
 
-@testset "PowerModelsSE" begin
+@testset "PowerModelsDistributionStateEstimation" begin
 
     include("estimation_criteria.jl")
     include("mixed_measurements.jl")

@@ -20,7 +20,7 @@ using JuMP
 using Plots, StatsPlots
 
 # ╔═╡ c10ba066-07d8-11eb-2127-f9b41999b5f7
-using PowerModelsDistribution, PowerModelsSE
+using PowerModelsDistribution, PowerModelsDistributionStateEstimation
 
 # ╔═╡ 42dfb878-07e5-11eb-1207-718e519a9d44
 ## Loading the network data path

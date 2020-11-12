@@ -3,7 +3,7 @@ using Documenter, PowerModelsDistributionStateEstimation
 makedocs(
     modules     = [PowerModelsDistributionStateEstimation],
     format      = Documenter.HTML(mathengine = Documenter.MathJax()),
-    sitename    = "PowerModelsSE.jl",
+    sitename    = "PowerModelsDistributionStateEstimation.jl",
     authors     = "Marta Vanin, and Tom Van Acker",
     pages       = [
               "Home"    => "index.md",
