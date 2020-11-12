@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsSE.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -59,7 +59,7 @@ end
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
-    PowerModelsSE.variable_mc_bus_voltage(pm; bounded = true)
+    PowerModelsDistributionStateEstimation.variable_mc_bus_voltage(pm; bounded = true)
     _PMD.variable_mc_branch_power(pm; bounded = true)
     _PMD.variable_mc_transformer_power(pm; bounded = true)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
@@ -76,7 +76,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
         _PMD.constraint_mc_theta_ref(pm, i)
     end
     for (i,bus) in _PMD.ref(pm, :bus)
-        PowerModelsSE.constraint_mc_load_power_balance_se(pm, i)
+        PowerModelsDistributionStateEstimation.constraint_mc_load_power_balance_se(pm, i)
     end
     for (i,branch) in _PMD.ref(pm, :branch)
         _PMD.constraint_mc_ohms_yt_from(pm, i)
@@ -100,7 +100,7 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
-    PowerModelsSE.variable_mc_branch_current(pm, bounded = true)
+    PowerModelsDistributionStateEstimation.variable_mc_branch_current(pm, bounded = true)
     variable_mc_gen_power_setpoint_se(pm, bounded = true)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
@@ -174,7 +174,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
 
     for (i,bus) in _PMD.ref(pm, :bus)
         if typeof(pm) <: _PMD.SDPUBFPowerModel
-            PowerModelsSE.constraint_mc_load_power_balance_se(pm,i)
+            PowerModelsDistributionStateEstimation.constraint_mc_load_power_balance_se(pm,i)
         else
             _PMD.constraint_mc_load_power_balance(pm, i)
         end
