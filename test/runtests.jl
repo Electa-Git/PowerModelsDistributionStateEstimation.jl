@@ -1,5 +1,5 @@
 ################################################################################
-#  Copyright 2020, Vanin Marta, Tom Van Acker                                  #
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
 # PowerModelsDistributionStateEstimation.jl                                                             #
 # An extention package of PowerModels(Distribution).jl for Static Power System #

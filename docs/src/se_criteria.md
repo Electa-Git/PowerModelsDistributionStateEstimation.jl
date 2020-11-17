@@ -2,7 +2,7 @@
 
 The state of a power system can be determined based on a specific estimation criterion.
 The user has to specify the `criterion` through the `se_settings` ([Input Data Format](@ref)).
-If no criterion is specified, it will default to `rwlav`. 
+If no criterion is specified, it will default to `rwlav`.
 
 Currently, the following criteria are supported:
 - `wlav`: weighted least absolute value
@@ -14,35 +14,35 @@ Currently, the following criteria are supported:
 The first four criteria assume that the error on a measurement follows a Gaussian
 distribution. The MLE criterion can account for any univariate continuous distribution.
 
-Furthermore, a rescaler can be introduced to improve the convergence of the state 
+Furthermore, a rescaler can be introduced to improve the convergence of the state
 estimation. The user has to specify the `rescaler` through the `se_settings` ([Input Data Format](@ref)).
 If no rescaler is specified, it will default to `1.0`.
 
 ## WLAV and rWLAV
 
-The WLAV criterion represents the absolute value norm (p=1) and is given by 
+The WLAV criterion represents the absolute value norm (p=1) and is given by
 ```math
 \begin{eqnarray}
       \rho_{m}          &= \frac{| x - \mu_{m} |}{\text{rsc} \cdot \sigma_{m}},\quad m \in \mathcal{M}: m \to x \in \mathcal{X},
 \end{eqnarray}
 ```
-where: 
+where:
 * `𝓜` denotes the set of measurements,
 * `𝓧` denotes the (extended) variable space of the OPF problem.
 
-A injective-only mapping exist between the measurement set `𝓜` and 
-variable space `𝓧`. 
+A injective-only mapping exist between the measurement set `𝓜` and
+variable space `𝓧`.
 
 Furthermore:
 
 * `ρ` denotes the residual associated with a measurement $m$,
 * `x` denotes the variable corresponding to a measurement $m$.
 * `μ` denotes the measured value,
-* `σ` denotes the the measurement error, 
+* `σ` denotes the the measurement error,
 * `rsc` denotes the rescaler.
 
-Solving a state estimation using the WLAV criterion is non-trivial as the 
-absolute value function is not continuously differentiable. This drawback is 
+Solving a state estimation using the WLAV criterion is non-trivial as the
+absolute value function is not continuously differentiable. This drawback is
 lifted by its exact linear relaxation: rWLAV[^1]. The rWLAV criterion is given by
 
 ```math
@@ -80,7 +80,7 @@ the associated distribution and is given by
 ```
 where `shf` denotes a shift setting the minimum value of the residual to zero.
 
-Currently, the following univariate continuous distributions are supported through 
+Currently, the following univariate continuous distributions are supported through
 the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 - Exponential
 - Weibull
@@ -93,5 +93,5 @@ the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 ExtendedBeta
 ```
 
-To avoid the use of automatic differentation, the first derivative (`gradlogpdf`) 
-is provided by Distributions.jl and the second derivative (`heslogpdf`) is provided interally.
+To avoid the use of automatic differentiation, the first derivative (`gradlogpdf`) 
+is provided by Distributions.jl and the second derivative (`heslogpdf`) is provided internally.
