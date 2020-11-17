@@ -14,7 +14,7 @@
     rd_lines   = true
 
     # set measurement path
-    msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
+    msr_path = joinpath(mktempdir(),"temp.csv")
     data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
     if rm_transfo _PMS.rm_enwl_transformer!(data) end
     if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
