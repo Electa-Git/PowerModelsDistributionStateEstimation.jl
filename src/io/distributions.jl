@@ -30,7 +30,7 @@ heslogpdf(d::_DST.Normal{T}, x::Real) where T<:Real = -1/_DST.std(d)^2
 function heslogpdf(d::_DST.LogNormal{T}, x::Real) where T<:Real
     if _DST.insupport(_DST.LogNormal, x)
         μ, σ = _DST.params(d)
-        ( log(x) - μ + σ^2 -1 ) / ( σ^2 * x^2 )
+        ( log(x - μ) - 1 ) / ( 2σ^2 * ( x- μ )^2 ) + 1 / x^2
     else
         zero(T)
     end
