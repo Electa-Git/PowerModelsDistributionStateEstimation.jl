@@ -1,18 +1,18 @@
 ## A list of things to do before v0.2.0
 
-- [ ] update code for PMD v0.10.0
+- [ ] update code for PMD v0.10.0 (!!!)
 
-- [ ] relaxations of measurement conversions
+- [ ] individual SE criterion per measurement ("mixed" criterion) (!!!)
 
-- [ ] individual SE criterion per measurement ("mixed" criterion)
+- [ ] add rho max speed up comp time (if infeasible, bad data identification possible?) (!!!)
 
-- [ ] add rho max speed up comp time (if infeasible, bad data identification possible?)
+- [ ] automated non gaussian measurement creation (!!!)
 
-- [ ] quantify rescaler
+- [ ] quantify rescaler for non-gaussian 
 
-- [ ] investigate techniques to speed up code
+- [ ] investigate techniques to speed up code 
 
-- [ ] automated non gaussian measurement creation
+- [ ] input through array of measurements rather then csv
 
 - [x] code beta distribution with 4 parameters
 
