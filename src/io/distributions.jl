@@ -14,7 +14,7 @@ heslogpdf(d::_DST.Exponential{T}, x::Real) where T<:Real = 0
 # functions
 function heslogpdf(d::_DST.Weibull{T}, x::Real) where T<:Real
     if _DST.insupport(_DST.Weibull, x)
-        α, θ = _DST.params(d)
+        θ, α = _DST.params(d)
         - (α - 1) / x^2 - (α - 1) * α * x^(α - 2) / θ^(α)
     else
         zero(T)
@@ -52,11 +52,11 @@ end
 """
     ExtendedBeta
 
-The [**extended beta distribution**](https://www.vosesoftware.com/riskwiki/Beta4distribution.php) 
-with shape parameters `α` and `β`, and optional support parameters `min` and 
+The [**extended beta distribution**](https://www.vosesoftware.com/riskwiki/Beta4distribution.php)
+with shape parameters `α` and `β`, and optional support parameters `min` and
 `max` has a probability density function
 ```math
-f(x, α, β, \\text{min}, \\text{max}) = 
+f(x, α, β, \\text{min}, \\text{max}) =
     \\begin{cases}
         0,                                                                                              &\\text{if:}~x < \\text{min},               \\\\
         \\frac{(x-\\text{min})^{α-1} (\\text{max}-x)^{β-1}}{B(α,β) (\\text{max}-\\text{min})^{α+β-1}},  &\\text{if:}~\\text{min} ≤ x ≤ \\text{max}, \\\\
@@ -80,7 +80,7 @@ scale(dst::ExtendedBeta) = (dst.α, dst.β)
 params(dst::ExtendedBeta) = (dst.α, dst.β, dst.min, dst.max)
 insupport(dst::ExtendedBeta, x::Real) = dst.min ≤ x ≤ dst.max
 
-mean(dst::ExtendedBeta) = dst.min + dst.α * (dst.max - dst.min) / (dst.α + dst.β) 
+mean(dst::ExtendedBeta) = dst.min + dst.α * (dst.max - dst.min) / (dst.α + dst.β)
 function mode(dst::ExtendedBeta)
     α, β, min, max = params(dst)
     if α > 1 && β > 1       return min + (α - 1) * (max - min) / (α + β - 2)
@@ -89,11 +89,11 @@ function mode(dst::ExtendedBeta)
     elseif α ≥ 1  && β < 1  return max
     elseif α > 1  && β == 1 return max
     elseif α ≤ 1  && β ≤ 1  Memento.error(_LOGGER, "mode is defined only when α > 1 and/or β > 1")
-    end 
+    end
 end
-skewness(dst::ExtendedBeta) = 
+skewness(dst::ExtendedBeta) =
     2 * (dst.β - dst.α) / (dst.α + dst.β + 2) * sqrt((dst.α + dst.β + 1) / (dst.α * dst.β))
-    
+
 function pdf(dst::ExtendedBeta{T}, x::Real) where T<:Real
     α, β, min, max = params(dst)
     if insupport(dst, x)
@@ -113,7 +113,7 @@ end
 function gradlogpdf(dst::ExtendedBeta{T}, x::Real) where T<:Real
     α, β, min, max = params(dst)
     if insupport(dst, x)
-        (α - 1) / (x - min) - (β - 1) / (max - x) 
+        (α - 1) / (x - min) - (β - 1) / (max - x)
     else
         zero(T)
     end
