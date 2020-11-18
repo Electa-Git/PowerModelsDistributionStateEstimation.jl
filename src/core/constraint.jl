@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -54,8 +54,8 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.has_upper_bound(var[c]) ? ub = JuMP.upper_bound(var[c]) : ub = 10 ;
             shf = abs(Optim.optimize(x -> -logpdf(dst[c],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
-            fun(x) = - shf + rsc * logpdf(dst[c],x)
-            grd(x) = gradlogpdf(dst[c],x)
+            fun(x) = rsc * (- shf + logpdf(dst[c],x))
+            grd(x) = _DST.gradlogpdf(dst[c],x)
             hes(x) = heslogpdf(dst[c],x)
             JuMP.register(pm.model, f, 1, fun, grd, hes)
             JuMP.add_NL_constraint(pm.model, :($(res[c]) == - $(f)($(var[c]))))
