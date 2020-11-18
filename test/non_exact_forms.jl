@@ -7,7 +7,7 @@
     ##################
 
     # set measurement path for all cases
-    msr_path = joinpath(_PMS.BASE_DIR,"test/data/enwl/measurements/temp.csv")
+    msr_path = joinpath(mktempdir(),"temp.csv")
 
     @testset "SDP with rwlav and rwls" begin
 

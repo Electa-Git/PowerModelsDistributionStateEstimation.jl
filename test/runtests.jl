@@ -1,5 +1,5 @@
 ################################################################################
-#  Copyright 2020, Vanin Marta, Tom Van Acker                                  #
+#  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
 # PowerModelsDistributionStateEstimation.jl                                                             #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
@@ -33,8 +33,7 @@ ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>30
 
 scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
                                                             "alpha"=>0.4, "verbose"=>0)
-
-
+                                                            
 
 @testset "PowerModelsDistributionStateEstimation" begin
 
