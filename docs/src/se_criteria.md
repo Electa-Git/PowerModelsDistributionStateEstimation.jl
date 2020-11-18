@@ -89,6 +89,18 @@ the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 - Gamma
 - Beta
 - Extended Beta
+From v0.2.0, the following will also be available:
+- Arcsine
+- Chi
+- Chisq
+- Frechet
+- Gumbel
+- Laplace
+- Locationscale
+- Logistic
+- Logitnormal
+- Tdist
+
 ```@docs
 ExtendedBeta
 ```
