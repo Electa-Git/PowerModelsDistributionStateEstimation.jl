@@ -51,8 +51,8 @@
         #delta_wlav, max_err_wlav, avg_wlav = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
         delta_wls, max_err_wls, avg_wls = _PMS.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)
 
-        @test se_result_sdp_wlav["termination_status"] == ALMOST_OPTIMAL
-        @test se_result_sdp_wls["termination_status"] == OPTIMAL
+        @test se_result_sdp_wlav["termination_status"] == ALMOST_OPTIMAL || se_result_sdp_wlav["termination_status"] == OPTIMAL  
+        @test se_result_sdp_wls["termination_status"] == OPTIMAL || se_result_sdp_wls["termination_status"] == ALMOST_OPTIMAL
         @test isapprox(max_err_wls, 0.000767; atol=1e-2)
         @test isapprox(avg_wls, 0.000344; atol=1e-2)
         @test isapprox(se_result_sdp_wls["objective"], 1.56e-5; atol=1e-3)
