@@ -1,11 +1,14 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
-
+"""
+    get_cmp_id(pm, nw, i)
+Retrieves the id of component i. This is a tuple if the component is a branch. Otherwise, it is a singleton.
+"""
 function get_cmp_id(pm, nw, i)
     if  _PMD.ref(pm, nw, :meas, i, "cmp") == :branch
         branch_id = _PMs.ref(pm, nw, :meas, i, "cmp_id")
@@ -61,4 +64,33 @@ function update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, 
     update_voltage_bounds!(data; v_min=v_min, v_max=v_max)
     update_generator_bounds!(data; p_min=pg_min, p_max=pg_max, q_min=qg_min, q_max=qg_max)
     update_load_bounds!(data; p_min=pd_min, p_max=pd_max, q_min=qd_min, q_max=qd_max)
+end
+
+"""
+    PowerModelsDistributionStateEstimation.assign_individual_measurement_criterion!(data::Dict; chosen_criterion::String="rwlav")
+Basic function that assigns a chosen criterion to individual measurements to perform a 'mixed' state estimation.
+If the distribution type of at least one of the measured phases is normal, the criterion defaults to the chosen_criterion. Otherwise,
+it is assigned the 'mle' criterion.
+The function takes as input either a single measurement dictionary, e.g., data["meas"]["1"] or the full measurement dictionary, data["meas].
+"""
+function assign_default_individual_criterion!(data::Dict; chosen_criterion::String="rwlav")
+    if haskey(data, "meas")
+        for (_, meas) in data["meas"]
+            dst_type = [typeof(i) for i in meas["dst"]]
+            if any(x->x==Distributions.Normal{Float64}, dst_type)
+                meas["crit"] = chosen_criterion
+            else
+                meas["crit"] = "mle"
+            end
+        end
+    elseif haskey(data, "dst")
+        dst_type = [typeof(i) for i in meas["dst"]]
+        if any(x->x==Distributions.Normal{Float64}, dst_type)
+            meas["crit"] = chosen_criterion
+        else
+            meas["crit"] = "mle"
+        end
+    else
+        Memento.error(_LOGGER, "Unrecognized data input.")
+    end
 end
