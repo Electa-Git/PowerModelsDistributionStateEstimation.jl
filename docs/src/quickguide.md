@@ -39,10 +39,10 @@ It should be noted that not all solvers can handle all problem types. For exampl
 
 Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsDistributionStateEstimation provides the `assign_start_to_variables!` function.
 ```@docs
-assign_start_to_variables!()
+PowerModelsDistributionStateEstimation.assign_start_to_variables!(data)
 ```
 ```@docs
-assign_start_to_variables!()
+PowerModelsDistributionStateEstimation.assign_start_to_variables!(data, start_values_source)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablename_start`. The example below shows how to do it for the `vm` and `va` variables.
 ```julia
@@ -61,17 +61,17 @@ This can be avoided if good knowledge of the system is available or if some vari
 Similar to providing a warm start, it is to user discretion to assign meaningful and "safe" variable bounds.
 PowerModelsDistributionStateEstimation has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
 ```@docs
-update_voltage_bounds!()
+PowerModelsDistributionStateEstimation.update_voltage_bounds!(data::Dict; v_min=0.0, v_max=Inf)
 ```
 ```@docs
-update_generator_bounds!()
+PowerModelsDistributionStateEstimation.update_generator_bounds!(data; p_min, p_max, q_min, q_max)
 ```
 ```@docs
-update_load_bounds!()
+PowerModelsDistributionStateEstimation.update_load_bounds!(data; p_min, p_max, q_min, q_max)
 ```
 or, alternatively, all the above at once:
 ```@docs
-update_all_bounds!()
+PowerModelsDistributionStateEstimation.update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablenamemin`/`variablenamemax`. The example below shows how to do it for the active power.
 ```julia
