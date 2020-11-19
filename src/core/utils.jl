@@ -67,7 +67,7 @@ function update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, 
 end
 
 """
-    PowerModelsDistributionStateEstimation.assign_individual_measurement_criterion!(data::Dict; chosen_criterion::String="rwlav")
+    assign_individual_measurement_criterion!(data::Dict; chosen_criterion::String="rwlav")
 Basic function that assigns a chosen criterion to individual measurements to perform a 'mixed' state estimation.
 If the distribution type of at least one of the measured phases is normal, the criterion defaults to the chosen_criterion. Otherwise,
 it is assigned the 'mle' criterion.

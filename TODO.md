@@ -14,6 +14,8 @@
 
 - [ ] automated non gaussian measurement creation
 
+- [ ] add some tests on post/pre processing functionalities to make sure they don't break
+
 - [x] code beta distribution with 4 parameters
 
 - [x] increase code coverage for distributions
