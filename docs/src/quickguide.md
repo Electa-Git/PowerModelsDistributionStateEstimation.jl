@@ -4,14 +4,14 @@
 To perform a state estimation (SE), a network data file (e.g. `"case3_unbalanced.dss"` in `../test/data/extra/networks`) needs to be acquired, together with its related measurement file (e.g. `"case3_meas.csv"` in `../test/data/extra/measurements`). The absolute path to the package is provided through the constant `BASE_DIR`. Network and measurement data will be merged and a SE can be run as follows:
 ```julia
 using PowerModels, PowerModelsDistribution, PowerModelsDistributionStateEstimation
-using Ipopt
+using JuMP, Ipopt
 
 #full paths to files
 ntw_path = joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss")
 msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
 
 #parse network data file
-data = parse_file(ntw_path; data_model=MATHEMATICAL)
+data = PowerModelsDistribution.parse_file(ntw_path; data_model=MATHEMATICAL)
 
 #add measurement data to network data file
 add_measurements!(data, msr_path, actual_meas = true)
@@ -20,7 +20,7 @@ add_measurements!(data, msr_path, actual_meas = true)
 data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
 
 #set solver parameters
-slv = optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
+slv = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 #run state estimation
 se_result = run_acp_mc_se(data, slv)
@@ -77,4 +77,12 @@ Alternatively, the user can directly assign a value or vector (depending on the 
 ```julia
 data["load"]["1"]["pmax"] = [1.0, 1.0, 1.0]
 data["load"]["1"]["pmin"] = [0.0, 0.0, 0.0]
+```
+### Updating Residual Bounds
+
+Residuals are a type of variable that is specific to the state estimation problem (and not, e.g., of power flow studies). If you do not know what a residual is, please read the [Problem Specifications](@ref) section of the documentation.
+While the residuals as defined in the present package are always non-negative (default lower bound is 0), there is no default upper bound.
+A function is available to add customized upper bounds:
+```@docs
+PowerModelsDistributionStateEstimation.assign_residual_ub!(data; chosen_upper_bound=100.0, rescale=false)
 ```

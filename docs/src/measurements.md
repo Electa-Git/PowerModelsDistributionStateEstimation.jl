@@ -34,7 +34,7 @@ The N* in the SDP formulation indicates that those variable are only native for
 generators, loads and other devices/extensions, but not for measurements that
 refer to branch flows, yet.
 
-## Conversion
+## Conversions
 
 Certain measurement variables may not be natively supported in the formulation
 space. Consequently, it becomes necessary to convert them into that specific

@@ -37,9 +37,9 @@ function assign_start_to_variables!(data::Dict{String, Any}, start_values_source
         msr_var = string(meas["var"])
         if haskey(start_values_source["solution"][msr_cmp][cmp_id], msr_var)
             if msr_var != "w"
-                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var]
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source["solution"][msr_cmp][cmp_id][msr_var]
             else
-                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var][1]
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source["solution"][msr_cmp][cmp_id][msr_var][1]
             end
         else
             Memento.warn(_LOGGER, "$(msr_var) is not in $(start_values_source), possible formulation mismatch")

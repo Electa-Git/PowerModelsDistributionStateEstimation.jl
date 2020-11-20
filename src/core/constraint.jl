@@ -56,7 +56,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.has_upper_bound(var[c]) ? ub = JuMP.upper_bound(var[c]) : ub = 10 ;
             shf = abs(Optim.optimize(x -> -_DST.logpdf(dst[c],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
-            fun(x) = - shf + rsc * _DST.logpdf(dst[c],x)
+            fun(x) = rsc * ( - shf + _DST.logpdf(dst[c],x) )
             grd(x) = _DST.gradlogpdf(dst[c],x)
             hes(x) = heslogpdf(dst[c],x)
             JuMP.register(pm.model, f, 1, fun, grd, hes)
