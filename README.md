@@ -53,7 +53,7 @@ the following contributors:
 
 ## Citing PowerModelsDistributionStateEstimation
 
-If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [work](https://www.researchgate.net/publication/345728235_A_Framework_for_Constrained_Static_State_Estimation_in_Unbalanced_Distribution_Networks):
+If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [work](https://arxiv.org/abs/2011.11614):
 
 ```bibtex
 @misc{vanin2021,
