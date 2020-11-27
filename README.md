@@ -28,8 +28,8 @@ Measurement Uncertainties:
 	- (reduced) ACR
 	- (reduced) IVR
 - Relaxations
-	- SDP 
-- Linear Approximations 
+	- SDP
+- Linear Approximations
 	- LinDist3Flow
 
 ## Data Formats
@@ -53,7 +53,7 @@ the following contributors:
 
 ## Citing PowerModelsDistributionStateEstimation
 
-If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [work](https://lirias.kuleuven.be/handle/123456789/662982):
+If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [paper](https://arxiv.org/abs/2011.11614):
 
 ```bibtex
 @misc{vanin2021,

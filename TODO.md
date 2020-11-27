@@ -6,11 +6,11 @@
 
 - [x] add rho max speed up comp time (if infeasible, bad data identification possible?) (!!!)
 
-- [ ] automated non gaussian measurement creation (!!!)
+- [x] automated non gaussian measurement creation (!!!)
 
 - [ ] quantify rescaler for non-gaussian
 
-- [ ] investigate techniques to speed up code
+- [ ] investigate techniques to speed up code (continuous effort)
 
 - [ ] input through array of measurements rather then csv
 
