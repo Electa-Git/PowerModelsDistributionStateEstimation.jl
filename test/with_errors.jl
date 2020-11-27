@@ -7,12 +7,12 @@
 
     # set measurement path
     msr_path = joinpath(mktempdir(),"temp.csv")
-    data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
-    if rm_transfo _PMS.rm_enwl_transformer!(data) end
-    if rd_lines   _PMS.reduce_enwl_lines_eng!(data) end
+    data = _PMD.parse_file(.get_enwl_dss_path(ntw, fdr))
+    if rm_transfo .rm_enwl_transformer!(data) end
+    if rd_lines   .reduce_enwl_lines_eng!(data) end
 
     # insert the load profiles
-    _PMS.insert_profiles!(data, season, elm, pfs, t = time)
+    .insert_profiles!(data, season, elm, pfs, t = time)
 
     # transform data model
     data = _PMD.transform_data_model(data);
@@ -26,27 +26,27 @@
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
-        _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
+        .write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
         # read-in measurement data and set initial values
-        _PMS.add_measurements!(data, msr_path, actual_meas = true)
-        _PMS.add_voltage_measurement!(data, pf_result, 0.005)
-        _PMS.assign_start_to_variables!(data)
-        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+        .add_measurements!(data, msr_path, actual_meas = true)
+        .add_voltage_measurement!(data, pf_result, 0.005)
+        .assign_start_to_variables!(data)
+        .update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
                                            "rescaler" => 100)
 
         # solve the state estimation
-        original_se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-        delta_ref, max_ref, avg_ref = _PMS.calculate_voltage_magnitude_error(original_se_result, pf_result)
+        original_se_result = .run_mc_se(data, model, ipopt_solver)
+        delta_ref, max_ref, avg_ref = .calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
 
             # solve the state estimation
-            se_result = _PMS.run_mc_se(data, data_model, ipopt_solver)
+            se_result = .run_mc_se(data, data_model, ipopt_solver)
 
             # tests
-            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            delta, max, avg = .calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max-max_ref, 0.0; atol = 1e-5)
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
@@ -60,27 +60,27 @@
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
-        _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
+        .write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
         # read-in measurement data and set initial values
-        _PMS.add_measurements!(data, msr_path, actual_meas = true)
-        _PMS.add_voltage_measurement!(data, pf_result, 0.005)
-        _PMS.assign_start_to_variables!(data)
-        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+        .add_measurements!(data, msr_path, actual_meas = true)
+        .add_voltage_measurement!(data, pf_result, 0.005)
+        .assign_start_to_variables!(data)
+        .update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
                                            "rescaler" => 10000)
 
         # solve the state estimation
-        original_se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-        delta_ref, max_ref, avg_ref = _PMS.calculate_voltage_magnitude_error(original_se_result, pf_result)
+        original_se_result = .run_mc_se(data, model, ipopt_solver)
+        delta_ref, max_ref, avg_ref = .calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
 
             # solve the state estimation
-            se_result = _PMS.run_mc_se(data, data_model, ipopt_solver)
+            se_result = .run_mc_se(data, data_model, ipopt_solver)
 
             # tests
-            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            delta, max, avg = .calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max-max_ref, 0.0; atol = 1e-5)
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
@@ -94,27 +94,27 @@
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
-        _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
+        .write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
         # read-in measurement data and set initial values
-        _PMS.add_measurements!(data, msr_path, actual_meas = true)
-        _PMS.add_voltage_measurement!(data, pf_result, 0.005)
-        _PMS.assign_start_to_variables!(data)
-        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+        .add_measurements!(data, msr_path, actual_meas = true)
+        .add_voltage_measurement!(data, pf_result, 0.005)
+        .assign_start_to_variables!(data)
+        .update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
                                            "rescaler" => 100)
 
         # solve the state estimation
-        original_se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-        delta_ref, max_ref, avg_ref = _PMS.calculate_voltage_magnitude_error(original_se_result, pf_result)
+        original_se_result = .run_mc_se(data, model, ipopt_solver)
+        delta_ref, max_ref, avg_ref = .calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
 
             # solve the state estimation
-            se_result = _PMS.run_mc_se(data, data_model, ipopt_solver)
+            se_result = .run_mc_se(data, data_model, ipopt_solver)
 
             # tests
-            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            delta, max, avg = .calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max-max_ref, 0.0; atol = 1e-5)
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
@@ -128,27 +128,27 @@
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
-        _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
+        .write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
         # read-in measurement data and set initial values
-        _PMS.add_measurements!(data, msr_path, actual_meas = true)
-        _PMS.add_voltage_measurement!(data, pf_result, 0.005)
-        _PMS.assign_start_to_variables!(data)
-        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+        .add_measurements!(data, msr_path, actual_meas = true)
+        .add_voltage_measurement!(data, pf_result, 0.005)
+        .assign_start_to_variables!(data)
+        .update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
                                            "rescaler" => 100)
 
         # solve the state estimation
-        original_se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-        delta_ref, max_ref, avg_ref = _PMS.calculate_voltage_magnitude_error(original_se_result, pf_result)
+        original_se_result = .run_mc_se(data, model, ipopt_solver)
+        delta_ref, max_ref, avg_ref = .calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
 
             # solve the state estimation
-            se_result = _PMS.run_mc_se(data, data_model, ipopt_solver)
+            se_result = .run_mc_se(data, data_model, ipopt_solver)
 
             # tests
-            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            delta, max, avg = .calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max-max_ref, 0.0; atol = 1e-5)
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
@@ -162,27 +162,27 @@
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
-        _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
+        .write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
         # read-in measurement data and set initial values
-        _PMS.add_measurements!(data, msr_path, actual_meas = true)
-        _PMS.add_voltage_measurement!(data, pf_result, 0.005)
-        _PMS.assign_start_to_variables!(data)
-        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+        .add_measurements!(data, msr_path, actual_meas = true)
+        .add_voltage_measurement!(data, pf_result, 0.005)
+        .assign_start_to_variables!(data)
+        .update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
                                            "rescaler" => 100)
 
         # solve the state estimation
-        original_se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-        delta_ref, max_ref, avg_ref = _PMS.calculate_voltage_magnitude_error(original_se_result, pf_result)
+        original_se_result = .run_mc_se(data, model, ipopt_solver)
+        delta_ref, max_ref, avg_ref = .calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
 
             # solve the state estimation
-            se_result = _PMS.run_mc_se(data, data_model, ipopt_solver)
+            se_result = .run_mc_se(data, data_model, ipopt_solver)
 
             # tests
-            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            delta, max, avg = .calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max-max_ref, 0.0; atol = 1e-5)
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end
@@ -196,27 +196,27 @@
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
-        _PMS.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
+        .write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
 
         # read-in measurement data and set initial values
-        _PMS.add_measurements!(data, msr_path, actual_meas = true)
-        _PMS.add_voltage_measurement!(data, pf_result, 0.005)
-        _PMS.assign_start_to_variables!(data)
-        _PMS.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+        .add_measurements!(data, msr_path, actual_meas = true)
+        .add_voltage_measurement!(data, pf_result, 0.005)
+        .assign_start_to_variables!(data)
+        .update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
                                            "rescaler" => 100)
 
         # solve the state estimation
-        original_se_result = _PMS.run_mc_se(data, model, ipopt_solver)
-        delta_ref, max_ref, avg_ref = _PMS.calculate_voltage_magnitude_error(original_se_result, pf_result)
+        original_se_result = .run_mc_se(data, model, ipopt_solver)
+        delta_ref, max_ref, avg_ref = .calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
 
             # solve the state estimation
-            se_result = _PMS.run_mc_se(data, data_model, ipopt_solver)
+            se_result = .run_mc_se(data, data_model, ipopt_solver)
 
             # tests
-            delta, max, avg = _PMS.calculate_voltage_magnitude_error(se_result, pf_result)
+            delta, max, avg = .calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max-max_ref, 0.0; atol = 1e-5)
             @test isapprox(avg-avg_ref, 0.0; atol = 1e-5)
         end

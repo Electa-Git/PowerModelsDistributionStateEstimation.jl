@@ -21,7 +21,7 @@ const _DST = Distributions
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
-const _PMS = PowerModelsDistributionStateEstimation
+const  = PowerModelsDistributionStateEstimation
 
 #network and feeder from ENWL for tests
 ntw, fdr = 4, 2

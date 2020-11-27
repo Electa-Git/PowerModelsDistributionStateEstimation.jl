@@ -1,4 +1,5 @@
 ## staged
+- Refactor: changed all _PMS abbreviations for the package into _PMDSE
 - Add: helper functions to generate pseudo measurement dictionaries, tests, docs and examples.
 - Add: extension of `minimum` and `maximum` for the `ExtendedBeta`
 - Add: possibility to rescale the `ExtendedBeta` if not in per unit
