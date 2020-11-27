@@ -16,10 +16,13 @@ function assign_start_to_variables!(data::Dict{String, Any})
         msr_cmp = string(meas["cmp"])
         cmp_id = string(meas["cmp_id"])
         msr_var = string(meas["var"])
-        if msr_var != "w"
-            data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])
-        else
-            data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])[1]
+        any(x -> x == _PMS.ExtendedBeta{Float64}, typeof.(meas["dst"])) ? pkg_id = _PMS : pkg_id = _DST
+        if pkg_id == _DST
+            if msr_var != "w"
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = pkg_id.mean.(meas["dst"])
+            else
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = pkg_id.mean.(meas["dst"])[1]
+            end
         end
     end
 end
