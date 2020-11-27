@@ -112,3 +112,48 @@ function assign_residual_ub!(data::Dict; chosen_upper_bound::Float64=100.0, resc
         Memento.error(_LOGGER, "Unrecognized data input.")
     end
 end
+"""
+    vm_to_w_conversion!(data::Dict)
+
+This function should be called after measurements are added to the data dictionary. It converts voltage magnitude
+    measurements into their square, so :vm is transformed into :w. It is useful when using the LinDist3Flow or SDP formulation.
+    The conversion is exact if applied to a Normal distribution, while does not necessarily apply to other distributions.
+    In the SDP case, :vm is currently not supported as input measurement, so this is necessary.
+    In the LinDist3Flow it allows to ignore the square vm conversion constraint.
+"""
+function vm_to_w_conversion!(data::Dict)
+    for (m,meas) in data["meas"]
+        if meas["var"] == :vm
+            for c in 1:length(meas["dst"])
+                if meas["dst"][c] != 0.0
+                    @assert (typeof(meas["dst"][c]) == Distributions.Normal{Float64}) "vm_to_w conversion only available for the Normal distribution"
+                    current_μ = _DST.mean(meas["dst"][c])
+                    current_σ = _DST.std(meas["dst"][c])
+                    data["meas"][m]["dst"][c] = _DST.Normal(current_μ^2, current_σ)
+                end
+            end
+            data["meas"][m]["var"] = :w
+        end
+    end
+end
+"""
+    assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array, csv_path::String; time_step::Int64=1, day::Int64=1)
+
+This function is a helper function to associate pseudo measurement information to a list of loads.
+    #Arguments:
+    - data: `ENGINEERING` data model of the feeder, or dictionary corresponding to a single measurement
+    - pseudo_load_list: list of loads that are described by pseudo measurements
+    - cluster_list: list of clusters to be associated one-on-one with the pseudo_load_list
+    - csv_path: path to csv file with cluster/pseudo measurement probability information
+    - time_step: time step to extract the probability distribuion function for, if applicable
+    - day: day to extract the probability distribuion function for, if applicable
+"""
+function assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array, csv_path::String; time_step::Int64=1, day::Int64=1)
+    cluster_df = CSV.read(csv_path)
+    for idx in 1:length(pseudo_load_list)
+        data["load"]["$(pseudo_load_list[idx])"]["pseudo"] = Dict{String, Any}("day" => day,
+                                                                               "time_step" => time_step,
+                                                                               "cluster" => cluster_list[idx]
+                                                                               )
+    end
+end
