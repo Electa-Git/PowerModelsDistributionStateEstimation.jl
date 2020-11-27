@@ -1,5 +1,5 @@
-day,cluster,time_step,par_1,par_2,par_3,par_4,distr
-1,1,1,1.15,6.7,-0.01,4.9,ExtendedBeta
-1,2,1,1.18,7.1,-0.01,4.4,ExtendedBeta
-1,1,2,1.22,10.3,-0.01,5.3,ExtendedBeta
-1,2,2,1.41,11.7,-0.01,4.3,ExtendedBeta
+day,cluster,time_step,par_1,par_2,par_3,par_4,distr,unit
+1,1,1,1.15,6.7,-0.01,4.9,ExtendedBeta,kW
+1,2,1,1.18,7.1,-0.01,4.4,ExtendedBeta,kW
+1,1,2,1.22,10.3,-0.01,5.3,ExtendedBeta,kW
+1,2,2,1.41,11.7,-0.01,4.3,ExtendedBeta,kW
