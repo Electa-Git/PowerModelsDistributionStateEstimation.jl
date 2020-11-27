@@ -137,14 +137,3 @@ function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
         zero(T)
     end
 end
-
-## Additional function to rescale pdf
-function make_per_unit!(dst::ExtendedBeta{T}, kw_nominal) where T<:Real
-    if params(dst)[4] > 1
-        return dst/kw_nominal
-    end
-end
-
-function make_per_unit!(dst::_DST.Normal{T}, kw_nominal) where T<:Real
-    #do nothing
-end
