@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -136,4 +136,15 @@ function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
     else
         zero(T)
     end
+end
+
+## Additional function to rescale pdf
+function make_per_unit!(dst::ExtendedBeta{T}, kw_nominal) where T<:Real
+    if params(dst)[4] > 1
+        return dst/kw_nominal
+    end
+end
+
+function make_per_unit!(dst::_DST.Normal{T}, kw_nominal) where T<:Real
+    #do nothing
 end
