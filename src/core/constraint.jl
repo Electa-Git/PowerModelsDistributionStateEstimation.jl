@@ -52,12 +52,13 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
                 Memento.error(_LOGGER, "State estimation criterion not recognized")
             end
         elseif crit == "mle" && !isa(dst[c], Float64)
+            typeof(dst[c]) == ExtendedBeta{Float64} ? pkg_id = _PMS : pkg_id = _DST
             JuMP.has_lower_bound(var[c]) ? lb = JuMP.lower_bound(var[c]) : lb = -10 ;
             JuMP.has_upper_bound(var[c]) ? ub = JuMP.upper_bound(var[c]) : ub = 10 ;
-            shf = abs(Optim.optimize(x -> -_DST.logpdf(dst[c],x),lb,ub).minimum)
+            shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[c],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
-            fun(x) = rsc * ( - shf + _DST.logpdf(dst[c],x) )
-            grd(x) = _DST.gradlogpdf(dst[c],x)
+            fun(x) = rsc * ( - shf + pkg_id.logpdf(dst[c],x) )
+            grd(x) = pkg_id.gradlogpdf(dst[c],x)
             hes(x) = heslogpdf(dst[c],x)
             JuMP.register(pm.model, f, 1, fun, grd, hes)
             JuMP.add_NL_constraint(pm.model, :($(res[c]) == - $(f)($(var[c]))))
