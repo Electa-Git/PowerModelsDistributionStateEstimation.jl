@@ -1,11 +1,4 @@
-
 @testset "Mixed measurements (vs pf)" begin
-    season     = "summer"
-    time       = 144
-    elm        = ["load", "pv"]
-    pfs        = [0.95, 0.90]
-    rm_transfo = true
-    rd_lines   = true
 
     # set measurement path
     msr_path = joinpath(mktempdir(),"temp.csv")

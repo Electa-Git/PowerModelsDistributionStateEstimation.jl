@@ -26,6 +26,13 @@ const _PMS = PowerModelsDistributionStateEstimation
 #network and feeder from ENWL for tests
 ntw, fdr = 4, 2
 
+season     = "summer"
+time       = 144
+elm        = ["load", "pv"]
+pfs        = [0.95, 0.90]
+rm_transfo = true
+rd_lines   = true
+
 # set solvers
 ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                               "tol"=>1e-10,
@@ -42,6 +49,7 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
     include("mixed_measurements.jl")
     include("non_exact_forms.jl")
     include("power_flow.jl")
+    include("pseudo_measurements.jl")
     include("utils_and_start_val.jl")
     include("with_errors.jl")
 

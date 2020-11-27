@@ -5,14 +5,6 @@
 
 @testset "Measurements with errors - comparison between formulations" begin
 
-    season = "summer"
-    time   = 228
-    elm    = ["load", "pv"]
-    pfs    = [0.95, 0.90]
-    ntw, fdr  = 1,2
-    rm_transfo = true
-    rd_lines   = true
-
     # set measurement path
     msr_path = joinpath(mktempdir(),"temp.csv")
     data = _PMD.parse_file(_PMS.get_enwl_dss_path(ntw, fdr))
