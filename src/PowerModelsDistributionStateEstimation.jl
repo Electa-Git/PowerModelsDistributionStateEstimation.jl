@@ -1,13 +1,14 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
 module PowerModelsDistributionStateEstimation
 
 # import pkgs
+import Base: minimum, maximum
 import CSV
 import DataFrames
 import Distributions

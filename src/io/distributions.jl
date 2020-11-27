@@ -126,7 +126,12 @@ function heslogpdf(dst::ExtendedBeta{T}, x::Real) where T<:Real
         zero(T)
     end
 end
-
+function maximum(dst::ExtendedBeta{T}) where T<:Real
+    return params(dst)[4]
+end
+function minimum(dst::ExtendedBeta{T}) where T<:Real
+    return params(dst)[3]
+end
 ## Gamma
 # functions
 function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
