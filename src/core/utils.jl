@@ -144,12 +144,10 @@ This function is a helper function to associate pseudo measurement information t
     - data: `ENGINEERING` data model of the feeder, or dictionary corresponding to a single measurement
     - pseudo_load_list: list of loads that are described by pseudo measurements
     - cluster_list: list of clusters to be associated one-on-one with the pseudo_load_list
-    - csv_path: path to csv file with cluster/pseudo measurement probability information
     - time_step: time step to extract the probability distribuion function for, if applicable
     - day: day to extract the probability distribuion function for, if applicable
 """
-function assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array, csv_path::String; time_step::Int64=1, day::Int64=1)
-    cluster_df = CSV.read(csv_path)
+function assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array; time_step::Int64=1, day::Int64=1)
     for idx in 1:length(pseudo_load_list)
         data["load"]["$(pseudo_load_list[idx])"]["pseudo"] = Dict{String, Any}("day" => day,
                                                                                "time_step" => time_step,
