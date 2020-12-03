@@ -245,7 +245,7 @@
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max, 0.0; atol = 5e-5)
-            @test isapprox(avg, 0.0; atol = 1e-7)
+            @test isapprox(avg, 0.0; atol = 4e-7)
         end
     end
 end

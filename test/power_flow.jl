@@ -1,6 +1,6 @@
 
 @testset "Benchmark vs power flow" begin
-    
+
     # set measurement path
     msr_path = joinpath(mktempdir(),"temp.csv")
 

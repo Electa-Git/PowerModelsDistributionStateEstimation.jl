@@ -57,6 +57,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             maximum(dst[c]) <  Inf ? ub = maximum(dst[c]) : ub = 10
             shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[c],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
+
             fun(x) = rsc * ( - shf + pkg_id.logpdf(dst[c],x) )
             grd(x) = pkg_id.gradlogpdf(dst[c],x)
             hes(x) = heslogpdf(dst[c],x)
