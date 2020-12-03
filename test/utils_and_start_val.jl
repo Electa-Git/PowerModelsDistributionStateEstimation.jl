@@ -2,7 +2,7 @@
 
 msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
 data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
-_PMS.add_measurements!(data, msr_path, actual_meas = true)
+_PMDSE.add_measurements!(data, msr_path, actual_meas = true)
 pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
 
 @testset "utils" begin
@@ -26,16 +26,16 @@ pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
     @test data["load"]["1"]["qmin"][1] == data["load"]["1"]["qmin"][2] == -qd
     @test data["load"]["1"]["qmax"][1] == data["load"]["1"]["qmax"][2] == qd
 
-    _PMS.assign_default_individual_criterion!(data; chosen_criterion="rwls")
+    _PMDSE.assign_default_individual_criterion!(data; chosen_criterion="rwls")
 
     @test data["meas"]["2"]["crit"] == "rwls"
     @test data["meas"]["10"]["crit"] == "rwls"
 
     for (m, meas) in data["meas"]
         if meas["var"] ∈ [:pd, :qd]
-           _PMS.assign_default_individual_criterion!(data["meas"][m]; chosen_criterion="mle")
+           _PMDSE.assign_default_individual_criterion!(data["meas"][m]; chosen_criterion="mle")
        else
-          _PMS.assign_default_individual_criterion!(data["meas"][m]; chosen_criterion="rwlav")
+          _PMDSE.assign_default_individual_criterion!(data["meas"][m]; chosen_criterion="rwlav")
        end
     end
 
@@ -53,11 +53,11 @@ pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
     @test isapprox(data["bus"]["3"]["vm_start"][2], 0.981757; atol = 1e-7)
     @test isapprox(data["load"]["3"]["pd_start"][1], 0.018; atol = 1e-7)
 
-    _PMS.assign_residual_ub!(data)
+    _PMDSE.assign_residual_ub!(data)
     @test data["meas"]["7"]["res_max"] == 100
 
     data["se_settings"] = Dict{String, Any}("rescaler" => 50)
-    _PMS.assign_residual_ub!(data, chosen_upper_bound=10.0, rescale = true)
+    _PMDSE.assign_residual_ub!(data, chosen_upper_bound=10.0, rescale = true)
     @test data["meas"]["7"]["res_max"] == 500
 
 end

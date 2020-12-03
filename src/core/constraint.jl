@@ -52,7 +52,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
                 Memento.error(_LOGGER, "State estimation criterion not recognized")
             end
         elseif crit == "mle" && !isa(dst[c], Float64)
-            typeof(dst[c]) == ExtendedBeta{Float64} ? pkg_id = _PMS : pkg_id = _DST
+            typeof(dst[c]) == ExtendedBeta{Float64} ? pkg_id = _PMDSE : pkg_id = _DST
             minimum(dst[c]) > -Inf ? lb = minimum(dst[c]) : lb = -10
             maximum(dst[c]) <  Inf ? ub = maximum(dst[c]) : ub = 10
             shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[c],x),lb,ub).minimum)

@@ -23,7 +23,7 @@ Called within read_measurement!. Samples measurement errors from a distribution.
 Currently available
 """
 function sample_fake_measurements(meas_row_dst, sorted_args, seed)
-    meas_row_dst == "ExtendedBeta" ? pkg_id = _PMS : pkg_id = _DST
+    meas_row_dst == "ExtendedBeta" ? pkg_id = _PMDSE : pkg_id = _DST
     distr = [getfield(pkg_id, Symbol(meas_row_dst))(tuple(sa...)...) for sa in sorted_args]
     randRNG = [_RAN.seed!(seed+i) for i in 1:length(sorted_args)]
     fake_meas = [_RAN.rand(randRNG[i], distr[i]) for i in 1:length(sorted_args)]
@@ -51,7 +51,7 @@ function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, sample_fake_
     if sample_fake_meas
         sorted_args = sample_fake_measurements(meas_row[:dst], sorted_args, seed)
     end
-    meas_row[:dst] == "ExtendedBeta" ? pkg_id = _PMS : pkg_id = _DST
+    meas_row[:dst] == "ExtendedBeta" ? pkg_id = _PMDSE : pkg_id = _DST
     data["dst"] = [getfield(pkg_id, Symbol(meas_row[:dst]))(tuple(sa...)...) for sa in sorted_args]
     #NB code below to change with PMD10.0
     if length(meas_row[:phase]) == 1
