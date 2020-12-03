@@ -34,7 +34,7 @@ The N* in the SDP formulation indicates that those variable are only native for
 generators, loads and other devices/extensions, but not for measurements that
 refer to branch flows, yet.
 
-## Conversion
+## Conversions
 
 Certain measurement variables may not be natively supported in the formulation
 space. Consequently, it becomes necessary to convert them into that specific
@@ -118,7 +118,3 @@ These are quadratic equality constraints, modeled using `@constraint`.
 
 ### No conversion provided
 As displayed in the Table, some conversions are not provided. This is because the measured quantities are either unlikely to take place in practice, e.g., w, or tend to appear in pairs, e.g., cmx and cax with PMUs. In the latter case, it is more efficient to transform cax and cmx into rectangular variables a priori and then use them, for instance, with IVR.
-
-## Functions to create and edit measurements
-
-TODO!

@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -16,10 +16,13 @@ function assign_start_to_variables!(data::Dict{String, Any})
         msr_cmp = string(meas["cmp"])
         cmp_id = string(meas["cmp_id"])
         msr_var = string(meas["var"])
-        if msr_var != "w"
-            data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])
-        else
-            data[msr_cmp][cmp_id]["$(msr_var)_start"] = _DST.mean.(meas["dst"])[1]
+        any(x -> x == _PMDSE.ExtendedBeta{Float64}, typeof.(meas["dst"])) ? pkg_id = _PMDSE : pkg_id = _DST
+        if pkg_id == _DST
+            if msr_var != "w"
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = pkg_id.mean.(meas["dst"])
+            else
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = pkg_id.mean.(meas["dst"])[1]
+            end
         end
     end
 end
@@ -37,9 +40,9 @@ function assign_start_to_variables!(data::Dict{String, Any}, start_values_source
         msr_var = string(meas["var"])
         if haskey(start_values_source["solution"][msr_cmp][cmp_id], msr_var)
             if msr_var != "w"
-                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var]
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source["solution"][msr_cmp][cmp_id][msr_var]
             else
-                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source[msr_cmp][cmp_id][msr_var][1]
+                data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source["solution"][msr_cmp][cmp_id][msr_var][1]
             end
         else
             Memento.warn(_LOGGER, "$(msr_var) is not in $(start_values_source), possible formulation mismatch")

@@ -28,8 +28,8 @@ Measurement Uncertainties:
 	- (reduced) ACR
 	- (reduced) IVR
 - Relaxations
-	- SDP 
-- Linear Approximations 
+	- SDP
+- Linear Approximations
 	- LinDist3Flow
 
 ## Data Formats
@@ -38,7 +38,7 @@ To use the package, two type of data inputs are required:
 - Network data: OpenDSS “.dss” files
 - Measurement data: CSV “.csv” files
 
-## Examples (Coming Soon)
+## Examples
 
 Examples on how to use PowerModelsDistributionStateEstimation can be found in Pluto Notebooks inside the `/examples` directory.
 
@@ -53,13 +53,17 @@ the following contributors:
 
 ## Citing PowerModelsDistributionStateEstimation
 
-If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [work](https://lirias.kuleuven.be/handle/123456789/662982):
+If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [paper](https://arxiv.org/abs/2011.11614):
 
 ```bibtex
-@misc{vanin2021,
-author = {Vanin, M and Van Acker, T and D'hulst, R and Van Hertem, D},
-title = {A framework for constrained static state estimation in unbalanced distribution networks},
-publicationstatus = {in-preparation},
+@article{VaninPMDSE,
+	title = {A framework for constrained static state estimation in unbalanced distribution networks},
+	volume = {},
+	number = {},
+	journal = {[Online], arXiv:2011.11614 [eess.SY]  },
+	author = {Vanin, Marta and Van Acker, Tom and D'hulst, Reinhilde and Van Hertem, Dirk},
+	month = {Nov.},
+	year = {2020},
 }
 
 ```

@@ -16,7 +16,7 @@ The latest stable release of PowerModelsDistributionStateEstimation can be insta
 package manager:
 
 ```
-] add https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl.git
+] add PowerModelsDistributionStateEstimation
 ```
 
 To be able to use PowerModelsDistributionStateEstimation, at least one solver is required. For our package tests, we rely on Ipopt and SCS solvers, since they do not have license restrictions. Both solvers can be installed using the package manager:

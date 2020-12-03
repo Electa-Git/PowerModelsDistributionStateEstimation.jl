@@ -1,0 +1,6 @@
+day,cluster,time_step,par_1,par_2,par_3,par_4,distr,per_unit,PF
+1,1,1,1.15,6.7,-0.01,4.9,ExtendedBeta,false,0.95
+1,2,1,1.18,7.1,-0.01,4.4,ExtendedBeta,false,0.95
+1,1,2,1.22,10.3,-0.01,5.3,ExtendedBeta,false,0.95
+1,2,2,1.41,11.7,-0.01,4.3,ExtendedBeta,false,0.95
+1,3,1,0.00001,0.000001,,,Normal,true,0.95
