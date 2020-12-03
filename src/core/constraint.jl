@@ -9,7 +9,8 @@
 """
     constraint_mc_residual
 
-comment here
+Equality constraint that describes the residual definition, which depends on the chosen criterion
+in data["se_settings"]["criterion"].
 """
 
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
@@ -19,7 +20,8 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
     var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp_id)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :se_settings)["rescaler"]
-    crit = _PMD.ref(pm, nw, :se_settings)["criterion"]
+    criterion = _PMD.ref(pm, nw, :se_settings)["criterion"]
+    criterion == "mixed" ? crit = _PMD.ref(pm, nw, :meas, i, "crit") : crit = criterion
 
     for c in _PMD.conductor_ids(pm; nw=nw)
         if isa(dst[c], Float64)
@@ -49,13 +51,15 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             else
                 Memento.error(_LOGGER, "State estimation criterion not recognized")
             end
-        elseif (crit == "mle" && !isa(dst[c], Float64))#||mixed criterion in v0.2: (criterion == "mixed" && (!isa(dst[c],Float64) || !isa(dst[c],_DST.Normal)))
-            JuMP.has_lower_bound(var[c]) ? lb = JuMP.lower_bound(var[c]) : lb = -10 ;
-            JuMP.has_upper_bound(var[c]) ? ub = JuMP.upper_bound(var[c]) : ub = 10 ;
-            shf = abs(Optim.optimize(x -> -logpdf(dst[c],x),lb,ub).minimum)
+        elseif crit == "mle" && !isa(dst[c], Float64)
+            typeof(dst[c]) == ExtendedBeta{Float64} ? pkg_id = _PMDSE : pkg_id = _DST
+            minimum(dst[c]) > -Inf ? lb = minimum(dst[c]) : lb = -10
+            maximum(dst[c]) <  Inf ? ub = maximum(dst[c]) : ub = 10
+            shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[c],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
-            fun(x) = rsc * (- shf + logpdf(dst[c],x))
-            grd(x) = _DST.gradlogpdf(dst[c],x)
+
+            fun(x) = rsc * ( - shf + pkg_id.logpdf(dst[c],x) )
+            grd(x) = pkg_id.gradlogpdf(dst[c],x)
             hes(x) = heslogpdf(dst[c],x)
             JuMP.register(pm.model, f, 1, fun, grd, hes)
             JuMP.add_NL_constraint(pm.model, :($(res[c]) == - $(f)($(var[c]))))
@@ -64,5 +68,3 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
         end
     end
 end
-
-

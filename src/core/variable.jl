@@ -1,12 +1,17 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
 """
     variable_mc_residual
+
+This is the residual variable, which is later associated to an equality constraint, depending on the chosen
+state estimation criterion.
+If bounded, the lower bound is set to zero, while the upper bound defaults to Inf, unless the user provides
+a different value in the measurement dictionary.
 """
 function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
                                 nw::Int=pm.cnw, bounded::Bool=true,
@@ -23,6 +28,8 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
     if bounded
         for i in _PMs.ids(pm, nw, :meas), c in _PMD.conductor_ids(pm; nw=nw)
             JuMP.set_lower_bound(res[i][c], 0.0)
+            haskey(_PMs.ref(pm, nw, :meas, i), "res_max") ? res_max = meas["res_max"] : res_max = Inf
+            JuMP.set_upper_bound(res[i][c], res_max)
         end
     end
 

@@ -82,14 +82,13 @@ The ENWL data set features a number of low-carbon technologies profiles: electri
 
 ## Measurement Data
 
-Measurement data must be added to a `MATHEMATICAL` data dictionary, of which they are a "sub-dictionary". The user can either create the measurement dictionary from scratch, or it can be imported from a csv file in the right format, with the `add_measurements!` function.
-
+Measurement data must be added to a `MATHEMATICAL` data dictionary, of which they are a "sub-dictionary". The user can either create the measurement dictionary from scratch, or it can be imported from a csv file in the right format, with the `add_measurements!` function. The measurement data in the csv file can be both real measurements (i.e., with an error), or "fake"/"ideal" measurements with no error. The function provides a functionality to add an error to "fake"/"ideal" measurements sampling the error from a Normal distribution. See the following:
 ```@docs
-PowerModelsDistributionStateEstimation.add_measurements!(data::Dict, meas_file::String; actual_meas = false)
+PowerModelsDistributionStateEstimation.add_measurements!(data::Dict, meas_file::String; actual_meas::Bool = false, seed::Int=0)
 ```
 An example of csv file in the right format can be found in PowerModelsDistributionStateEstimation/test/data/enwl/measurements/meas_data_example.csv and refers to network 1, feeder 1 of the ENWL data. The format of the csv input file is explained in the following subsection.
 
-Furthermore, functionality is included to write a measurement file, with the `write_measurements!` function. This is useful for quick testing or when the user has no actual measurement data, and allows to generate measurement files from the results of powerflow calculations on the same network. It should be noted that this function sets the measurement errors so that they follow a Normal distribution. Other distributions are supported (see relative section of the manual), but currently there is not an automatic way to generate measurement data following them.
+Furthermore, functionality is included to write a measurement file, with the `write_measurements!` function. This is useful for quick testing or when the user has no actual measurement data, and allows to generate measurement files from the results of powerflow calculations on the same network. It should be noted that this function sets the measurement errors so that they follow a Normal distribution.
 
 ```@docs
 PowerModelsDistributionStateEstimation.write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String)
@@ -97,7 +96,23 @@ PowerModelsDistributionStateEstimation.write_measurements!(model::Type, data::Di
 
 The measurement "sub-dictionary" is now incorporated in the network data dictionary, and can be showed in REPL typing data["meas"].
 
-### The csv measurement data format
+If there are pseudo measurements, or the user wants to explicitly describe measurements as non-Gaussian probability distributions, the same rules apply: either the measurements are provided as a csv file, or they can be created with the `write_measurements_and_pseudo!` function.
+```@docs
+PowerModelsDistributionStateEstimation.write_measurements_and_pseudo!(model::Type, data::Dict, pf_results::Dict, path::String; exclude::Vector{String}=String[], distribution_info::String, σ::Float64=0.005)
+```
+Please note that this function has only been fully tested with the `ExtendedBeta` distribution. Some functionalities, such as the per unit conversion of pdfs whose parameters are not in per unit might not work for other distributions. Providing distributions that are already in per unit might allow to use this function directly, but it is not guaranteed.
+Furthermore, some assumptions need to hold to be able to correctly use this function:
+- The distributions provided refer to active power pseudo measurements. The same distributions are scaled using the power factor to represent the reactive power of the same load.
+- The format of the external file with distribution information matches the example one: test/data/extra/measurements/distr_example.csv.
+
+In general, it is advised that users that intend to recur to non-Gaussian distributions build their own measurement creator/parser.
+
+As state in the function description, the `data["load"]` dictionary entries of pseudo measurements need to point to the distribution file. A helper function is provided for this purpose as well:
+```@docs
+PowerModelsDistributionStateEstimation.assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array, csv_path::String; time_step::Int64=1, day::Int64=1)
+```
+
+### The csv (pseudo) measurement data format
 
 In the present section, the term "component" refers to buses, branches, loads, generators or any other element present in the network data model. These need to be addressed using the singular term/abbreviation as present in the MATHEMATICAL data model, e.g. gen for generator. In the network data model, each component is identified by a unique index number (NB: there can be both a "load 1" and a "gen 1", but there can't be two "load 1").  
 The required csv measurement file features the following columns:
@@ -105,14 +120,53 @@ The required csv measurement file features the following columns:
 - cmp_type: indicates which component the measurement refers to: bus, load, gen, branch, etc.
 - cmp_id: integer that indicates the index of the above component.
 - meas_type: this is "G" if the measured quantity is between phase and neutral, "P" if between phases.
-- meas_var: indicates which variable is measured. The entry must correspond to the variable name as defined in PowerModelsDistribution or PowerModelSE, e.g., pg for the injected power from a generator, vm for a bus voltage magnitude, etc.
+- meas_var: indicates which variable is measured. The entry must correspond to the variable name as defined in PowerModelsDistribution or PowerModelsDistributionStateEstimation, e.g., pg for the injected power from a generator, vm for a bus voltage magnitude, etc.
 - phase: phase the measurement refers to, i.e., 1, 2 or 3. If it is a three-phase measurement, this can be indicated with a "[1, 2, 3]".
 - dst: type of continuous univariate distribution associated to the measurement. In the classic WLAV/WLS estimators, this is a "Normal" distribution. In this package, we allow a number of additional distributions. For details, see the manual section on "Maximum Likelihood Estimation"
 - par_1: is the first of the two parameters that define the measurement error distribution. For the Normal distribution, this is the mean.
 - par_2: second parameter of the distribution. For the Normal distribution this is the standard deviation.
+- par_3: can be missing or string, if the distribution requires a third parameter.
+- par_4: can be missing or string, if the distribution requires a third parameter.
+- crit: can be missing, or it assigns an individual SE criterion to the measurement in a given row. This can be used in combination with the "mixed" criterion (see [Mathematical Model of the State Estimation Criteria](@ref)).
+- parse: can be true or false (or missing). It should be true if the measurement provided are real measurements (i.e., with errors). It should be false if the measurements are not real but, e.g., generated with power flow calculations (i.e., they have no errors). In this case, a value with error is sampled from the distribution associated to the measurements, and used in the state estimation process.
 
+Note that the error parsing only works for Normal distributions. It will not return an error for non-Normal distributions, but will default to the same behaviour as setting parse to false.
 
-### State estimation settings
+The last three columns are optional and don't necessarily need to be part of the CSV files. If a row/measurement is characterized by a distribution that requires 4 parameters, while the rest of them only require 2, the par_3 and par_4 columns of all other measurements need to have "missing" values, which will be ignored. Similarly, "missing" values in the other optional columns can be set, and they are ignored.
+
+### The csv distribution file format
+
+This section explains the format of the csv file that contains information relative to probability distribution for pseudo measurements.
+An example is test/data/extra/measurements/distr_example.csv.
+The file has the following columns:
+- day: day to which the distribution refers, integer
+- time_step: time step to which the distribution refers, integer
+- cluster: load profile group or cluster, integer
+- par_1,par_2,par_2,par_4: parameters of the distribution, if less than four are required, can be missing. Otherwise, they are floats
+- distr: distribution type, string
+- per_unit: boolean, indicates whether the distribution has been rescaled to the unit values used in the SE calculations (true) or not (false). It is advised to used rescaled distributions.
+- PF: power factor. This is used to apply the same distribution, which is assumed to refer to the active power, to the reactive power
+
+### The final dictionary format
+
+In general, the measurement information needs to be correctly provided in the `data["meas"]` sub-dictionary, as ultimately it is this which is used for the calculations. It is to the user to make sure that this is the case, regardless of which helper functions and files are used.
+Each measurement "m" needs to be unique, and should be similar to measurement "1" here:
+```julia
+data["meas"]["1"] => Dict{String,Any}(
+    "var" => :pd,
+    "cmp" => :load,
+    "cmp_id" => 4
+    "dst" => Any[ExtendedBeta{Float64}(α=1.18, β=7.1, min=-3.28684e-8, max=1.44621e-5), 0.0, 0.0],
+    "crit" => "rwlav"
+)
+```
+`var` is the variable to which the measurement refers. In this case, active power.
+`cmp` is the component type to which the measurement refers. In this case, a load.
+`cmp_id` is the unique id of this component.
+`dst` is a vector that contains the pdf of the measurement, for each phase separately and scaled to the correct units. At the moment, this is always a 3x1 vector, and phases to which loads are not used are assigned a 0.0. **This is going to change very soon** when upgrading to PowerModelsDistribution v0.10.0, in v0.2.0 of the present package. We will do our best to keep the docs up to date but there might be a delay.
+`crit` optional entry which is only used in case the `mixed` SE criteria is chosen for the state estimation. See [Mathematical Model of the State Estimation Criteria](@ref).
+
+## State estimation settings
 
 Finally, an indication on what type of state estimation needs to be performed should be provided using the "se_settings" dictionary.
 The "se_settings" dictionary contains two keys: "rescaler" and "criterion".

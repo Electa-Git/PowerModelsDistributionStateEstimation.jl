@@ -10,9 +10,11 @@ Currently, the following criteria are supported:
 - `wls`: weighted least square
 - `rwls`: relaxed weighted least square
 - `mle`: maximum likelihood estimation
+- `mixed`: a combination of the criteria above
 
-The first four criteria assume that the error on a measurement follows a Gaussian
-distribution. The MLE criterion can account for any univariate continuous distribution.
+The first four criteria assume that the error on a measurement follows a Normal
+distribution. The `mle` criterion can account for any univariate continuous distribution.
+The `mixed` criterion allows to use a combination of the above, for different measurements.
 
 Furthermore, a rescaler can be introduced to improve the convergence of the state
 estimation. The user has to specify the `rescaler` through the `se_settings` ([Input Data Format](@ref)).
@@ -105,5 +107,17 @@ From v0.2.0, the following will also be available:
 ExtendedBeta
 ```
 
-To avoid the use of automatic differentiation, the first derivative (`gradlogpdf`) 
+To avoid the use of automatic differentiation, the first derivative (`gradlogpdf`)
 is provided by Distributions.jl and the second derivative (`heslogpdf`) is provided internally.
+
+## Mixed criterion
+
+To use the `mixed` criterion, it is not sufficient to set the `criterion` in `se_settings` as `mixed`.
+In addition to this, an individual dictionary entry for every measurement in `data["meas"]` needs to be added,
+to state which criterion is associated to each measurement.
+The individual criterion entry needs to be placed under a `crit` key. For example:
+`data["meas"]["1"]["crit"] = "rwlav"` and `data["meas"]["2"]["crit"] = "mle"`.
+A basic function to assign different criteria to different measurement is provided:
+```@docs
+PowerModelsDistributionStateEstimation.assign_default_individual_criterion!(data; chosen_criterion="rwlav")
+```

@@ -4,14 +4,14 @@
 To perform a state estimation (SE), a network data file (e.g. `"case3_unbalanced.dss"` in `../test/data/extra/networks`) needs to be acquired, together with its related measurement file (e.g. `"case3_meas.csv"` in `../test/data/extra/measurements`). The absolute path to the package is provided through the constant `BASE_DIR`. Network and measurement data will be merged and a SE can be run as follows:
 ```julia
 using PowerModels, PowerModelsDistribution, PowerModelsDistributionStateEstimation
-using Ipopt
+using JuMP, Ipopt
 
 #full paths to files
 ntw_path = joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss")
 msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
 
 #parse network data file
-data = parse_file(ntw_path; data_model=MATHEMATICAL)
+data = PowerModelsDistribution.parse_file(ntw_path; data_model=MATHEMATICAL)
 
 #add measurement data to network data file
 add_measurements!(data, msr_path, actual_meas = true)
@@ -20,7 +20,7 @@ add_measurements!(data, msr_path, actual_meas = true)
 data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
 
 #set solver parameters
-slv = optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
+slv = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 #run state estimation
 se_result = run_acp_mc_se(data, slv)
@@ -39,10 +39,10 @@ It should be noted that not all solvers can handle all problem types. For exampl
 
 Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsDistributionStateEstimation provides the `assign_start_to_variables!` function.
 ```@docs
-assign_start_to_variables!()
+PowerModelsDistributionStateEstimation.assign_start_to_variables!(data)
 ```
 ```@docs
-assign_start_to_variables!()
+PowerModelsDistributionStateEstimation.assign_start_to_variables!(data, start_values_source)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablename_start`. The example below shows how to do it for the `vm` and `va` variables.
 ```julia
@@ -61,20 +61,28 @@ This can be avoided if good knowledge of the system is available or if some vari
 Similar to providing a warm start, it is to user discretion to assign meaningful and "safe" variable bounds.
 PowerModelsDistributionStateEstimation has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
 ```@docs
-update_voltage_bounds!()
+PowerModelsDistributionStateEstimation.update_voltage_bounds!(data::Dict; v_min=0.0, v_max=Inf)
 ```
 ```@docs
-update_generator_bounds!()
+PowerModelsDistributionStateEstimation.update_generator_bounds!(data; p_min, p_max, q_min, q_max)
 ```
 ```@docs
-update_load_bounds!()
+PowerModelsDistributionStateEstimation.update_load_bounds!(data; p_min, p_max, q_min, q_max)
 ```
 or, alternatively, all the above at once:
 ```@docs
-update_all_bounds!()
+PowerModelsDistributionStateEstimation.update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablenamemin`/`variablenamemax`. The example below shows how to do it for the active power.
 ```julia
 data["load"]["1"]["pmax"] = [1.0, 1.0, 1.0]
 data["load"]["1"]["pmin"] = [0.0, 0.0, 0.0]
+```
+### Updating Residual Bounds
+
+Residuals are a type of variable that is specific to the state estimation problem (and not, e.g., of power flow studies). If you do not know what a residual is, please read the [Problem Specifications](@ref) section of the documentation.
+While the residuals as defined in the present package are always non-negative (default lower bound is 0), there is no default upper bound.
+A function is available to add customized upper bounds:
+```@docs
+PowerModelsDistributionStateEstimation.assign_residual_ub!(data; chosen_upper_bound=100.0, rescale=false)
 ```
