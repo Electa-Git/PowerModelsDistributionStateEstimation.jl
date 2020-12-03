@@ -28,7 +28,7 @@ Measurement Uncertainties:
 	- (reduced) ACR
 	- (reduced) IVR
 - Relaxations
-	- SDP
+	- SDP (Currently unstable)
 - Linear Approximations
 	- LinDist3Flow
 
