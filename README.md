@@ -2,7 +2,7 @@
 
 <a href="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/actions?query=workflow%3ACI"><img src="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/workflows/CI/badge.svg"></img></a>
 <a href="https://codecov.io/gh/Electa-Git/PowerModelsDistributionStateEstimation.jl"><img src="https://img.shields.io/codecov/c/github/Electa-Git/PowerModelsDistributionStateEstimation.jl?logo=Codecov"></img></a>
-<a href="https://electa-git.github.io/PowerModelsDistributionStateEstimation.jl/dev/"><img src="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/workflows/Documentation/badge.svg"></img></a>
+<a href="https://electa-git.github.io/PowerModelsDistributionStateEstimation.jl/stable/"><img src="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/workflows/Documentation/badge.svg"></img></a>
 
 PowerModelsDistributionStateEstimation.jl is an extension package of PowerModelsDistribution.jl for Static Power Distribution Network State Estimation. The package is a flexible design tool, enabling benchmarks between different state estimation models. Different state estimation models can be built by using different power flow formulations, state estimation criteria, (in)equality constraints, etc.
 
