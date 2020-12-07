@@ -1,6 +1,6 @@
 # Mathematical Model of the State Estimation Criteria
 
-Let `Xₘ` be the random variable associated to a measurement `m ∈ 𝓜` and `xₘ ∈ 𝓧` 
+Let `X` be the random variable associated to a measurement `m ∈ 𝓜` and `x ∈ 𝓧` 
 the related variable, where:
 * `𝓜` denotes the set of measurements,
 * `𝓧` denotes the (extended) variable space of the OPF problem.
@@ -20,10 +20,10 @@ ExtendedBeta
 
 The state of a power system can be determined based on a specific estimation 
 criterion. The state estimator criteria can be classified into two groups based 
-on the random variable `Xₘ`:
+on the random variable `X`:
 - `Gaussian`
-	* `wlav`: weighted least absolute value (exact)
-	* `rwlav`: relaxed weighted least absolute value (exact relaxation)
+    * `wlav`: weighted least absolute value (exact)
+    * `rwlav`: relaxed weighted least absolute value (exact relaxation)
     * `wls`: weighted least square (exact)
     * `rwls`: relaxed weighted least square (exact relaxation)
 - `Non-Gaussian`
@@ -62,8 +62,8 @@ The WLAV criterion represents the absolute value norm (p=1) and is given by
 where:
 * `ρ` denotes the residual associated with a measurement $m$,
 * `x` denotes the variable corresponding to a measurement $m$.
-* `μ` denotes the measured value, i.e., expectation `𝐄(Xₘ)`,
-* `σ` denotes the the measurement error, i.e., standard deviation `√(𝐕(Xₘ))`,
+* `μ` denotes the measured value, i.e., expectation `𝐄(X)`,
+* `σ` denotes the the measurement error, i.e., standard deviation `√(𝐕(X))`,
 * `rsc` denotes the rescaler.
 
 Solving a state estimation using the WLAV criterion is non-trivial as the
@@ -98,21 +98,21 @@ The rWLS criterion relaxes the former as a cone and is given by
 
 ## Gaussian Mixture Estimation
 
-The Gaussian mixture criterion splits the random variable `Xₘ` into Gaussian 
-components `Xₙ`, and introduces two constraints. First, the related variable `xₘ`
-is the sum of the variables `xₙ` related to the Gaussian components. Second, the 
-overall residual `ρₘ` equal to the sum of Gaussian components' residuals. The 
+The Gaussian mixture criterion splits the random variable `X` into `𝓝` Gaussian 
+components `Y`, and introduces two constraints. First, the related variable `x`
+is the sum of the variables `y` related to the Gaussian components. Second, the 
+overall residual `ρ` equal to the sum of Gaussian components' residuals. The 
 `rwlav` criterion is choosen to model the residual of the Gaussian components.
 
 ```math
 \begin{eqnarray}
-      x_{m}             &= \sum_{m \to n \in \mathcal{N}} x_{n},\quad m \in \mathcal{M}: m \to x_{m} \in \mathcal{X}                                  \\
-      \rho_{m}          &\geq \sum_{m \to n \in \mathcal{N}} \frac{ x_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{n}},\quad m \in \mathcal{M},     \\
-      \rho_{m}          &\geq - \sum_{m \to n \in \mathcal{N}} \frac{ x_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{m}},\quad m \in \mathcal{M},   \\
+      x_{m}             &= \sum_{m \to n \in \mathcal{N}} y_{n},\quad m \in \mathcal{M}: m \to x_{m} \in \mathcal{X}                                  \\
+      \rho_{m}          &\geq \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{n}},\quad m \in \mathcal{M},     \\
+      \rho_{m}          &\geq - \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{m}},\quad m \in \mathcal{M},   \\
 \end{eqnarray}
 ```
 where:
-* `w` denotes the weight associated with a Gaussian component $n$.
+* `w` denotes the weight associated with a Gaussian component.
 
 The user has to specify the `number_of_gaussian` through the `se_settings` ([Input Data Format](@ref)). 
 If no number is specified, it will default to `10`.
