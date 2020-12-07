@@ -106,7 +106,7 @@ overall residual `ρ` equal to the sum of Gaussian components' residuals. The
 
 ```math
 \begin{eqnarray}
-      x_{m}             &= \sum_{m \to n \in \mathcal{N}} y_{n},\quad m \in \mathcal{M}: m \to x_{m} \in \mathcal{X}                                  \\
+      x_{m}             &= \sum_{m \to n \in \mathcal{N}} w_{n} y_{n},\quad m \in \mathcal{M}: m \to x_{m} \in \mathcal{X}                                  \\
       \rho_{m}          &\geq \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{n}},\quad m \in \mathcal{M},     \\
       \rho_{m}          &\geq - \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{m}},\quad m \in \mathcal{M},   \\
 \end{eqnarray}
