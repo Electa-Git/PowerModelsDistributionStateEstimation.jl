@@ -54,7 +54,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             gmm = _GMM.GMM(N, rand(dst, 10000))
             gmv = _PMD.var(pm, nw, :gmv, cmp)
             JuMP.@constraint(pm.model,
-                var[c] == sum(gmv[c,n] for n in 1:N)
+                var[c] == sum(gmm.w[n] * gmv[c,n] for n in 1:N)
             )
             JuMP.@constraint(pm.model,
                 res[c] >= sum((gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / gmm.w[n] / rsc 
