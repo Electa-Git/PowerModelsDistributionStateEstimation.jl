@@ -51,17 +51,17 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             )
         elseif crt == "gmm"
             N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
-            gmm = _GMM.GMM(N, rand(dst, 10000))
+            gmm = _GMM.GMM(N, rand(dst[c], 10000))
             gmv = _PMD.var(pm, nw, :gmv, cmp)
             JuMP.@constraint(pm.model,
                 var[c] == sum(gmm.w[n] * gmv[c,n] for n in 1:N)
             )
             JuMP.@constraint(pm.model,
-                res[c] >= sum((gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / gmm.w[n] / rsc 
+                res[c] >= sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc 
                                         for n in 1:N)
             )
             JuMP.@constraint(pm.model,
-                res[c] >= - sum((gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / gmm.w[n] / rsc 
+                res[c] >= - sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc 
                                         for n in 1:N)
             )        
         elseif crt == "mle"
