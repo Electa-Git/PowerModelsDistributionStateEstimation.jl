@@ -13,6 +13,7 @@ import CSV
 import DataFrames
 import Distributions
 import Distributions: logpdf, gradlogpdf
+import GaussianMixtures
 import InfrastructureModels
 import JuMP
 import LinearAlgebra: diag
@@ -28,6 +29,7 @@ import Statistics
 const _CSV = CSV
 const _DFS = DataFrames
 const _DST = Distributions
+const _GM  = GaussianMixtures
 const _IM  = InfrastructureModels
 const _JMP = JuMP
 const _PMs = PowerModels
@@ -39,6 +41,9 @@ const _STT = Statistics
 
 # paths
 const BASE_DIR = dirname(@__DIR__)
+
+# fix a random seed 
+_RAN.seed!(1234);
 
 # logger for errors and warnings
 const _LOGGER = Memento.getlogger(@__MODULE__)
