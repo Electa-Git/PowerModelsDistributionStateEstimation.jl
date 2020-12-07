@@ -54,6 +54,11 @@ function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, sol
         data["se_settings"]["criterion"] = "rwlav"
         Memento.warn(_LOGGER, "Estimation criterion set to default value, edit data dictionary if you wish to change it.")
     end
+    if !haskey(data["se_settings"], "number_of_gaussian")
+        data["se_settings"]["number_of_gaussian"] = 10
+        Memento.warn(_LOGGER, "Estimation criterion set to default value, edit data dictionary if you wish to change it.")
+    end
+    _PMDSE.assign_default_individual_criterion!(data; chosen_criterion=data["se_settings"]["criterion"])
     return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end
 
@@ -66,8 +71,9 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     _PMD.variable_mc_transformer_power(pm; bounded = true)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
     variable_mc_load(pm; report = true)
-    variable_mc_residual(pm, bounded = true)
-    variable_mc_measurement(pm, bounded = false)
+    variable_mc_residual(pm; bounded = true)
+    variable_mc_measurement(pm; bounded = false)
+    variable_mc_gaussian_mixture(pm; bounded = false)
 
     # Constraints
     for (i,gen) in _PMD.ref(pm, :gen)
@@ -102,12 +108,13 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
     # Variables
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
-    PowerModelsDistributionStateEstimation.variable_mc_branch_current(pm, bounded = true)
+    _PMDSE.variable_mc_branch_current(pm, bounded = true)
     variable_mc_gen_power_setpoint_se(pm, bounded = true)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
+    variable_mc_gaussian_mixture(pm; bounded = false)
 
     # Constraints
     for (i,bus) in _PMD.ref(pm, :ref_buses)
@@ -161,6 +168,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
+    variable_mc_gaussian_mixture(pm; bounded = false)
 
     #Constraints
     _PMD.constraint_mc_model_current(pm)

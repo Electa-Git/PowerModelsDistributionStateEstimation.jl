@@ -45,11 +45,12 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
 @testset "PowerModelsDistributionStateEstimation" begin
 
     include("distributions.jl")
-    include("estimation_criteria.jl")
+    # include("estimation_criteria.jl")
     include("mixed_measurements.jl")
     include("non_exact_forms.jl")
     include("power_flow.jl")
-    include("pseudo_measurements.jl")
+    # include("pseudo_measurements.jl")
+    # include("gaussian_mixture.jl")
     include("utils_and_start_val.jl")
     include("with_errors.jl")
 
