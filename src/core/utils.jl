@@ -137,7 +137,7 @@ function vm_to_w_conversion!(data::Dict)
     end
 end
 """
-    assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array, csv_path::String; time_step::Int64=1, day::Int64=1)
+    assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Array, cluster_list::Array; time_step::Int64=1, day::Int64=1)
 
 This function is a helper function to associate pseudo measurement information to a list of loads.
     #Arguments:
