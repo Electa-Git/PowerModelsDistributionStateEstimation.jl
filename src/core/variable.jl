@@ -35,7 +35,25 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
 
     report && _IM.sol_component_value(pm, nw, :meas, :res, _PMs.ids(pm, nw, :meas), res)
 end
+"""
+    variable_mc_gaussian_mixture for gaussian mixture criterion
+"""
+function variable_mc_gaussian_mixture(  pm::_PMs.AbstractPowerModel;
+                                        nw::Int=pm.cnw, bounded::Bool=true,
+                                        report::Bool=true)
+    N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
+    cnds = _PMD.conductor_ids(pm; nw=nw)
+    ncnds = length(cnds)
 
+    gmmeas = [i for i in _PMD.ids(pm, nw, :meas) if _PMD.ref(pm, nw, :meas, i, "crit") == "gmm"]
+
+    gmv = _PMD.var(pm, nw)[:gmv] = Dict(i => JuMP.@variable(pm.model,
+        [c in 1:ncnds, n = 1:N], base_name = "$(nw)_gmv_$(i)"
+        )   for i in gmmeas
+          )
+
+    report && _IM.sol_component_value(pm, nw, :meas, :gmv, gmmeas, gmv)
+end
 """
     variable_mc_gaussian_mixture for gaussian mixture criterion
 """
@@ -84,7 +102,7 @@ function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
             end
         end
     end
-
+0
     report && _IM.sol_component_value(pm, nw, :load, :pd, _PMD.ids(pm, nw, :load), pd)
 end
 

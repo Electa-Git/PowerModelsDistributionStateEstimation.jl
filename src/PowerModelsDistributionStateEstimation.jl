@@ -29,7 +29,7 @@ import Statistics
 const _CSV = CSV
 const _DFS = DataFrames
 const _DST = Distributions
-const _GM  = GaussianMixtures
+const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
 const _JMP = JuMP
 const _PMs = PowerModels
@@ -43,7 +43,7 @@ const _STT = Statistics
 const BASE_DIR = dirname(@__DIR__)
 
 # fix a random seed 
-_RAN.seed!(1234);
+#_RAN.seed!(1234);
 
 # logger for errors and warnings
 const _LOGGER = Memento.getlogger(@__MODULE__)
@@ -72,8 +72,9 @@ include("prob/se.jl")
 export BASE_DIR
 export run_mc_se, run_acp_mc_se, run_acr_mc_se, run_ivr_mc_se
 export rm_enwl_transformer!, reduce_enwl_lines_eng!
-export add_measurements!, write_measurements!
-export assign_start_to_variables!
+export add_measurements!, write_measurements!, assign_load_pseudo_measurement_info!
+export assign_unique_individual_criterion!, assign_basic_individual_criteria!
+export assign_start_to_variables!, assign_residual_ub!
 export calculate_voltage_magnitude_error
 export update_load_bounds!, update_voltage_bounds!, update_generator_bounds!, update_all_bounds!
 export ExtendedBeta

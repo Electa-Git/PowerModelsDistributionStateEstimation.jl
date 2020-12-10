@@ -26,16 +26,16 @@ pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
     @test data["load"]["1"]["qmin"][1] == data["load"]["1"]["qmin"][2] == -qd
     @test data["load"]["1"]["qmax"][1] == data["load"]["1"]["qmax"][2] == qd
 
-    _PMDSE.assign_default_individual_criterion!(data; chosen_criterion="rwls")
+    _PMDSE.assign_basic_individual_criteria!(data; chosen_criterion="rwls")
 
     @test data["meas"]["2"]["crit"] == "rwls"
     @test data["meas"]["10"]["crit"] == "rwls"
 
     for (m, meas) in data["meas"]
         if meas["var"] ∈ [:pd, :qd]
-           _PMDSE.assign_default_individual_criterion!(data["meas"][m]; chosen_criterion="mle")
+           _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="mle")
        else
-          _PMDSE.assign_default_individual_criterion!(data["meas"][m]; chosen_criterion="rwlav")
+          _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="rwlav")
        end
     end
 

@@ -9,8 +9,8 @@
 """
     constraint_mc_residual
 
-Equality constraint that describes the residual definition, which depends on the chosen criterion
-in data["se_settings"]["criterion"].
+Equality constraint that describes the residual definition, which depends on the
+criterion assigned to each individual measurement in data["meas"]["m"]["crit"].
 """
 
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
@@ -20,28 +20,28 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
     var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :se_settings)["rescaler"]
-    crt = _PMD.ref(pm, nw, :meas, i, "crit") 
+    crit = _PMD.ref(pm, nw, :meas, i, "crit")
 
     for c in _PMD.conductor_ids(pm; nw=nw)
         if isa(dst[c], Float64)
             JuMP.@constraint(pm.model, var[c] == dst[c])
             JuMP.@constraint(pm.model, res[c] == 0.0)
-        elseif crt == "wls" && isa(dst[c], _DST.Normal)
+        elseif crit == "wls" && isa(dst[c], _DST.Normal)
             μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
             JuMP.@constraint(pm.model,
                 res[c] == (var[c] - μ)^2 / σ^2 / rsc
             )
-        elseif crt == "rwls" && isa(dst[c], _DST.Normal)
+        elseif crit == "rwls" && isa(dst[c], _DST.Normal)
             μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
             JuMP.@constraint(pm.model,
                 res[c] * rsc * σ^2 >= (var[c] - μ)^2
             )
-        elseif crt == "wlav" && isa(dst[c], _DST.Normal)
+        elseif crit == "wlav" && isa(dst[c], _DST.Normal)
             μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
             JuMP.@NLconstraint(pm.model,
                 res[c] == abs(var[c] - μ) / σ / rsc
             )
-        elseif crt == "rwlav" && isa(dst[c], _DST.Normal)
+        elseif crit == "rwlav" && isa(dst[c], _DST.Normal)
             μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
             JuMP.@constraint(pm.model,
                 res[c] >= (var[c] - μ) / σ / rsc
@@ -49,23 +49,23 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.@constraint(pm.model,
                 res[c] >= - (var[c] - μ) / σ / rsc
             )
-        elseif crt == "gmm"
+        elseif crit == "gmm"
             N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
             gmm = _GMM.GMM(N, rand(dst[c], 10000))
-            gmv = _PMD.var(pm, nw, :gmv, cmp)
+            gmv = _PMD.var(pm, nw, :gmv, i)
             JuMP.@constraint(pm.model,
                 var[c] == sum(gmm.w[n] * gmv[c,n] for n in 1:N)
             )
             JuMP.@constraint(pm.model,
-                res[c] >= sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc 
+                res[c] >= sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc
                                         for n in 1:N)
             )
             JuMP.@constraint(pm.model,
-                res[c] >= - sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc 
+                res[c] >= - sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc
                                         for n in 1:N)
-            )        
-        elseif crt == "mle"
-            typeof(dst[c]) == ExtendedBeta{Float64} ? pkg_id = _PMDSE : pkg_id = _DST
+            )
+        elseif crit == "mle"
+            isa(dst[c], ExtendedBeta{Float64}) ? pkg_id = _PMDSE : pkg_id = _DST
             minimum(dst[c]) > -Inf ? lb = minimum(dst[c]) : lb = -10
             maximum(dst[c]) <  Inf ? ub = maximum(dst[c]) : ub = 10
             shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[c],x),lb,ub).minimum)
@@ -77,7 +77,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.register(pm.model, f, 1, fun, grd, hes)
             JuMP.add_NL_constraint(pm.model, :($(res[c]) == - $(f)($(var[c]))))
         else
-            Memento.error(_LOGGER, "State estimation criterion not recognized")
+            Memento.error(_LOGGER, "SE criterion of measurement $(i) not recognized")
         end
     end
 end

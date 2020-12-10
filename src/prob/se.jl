@@ -46,12 +46,15 @@ function run_linear_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs
 end
 
 function run_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, solver; kwargs...)
+    if haskey(data["se_settings"], "criterion")
+        _PMDSE.assign_unique_individual_criterion!(data)
+    end
     if !haskey(data["se_settings"], "rescaler")
         data["se_settings"]["rescaler"] = 1
-        Memento.warn(_LOGGER, "Rescaler set to default value, edit data dictionary if you wish to change it.") 
+        Memento.warn(_LOGGER, "Rescaler set to default value, edit data dictionary if you wish to change it.")
     end
-    if !haskey(data["se_settings"], "criterion")
-        data["se_settings"]["criterion"] = "rwlav"
+    if !haskey(data["se_settings"], "number_of_gaussian")
+        data["se_settings"]["number_of_gaussian"] = 10
         Memento.warn(_LOGGER, "Estimation criterion set to default value, edit data dictionary if you wish to change it.")
     end
     if !haskey(data["se_settings"], "number_of_gaussian")
@@ -66,7 +69,7 @@ end
 function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Variables
-    PowerModelsDistributionStateEstimation.variable_mc_bus_voltage(pm; bounded = true)
+    _PMDSE.variable_mc_bus_voltage(pm; bounded = true)
     _PMD.variable_mc_branch_power(pm; bounded = true)
     _PMD.variable_mc_transformer_power(pm; bounded = true)
     _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
@@ -84,7 +87,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
         _PMD.constraint_mc_theta_ref(pm, i)
     end
     for (i,bus) in _PMD.ref(pm, :bus)
-        PowerModelsDistributionStateEstimation.constraint_mc_load_power_balance_se(pm, i)
+        _PMDSE.constraint_mc_load_power_balance_se(pm, i)
     end
     for (i,branch) in _PMD.ref(pm, :branch)
         _PMD.constraint_mc_ohms_yt_from(pm, i)
@@ -184,7 +187,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
 
     for (i,bus) in _PMD.ref(pm, :bus)
         if typeof(pm) <: _PMD.SDPUBFPowerModel
-            PowerModelsDistributionStateEstimation.constraint_mc_load_power_balance_se(pm,i)
+            _PMDSE.constraint_mc_load_power_balance_se(pm,i)
         else
             _PMD.constraint_mc_load_power_balance(pm, i)
         end

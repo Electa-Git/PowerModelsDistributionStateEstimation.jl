@@ -1,12 +1,12 @@
 # Mathematical Model of the State Estimation Criteria
 
-Let `X` be the random variable associated to a measurement `m ∈ 𝓜` and `x ∈ 𝓧` 
+Let `X` be the random variable associated to a measurement `m ∈ 𝓜` and `x ∈ 𝓧`
 the related variable, where:
 * `𝓜` denotes the set of measurements,
 * `𝓧` denotes the (extended) variable space of the OPF problem.
 
-The state of a power system can be determined based on a specific estimation 
-criterion. The state estimator criteria can be classified into two groups based 
+The state of a power system can be determined based on a specific estimation
+criterion. The state estimator criteria can be classified into two groups based
 on the random variable `X`:
 - `Gaussian`
     * `wlav`: weighted least absolute value (exact)
@@ -17,19 +17,19 @@ on the random variable `X`:
     * `gmm`: Gaussian mixture model (approximation)
     * `mle`: maximum likelihood estimation (exact)
 
-The user has to specify the `criterion` through the `se_settings` ([Input Data Format](@ref)).
-If no criterion is specified, it will default to `rwlav` in the Gaussian case 
-and `mle` in the non-Gaussian case.
-
-To use a `mixed` criterion, it is not sufficient to set the `criterion` in 
-`se_settings` as `mixed`. In addition to this, an individual dictionary entry 
-for every measurement in `data["meas"]` needs to be added, to state which 
-criterion is associated to each measurement.
-The individual criterion entry needs to be placed under a `crit` key. For example:
-`data["meas"]["1"]["crit"] = "rwlav"` and `data["meas"]["2"]["crit"] = "mle"`.
-A basic function to assign different criteria to different measurement is provided:
+The user has to specify the `criterion` for each measurement individually.
+However, if all measurements can be described by the same criterion, it is sufficient to
+set the criterion name in the `se_settings` ([Input Data Format](@ref)), as PMDSE
+will automatically call assign_unique_individual_criterion!().
 ```@docs
-PowerModelsDistributionStateEstimation.assign_default_individual_criterion!(data; chosen_criterion="rwlav")
+assign_unique_individual_criterion!(data::Dict)
+```
+To use a combination of different criteria, the user should provide information
+in `data["meas"]`, under a `crit` key. For example:
+`data["meas"]["1"]["crit"] = "rwlav"` and `data["meas"]["2"]["crit"] = "mle"`.
+A basic helper function to assign different criteria to different measurement is provided:
+```@docs
+assign_basic_individual_criteria!(data::Dict; chosen_criterion::String="rwlav")
 ```
 
 Furthermore, a rescaler can be introduced to improve the convergence of the state
@@ -66,7 +66,7 @@ lifted by its exact linear relaxation: rWLAV[^1]. The rWLAV criterion is given b
 
 [^1]: Note that this relaxation is only exact in the context of minimization problem.
 
-### WLS and rWLS
+## WLS and rWLS
 
 The WLS criterion represents the Eucledian norm (p=2) and is given by
 ```math
@@ -83,30 +83,28 @@ The rWLS criterion relaxes the former as a cone and is given by
 
 ## Non-Gaussian State Estimation Criteria
 
-### Gaussian Mixture Estimation
+## Gaussian Mixture Estimation
 
-The Gaussian mixture criterion splits the random variable `X` into `𝓝` Gaussian 
+The Gaussian mixture criterion splits the random variable `X` into `𝓝` Gaussian
 components `Y`, and introduces two constraints. First, the related variable `x`
-is the sum of the variables `y` related to the Gaussian components. Second, the 
-overall residual `ρ` equal to the sum of Gaussian components' residuals. The 
+is the weighted sum of the variables `y` related to the Gaussian components. Second, the
+overall residual `ρ` equal to the sum of Gaussian components' residuals. The
 `rwlav` criterion is choosen to model the residual of the Gaussian components.
 
 ```math
 \begin{eqnarray}
       x_{m}             &= \sum_{m \to n \in \mathcal{N}} w_{n} y_{n},\quad m \in \mathcal{M}: m \to x_{m} \in \mathcal{X}                                  \\
-      \rho_{m}          &\geq \sum_{m \to n \in \mathcal{N}} w_{n} \cdot \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot \sigma_{n}},\quad m \in \mathcal{M},     \\
-      \rho_{m}          &\geq - \sum_{m \to n \in \mathcal{N}} w_{n} \cdot \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot \sigma_{m}},\quad m \in \mathcal{M},   \\
+      \rho_{m}          &\geq \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{n}},\quad m \in \mathcal{M},     \\
+      \rho_{m}          &\geq - \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{m}},\quad m \in \mathcal{M},   \\
 \end{eqnarray}
 ```
 where:
-* `w` denotes the weight associated with a Gaussian component $n$,
-* `μ` denotes the mean of a Gaussian component $n$,
-* `σ` denotes the standard deviation of a Gaussian component $n$.
+* `w` denotes the weight associated with a Gaussian component.
 
-The user has to specify the `number_of_gaussian` through the `se_settings` ([Input Data Format](@ref)). 
+The user has to specify the `number_of_gaussian` through the `se_settings` ([Input Data Format](@ref)).
 If no number is specified, it will default to `10`.
 
-### Maximum Likelihood Estimation
+## Maximum Likelihood Estimation
 
 The maximum likelihood criterion links the measurement residual to the logpdf of
 the associated distribution and is given by
@@ -122,7 +120,7 @@ is provided by Distributions.jl and the second derivative (`heslogpdf`) is provi
 
 ## Supported Distributions
 
-Currently, the following parametric univariate continuous distributions are supported through
+Currently, the following univariate continuous distributions are supported through
 the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 - Exponential
 - Weibull

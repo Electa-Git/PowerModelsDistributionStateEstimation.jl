@@ -39,10 +39,10 @@ It should be noted that not all solvers can handle all problem types. For exampl
 
 Providing a (good) initial value to some or all optimization variables can reduce the number of solver iterations. PowerModelsDistributionStateEstimation provides the `assign_start_to_variables!` function.
 ```@docs
-PowerModelsDistributionStateEstimation.assign_start_to_variables!(data)
+assign_start_to_variables!(data)
 ```
 ```@docs
-PowerModelsDistributionStateEstimation.assign_start_to_variables!(data, start_values_source)
+assign_start_to_variables!(data, start_values_source)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablename_start`. The example below shows how to do it for the `vm` and `va` variables.
 ```julia
@@ -61,17 +61,17 @@ This can be avoided if good knowledge of the system is available or if some vari
 Similar to providing a warm start, it is to user discretion to assign meaningful and "safe" variable bounds.
 PowerModelsDistributionStateEstimation has functions that allow to define bounds on voltage magnitude, power generation (active and reactive) or power demand (active and reactive):
 ```@docs
-PowerModelsDistributionStateEstimation.update_voltage_bounds!(data::Dict; v_min=0.0, v_max=Inf)
+update_voltage_bounds!(data::Dict; v_min=0.0, v_max=Inf)
 ```
 ```@docs
-PowerModelsDistributionStateEstimation.update_generator_bounds!(data; p_min, p_max, q_min, q_max)
+update_generator_bounds!(data; p_min, p_max, q_min, q_max)
 ```
 ```@docs
-PowerModelsDistributionStateEstimation.update_load_bounds!(data; p_min, p_max, q_min, q_max)
+update_load_bounds!(data; p_min, p_max, q_min, q_max)
 ```
 or, alternatively, all the above at once:
 ```@docs
-PowerModelsDistributionStateEstimation.update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
+update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablenamemin`/`variablenamemax`. The example below shows how to do it for the active power.
 ```julia
@@ -84,5 +84,5 @@ Residuals are a type of variable that is specific to the state estimation proble
 While the residuals as defined in the present package are always non-negative (default lower bound is 0), there is no default upper bound.
 A function is available to add customized upper bounds:
 ```@docs
-PowerModelsDistributionStateEstimation.assign_residual_ub!(data; chosen_upper_bound=100.0, rescale=false)
+assign_residual_ub!(data; chosen_upper_bound=100.0, rescale=false)
 ```
