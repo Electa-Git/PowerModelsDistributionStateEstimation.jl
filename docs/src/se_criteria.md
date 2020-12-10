@@ -79,7 +79,7 @@ lifted by its exact linear relaxation: rWLAV[^1]. The rWLAV criterion is given b
 
 [^1]: Note that this relaxation is only exact in the context of minimization problem.
 
-## WLS and rWLS
+### WLS and rWLS
 
 The WLS criterion represents the Eucledian norm (p=2) and is given by
 ```math
@@ -96,7 +96,7 @@ The rWLS criterion relaxes the former as a cone and is given by
 
 ## Non-Gaussian State Estimation Criteria
 
-## Gaussian Mixture Estimation
+### Gaussian Mixture Estimation
 
 The Gaussian mixture criterion splits the random variable `X` into `𝓝` Gaussian 
 components `Y`, and introduces two constraints. First, the related variable `x`
@@ -117,7 +117,7 @@ where:
 The user has to specify the `number_of_gaussian` through the `se_settings` ([Input Data Format](@ref)). 
 If no number is specified, it will default to `10`.
 
-## Maximum Likelihood Estimation
+### Maximum Likelihood Estimation
 
 The maximum likelihood criterion links the measurement residual to the logpdf of
 the associated distribution and is given by
