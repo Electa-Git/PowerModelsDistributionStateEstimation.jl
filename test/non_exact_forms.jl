@@ -8,6 +8,119 @@
     # set measurement path for all cases
     msr_path = joinpath(mktempdir(),"temp.csv")
 
+    @testset "LinDist3Flow - rwlav" begin
+        crit = "rwlav"
+        model = _PMD.LPUBFDiagPowerModel
+
+        data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
+        if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
+        if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
+
+        # insert the load profiles
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
+
+        # transform data model
+        data = _PMD.transform_data_model(data);
+
+        # solve the power flow
+        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+
+        # write measurements based on power flow
+        _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
+
+        # read-in measurement data and set initial values
+        _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
+        _PMDSE.assign_start_to_variables!(data)
+        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+
+        # set se settings
+        data["se_settings"] = Dict{String,Any}("criterion" => crit,
+                                           "rescaler" => 100)
+
+        # solve the state estimation
+        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+
+        # tests
+        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
+        @test isapprox(max, 0.0; atol = 1e-6)
+        @test isapprox(avg, 0.0; atol = 1e-8)
+    end
+
+    @testset "LinDist3Flow - wls" begin
+        crit = "wls"
+        model = _PMD.LPUBFDiagPowerModel
+
+        data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
+        if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
+        if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
+
+        # insert the load profiles
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
+
+        # transform data model
+        data = _PMD.transform_data_model(data);
+
+        # solve the power flow
+        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+
+        # write measurements based on power flow
+        _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
+
+        # read-in measurement data and set initial values
+        _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
+        _PMDSE.assign_start_to_variables!(data)
+        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+
+        # set se settings
+        data["se_settings"] = Dict{String,Any}("criterion" => crit,
+                                           "rescaler" => 100)
+
+        # solve the state estimation
+        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+
+        # tests
+        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
+        @test isapprox(max, 0.0; atol = 1e-6)
+        @test isapprox(avg, 0.0; atol = 1e-8)
+    end
+    @testset "LinDist3Flow - rwlav" begin
+        crit = "rwlav"
+        model = _PMD.LPUBFDiagPowerModel
+
+        data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
+        if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
+        if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
+
+        # insert the load profiles
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
+
+        # transform data model
+        data = _PMD.transform_data_model(data);
+
+        # solve the power flow
+        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+
+        # write measurements based on power flow
+        _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
+
+        # read-in measurement data and set initial values
+        _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
+        _PMDSE.assign_start_to_variables!(data)
+        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+
+        # set se settings
+        data["se_settings"] = Dict{String,Any}("criterion" => crit,
+                                           "rescaler" => 100)
+
+        # solve the state estimation
+        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+
+        # tests
+        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
+        @test isapprox(max, 0.0; atol = 1e-6)
+        @test isapprox(avg, 0.0; atol = 1e-8)
+    end
+
     @testset "SDP with rwlav and rwls" begin
 
         sdp_data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
@@ -57,125 +170,5 @@
         #@test isapprox(max_err_wlav, 0.046954; atol=2e-1)
         #@test isapprox(avg_wlav, 0.012229; atol=1e-1)
         #@test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-2)
-    end
-
-    season     = "summer"
-    time       = 144
-    elm        = ["load", "pv"]
-    pfs        = [0.95, 0.90]
-    rm_transfo = true
-    rd_lines   = true
-
-    @testset "LinDist3Flow - rwlav" begin
-        crit = "rwlav"
-        model = _PMD.LPUBFDiagPowerModel
-
-        data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
-        if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
-        if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
-
-        # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
-
-        # transform data model
-        data = _PMD.transform_data_model(data);
-
-        # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
-
-        # write measurements based on power flow
-        _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
-
-        # read-in measurement data and set initial values
-        _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-        _PMDSE.assign_start_to_variables!(data)
-        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
-
-        # set se settings
-        data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
-
-        # solve the state estimation
-        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
-
-        # tests
-        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
-        @test isapprox(max, 0.0; atol = 1e-6)
-        @test isapprox(avg, 0.0; atol = 1e-8)
-    end
-
-    @testset "LinDist3Flow - wls" begin
-        crit = "wls"
-        model = _PMD.LPUBFDiagPowerModel
-
-        data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
-        if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
-        if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
-
-        # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
-
-        # transform data model
-        data = _PMD.transform_data_model(data);
-
-        # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
-
-        # write measurements based on power flow
-        _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
-
-        # read-in measurement data and set initial values
-        _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-        _PMDSE.assign_start_to_variables!(data)
-        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
-
-        # set se settings
-        data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
-
-        # solve the state estimation
-        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
-
-        # tests
-        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
-        @test isapprox(max, 0.0; atol = 1e-6)
-        @test isapprox(avg, 0.0; atol = 1e-8)
-    end
-    @testset "LinDist3Flow - rwlav" begin
-        crit = "rwlav"
-        model = _PMD.LPUBFDiagPowerModel
-
-        data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
-        if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
-        if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
-
-        # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
-
-        # transform data model
-        data = _PMD.transform_data_model(data);
-
-        # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
-
-        # write measurements based on power flow
-        _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
-
-        # read-in measurement data and set initial values
-        _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-        _PMDSE.assign_start_to_variables!(data)
-        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
-
-        # set se settings
-        data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
-
-        # solve the state estimation
-        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
-
-        # tests
-        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
-        @test isapprox(max, 0.0; atol = 1e-6)
-        @test isapprox(avg, 0.0; atol = 1e-8)
     end
 end

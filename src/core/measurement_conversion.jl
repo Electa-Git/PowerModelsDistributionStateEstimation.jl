@@ -221,7 +221,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     else
         new_var_den = []
         for nvd in msr.denominator
-            if typeof(nvd) != Symbol #only case is when I have an array of ones
+            if !isa(nvd, Symbol) #only case is when I have an array of ones
                 push!(new_var_den, nvd)
             elseif occursin("v", String(nvd)) && msr.cmp_type != :bus
                 push!(new_var_den, _PMD.var(pm, nw, nvd, msr.bus_ind))

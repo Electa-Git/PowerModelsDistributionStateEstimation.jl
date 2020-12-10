@@ -127,7 +127,7 @@ The required csv measurement file features the following columns:
 - par_2: second parameter of the distribution. For the Normal distribution this is the standard deviation.
 - par_3: can be missing or string, if the distribution requires a third parameter.
 - par_4: can be missing or string, if the distribution requires a third parameter.
-- crit: can be missing, or it assigns an individual SE criterion to the measurement in a given row. This can be used in combination with the "mixed" criterion (see [Mathematical Model of the State Estimation Criteria](@ref)).
+- crit: can be missing, or it assigns an individual SE criterion to the measurement in a given row (see [Mathematical Model of the State Estimation Criteria](@ref)).
 - parse: can be true or false (or missing). It should be true if the measurement provided are real measurements (i.e., with errors). It should be false if the measurements are not real but, e.g., generated with power flow calculations (i.e., they have no errors). In this case, a value with error is sampled from the distribution associated to the measurements, and used in the state estimation process.
 
 Note that the error parsing only works for Normal distributions. It will not return an error for non-Normal distributions, but will default to the same behaviour as setting parse to false.
@@ -164,21 +164,20 @@ data["meas"]["1"] => Dict{String,Any}(
 `cmp` is the component type to which the measurement refers. In this case, a load.
 `cmp_id` is the unique id of this component.
 `dst` is a vector that contains the pdf of the measurement, for each phase separately and scaled to the correct units. At the moment, this is always a 3x1 vector, and phases to which loads are not used are assigned a 0.0. **This is going to change very soon** when upgrading to PowerModelsDistribution v0.10.0, in v0.2.0 of the present package. We will do our best to keep the docs up to date but there might be a delay.
-`crit` optional entry which is only used in case the `mixed` SE criteria is chosen for the state estimation. See [Mathematical Model of the State Estimation Criteria](@ref).
+`crit` string that indicates the measurement's SE criterion, see [Mathematical Model of the State Estimation Criteria](@ref).
 
 ## State estimation settings
 
 Finally, an indication on what type of state estimation needs to be performed should be provided using the "se_settings" dictionary.
-The "se_settings" dictionary contains two keys: "rescaler" and "criterion".
-The "rescaler" consists of one value or an array of two values used to multiply the residual constraints (and in some cases also to put an offset on them) in the state estimation problem. Depending on the case the rescaler can improve tractability, even quite significantly. For more details on the use of the rescaler, the user can refer to the "State Estimation Criteria" section of this manual.
-The "criterion" allows the user to choose the "type" of state estimation to be performed, the classic examples being weighted least squares (WLS) and weighted least absolute values (WLAV). For details on which criteria are available and how to use them, the user is again referred to the "State Estimation Criteria" section of this manual.
-
-If the user does not provide any "se_settings", this dictionary automatically created when running state estimation calculations, and set to the default rescaler value of 1 and estimation criterion of "rwlav":
-
+The `se_settings` dictionary contains up to three keys: `rescaler`, `criterion` and `number_of_gaussian`.
+The `rescaler` is a Float that multiplies the residual constraints. Depending on the specific case and solver, adding a rescaler can improve tractability, even quite significantly. If no entry is provided, this defaults to 1.0.
+The `criterion` is a String and allows the user to choose a **global** residual definition for all measurements. If different measurements need to have different criteria, this shouldn't be used, but rather a local individual needs to be assigned to each measurement. For details on which criteria are available and how to use them, see [Mathematical Model of the State Estimation Criteria](@ref). If no entry is provided, no action is taken, as individual criterion assignment is assumed.
+The `number_of_gaussian` is an Int and is only resorted to when the Gaussian Mixture criterion is chosen. In this context, it represents the number of Gaussian components of the model. If no entry is provided, this defaults to 10.
 ```julia
 "se_settings" => Dict{String,Any}(
-    "rescaler" => 1,
-    "criterion" => "rwlav"
+    "rescaler" => 10,
+    "criterion" => "gmm", #only for global criterion assignment
+    "number_of_gaussian" => 6
 )
 ```
 
@@ -203,7 +202,7 @@ Dict{String,Any}(
     ),
     "se_settings" => Dict{String,Any}(
         "rescaler" => value,
-        "criterion" => "chosen_criterion"  
+        "criterion" => "chosen_criterion" #only for global criterion assignment
     ),
     ...
 )

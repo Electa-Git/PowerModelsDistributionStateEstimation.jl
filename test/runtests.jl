@@ -8,6 +8,7 @@
 
 # using pkgs
 using Distributions
+using GaussianMixtures
 using Ipopt
 using JuMP
 using PowerModels
@@ -18,6 +19,7 @@ using Test
 
 # pkg const
 const _DST = Distributions
+const _GMM = GaussianMixtures
 const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
@@ -27,7 +29,7 @@ const _PMDSE = PowerModelsDistributionStateEstimation
 ntw, fdr = 4, 2
 
 season     = "summer"
-time       = 144
+time_step  = 144
 elm        = ["load", "pv"]
 pfs        = [0.95, 0.90]
 rm_transfo = true
@@ -46,6 +48,7 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
 
     include("distributions.jl")
     include("estimation_criteria.jl")
+    include("gaussian_mixture.jl")
     include("mixed_measurements.jl")
     include("non_exact_forms.jl")
     include("power_flow.jl")

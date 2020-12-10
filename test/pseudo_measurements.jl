@@ -4,7 +4,6 @@
     msr_path = joinpath(mktempdir(),"temp.csv")
     pseudo_path = joinpath(BASE_DIR, "test/data/extra/measurements/distr_example.csv")
 
-    crit = "mixed"
     model = _PMs.ACPPowerModel
 
     # load data
@@ -13,7 +12,7 @@
     if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
     # insert the load profiles
-    _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+    _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
     # transform data model
     data = _PMD.transform_data_model(data);
@@ -29,7 +28,7 @@
 
     # read-in measurement data and set initial values
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-    _PMDSE.assign_default_individual_criterion!(data; chosen_criterion="rwlav")
+    _PMDSE.assign_basic_individual_criteria!(data; chosen_criterion="rwlav")
     data["meas"]["21"]["crit"] = "mle"
     data["meas"]["22"]["crit"] = "mle"
     _PMDSE.assign_start_to_variables!(data)
@@ -38,16 +37,14 @@
     for (m, meas) in data["meas"]
         if meas["cmp"] == :load && m ∉ ["21", "22"]
             for phase in 1:length(meas["dst"])
-                if typeof(meas["dst"][phase]) == _DST.Normal{Float64}
+                if isa(meas["dst"][phase], _DST.Normal{Float64})
                     @test mean(meas["dst"][phase]) == data["load"]["$(meas["cmp_id"])"][string(meas["var"])][phase]
                 end
             end
         end
     end
 
-    # set se settings
-    data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                       "rescaler" => 1)
+    data["se_settings"] = Dict()
 
     # solve the state estimation
     se_result = _PMDSE.run_mc_se(data, _PMs.ACPPowerModel, ipopt_solver)

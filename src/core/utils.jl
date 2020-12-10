@@ -62,14 +62,14 @@ function update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, 
     update_load_bounds!(data; p_min=pd_min, p_max=pd_max, q_min=qd_min, q_max=qd_max)
 end
 """
-    assign_individual_measurement_criterion!(data::Dict; chosen_criterion::String="rwlav")
-Basic function that assigns a chosen criterion to individual measurements to perform a 'mixed' state estimation.
-If the distribution type of at least one of the measured phases is normal, the criterion defaults to the chosen_criterion. Otherwise,
-it is assigned the 'mle' criterion.
+    assign_basic_individual_criteria!(data::Dict; chosen_criterion::String="rwlav")
+Basic function that assigns individual criteria to measurements in data["meas"].
+For each measurement, if the distribution type of at least one of the phases is normal, the criterion defaults to the chosen_criterion.
+Otherwise, it is assigned the 'mle' criterion.
 The function takes as input either a single measurement dictionary, e.g., data["meas"]["1"]
-or the full ENGINEERING data model of the feeder.
+or the full MATHEMATICAL data model.
 """
-function assign_default_individual_criterion!(data::Dict; chosen_criterion::String="rwlav")
+function assign_basic_individual_criteria!(data::Dict; chosen_criterion::String="rwlav")
     if haskey(data, "meas")
         for (_, meas) in data["meas"]
             dst_type = [typeof(i) for i in meas["dst"]]
@@ -126,7 +126,7 @@ function vm_to_w_conversion!(data::Dict)
         if meas["var"] == :vm
             for c in 1:length(meas["dst"])
                 if meas["dst"][c] != 0.0
-                    @assert (typeof(meas["dst"][c]) == Distributions.Normal{Float64}) "vm_to_w conversion only available for the Normal distribution"
+                    @assert (isa(meas["dst"][c], Distributions.Normal{Float64})) "vm_to_w conversion only available for the Normal distribution"
                     current_μ = _DST.mean(meas["dst"][c])
                     current_σ = _DST.std(meas["dst"][c])
                     data["meas"][m]["dst"][c] = _DST.Normal(current_μ^2, current_σ)
@@ -153,5 +153,15 @@ function assign_load_pseudo_measurement_info!(data::Dict, pseudo_load_list::Arra
                                                                                "time_step" => time_step,
                                                                                "cluster" => cluster_list[idx]
                                                                                )
+    end
+end
+"""
+    assign_unique_individual_criterion!(data::Dict)
+    - data: `MATHEMATICAL` data model of the network
+    Assigns the criterion in data["se_settings"]["criterion"] to all individual measurements.
+"""
+function assign_unique_individual_criterion!(data::Dict)
+    for (m, meas) in data["meas"]
+        meas["crit"] = data["se_settings"]["criterion"]
     end
 end

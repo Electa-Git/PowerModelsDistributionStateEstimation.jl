@@ -14,7 +14,7 @@
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
         # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
         # transform data model
          data = _PMD.transform_data_model(data);
@@ -54,7 +54,7 @@
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
         # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
         # transform data model
         data = _PMD.transform_data_model(data);
@@ -94,7 +94,7 @@
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
         # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
         # transform data model
         data = _PMD.transform_data_model(data);
@@ -136,7 +136,7 @@
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
         # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
         # transform data model
         data = _PMD.transform_data_model(data);
@@ -177,7 +177,7 @@
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
         # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
         # transform data model
         data = _PMD.transform_data_model(data);
@@ -218,7 +218,7 @@
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
 
         # insert the load profiles
-        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time)
+        _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
         # transform data model
         data = _PMD.transform_data_model(data);

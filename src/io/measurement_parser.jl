@@ -38,7 +38,7 @@ function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, sample_fake_
     dst_params = []
     for nr in 1:4
         if "par_$(nr)" ∈ names(meas_row) && !ismissing(meas_row[Symbol("par_",nr)]) && meas_row[Symbol("par_",nr)] != "missing"
-            typeof(meas_row[Symbol("par_",nr)]) == String ? par_array = dataString_to_array(meas_row[Symbol("par_",nr)]) : par_array = [meas_row[Symbol("par_",nr)]]
+            isa(meas_row[Symbol("par_",nr)], String) ? par_array = dataString_to_array(meas_row[Symbol("par_",nr)]) : par_array = [meas_row[Symbol("par_",nr)]]
             push!(dst_params, par_array)
         end
     end
