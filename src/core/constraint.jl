@@ -15,9 +15,9 @@ criterion assigned to each individual measurement in data["meas"]["m"]["crit"].
 
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
 
+    cmp = get_cmp_id(pm, nw, i)
     res = _PMD.var(pm, nw, :res, i)
-    cmp_id = get_cmp_id(pm, nw, i)
-    var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp_id)
+    var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :se_settings)["rescaler"]
     crit = _PMD.ref(pm, nw, :meas, i, "crit")

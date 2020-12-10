@@ -55,6 +55,25 @@ function variable_mc_gaussian_mixture(  pm::_PMs.AbstractPowerModel;
     report && _IM.sol_component_value(pm, nw, :meas, :gmv, gmmeas, gmv)
 end
 """
+    variable_mc_gaussian_mixture for gaussian mixture criterion
+"""
+function variable_mc_gaussian_mixture(  pm::_PMs.AbstractPowerModel;
+                                        nw::Int=pm.cnw, bounded::Bool=true,
+                                        report::Bool=true)
+    N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
+    cnds = _PMD.conductor_ids(pm; nw=nw)
+    ncnds = length(cnds)
+
+    gmv = _PMD.var(pm, nw)[:gmv] = Dict(i => JuMP.@variable(pm.model,
+        [c in 1:ncds, n = 1:N], base_name = "$(nw)_gmv_$(i)",
+        )   for i in _PMD.ids(pm, nw, :meas) 
+            if _PMD.ref(pm, nw, :meas, i, "crit") == "gmm"
+    )
+
+    #report && _IM.sol_component_value(pm, nw, :meas, :gmv, _PMs.ids(pm, nw, :meas), gmv)
+end
+
+"""
     variable_mc_load in terms of power, for ACR and ACP
 """
 function variable_mc_load(pm::_PMs.AbstractPowerModel; kwargs...)
