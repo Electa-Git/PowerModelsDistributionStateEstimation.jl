@@ -5,19 +5,6 @@ the related variable, where:
 * `𝓜` denotes the set of measurements,
 * `𝓧` denotes the (extended) variable space of the OPF problem.
 
-Currently, the following univariate continuous distributions are supported through
-the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
-- Exponential
-- Weibull
-- Normal
-- Log-Normal
-- Gamma
-- Beta
-- Extended Beta
-```@docs
-ExtendedBeta
-```
-
 The state of a power system can be determined based on a specific estimation 
 criterion. The state estimator criteria can be classified into two groups based 
 on the random variable `X`:
@@ -132,3 +119,18 @@ where `shf` denotes a shift setting the minimum value of the residual to zero.
 
 To avoid the use of automatic differentiation, the first derivative (`gradlogpdf`)
 is provided by Distributions.jl and the second derivative (`heslogpdf`) is provided internally.
+
+## Supported Distributions
+
+Currently, the following parametric univariate continuous distributions are supported through
+the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
+- Exponential
+- Weibull
+- Normal
+- Log-Normal
+- Gamma
+- Beta
+- Extended Beta
+```@docs
+ExtendedBeta
+```
