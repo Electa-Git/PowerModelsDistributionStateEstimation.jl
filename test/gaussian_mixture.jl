@@ -107,3 +107,4 @@
         @test isapprox(avg_mle-avg_gmm, 0.000; atol = 1e-6)
     end
 end
+

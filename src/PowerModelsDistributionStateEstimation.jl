@@ -42,6 +42,9 @@ const _STT = Statistics
 # paths
 const BASE_DIR = dirname(@__DIR__)
 
+# fix a random seed 
+#_RAN.seed!(1234);
+
 # logger for errors and warnings
 const _LOGGER = Memento.getlogger(@__MODULE__)
 __init__() = Memento.register(_LOGGER)
