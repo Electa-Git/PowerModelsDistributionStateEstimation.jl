@@ -165,3 +165,55 @@ function assign_unique_individual_criterion!(data::Dict)
         meas["crit"] = data["se_settings"]["criterion"]
     end
 end
+"""
+    reduce_single_phase_loadbuses!(data::Dict; exclude = [])
+Reduces the dimensions of voltage variables for load buses in which the connected load(s) only have one active phase.
+
+    - data: `MATHEMATICAL` data model of the network
+    - exclude: buses to which this transformation is not applied
+"""
+function reduce_single_phase_loadbuses!(data::Dict; exclude=[])
+    load_info = get_load_info(data, exclude)
+    already_checked = []
+    for (bus_id,load_id,nr_conn_loads) in load_info
+        load_connections = data["load"][load_id]["connections"]
+        if nr_conn_loads == 1 && length(load_connections) == 1
+            perform_dimension_reduction(data, bus_id, load_connections)
+        elseif nr_conn_loads > 1 && bus_id ∉ already_checked
+            push!(already_checked, bus_id)
+            loads_at_bus_id = [load_id for (x, load_id, z) in load_info if x == bus_id]
+            used_connections = unique([data["load"][lid]["connections"] for lid in loads_at_bus_id])
+            if length(used_connections) == 1 perform_dimension_reduction(data, bus_id, load_connections) end
+        end
+    end
+end
+
+function perform_dimension_reduction(data::Dict, bus_id::Int64, load_connections)
+    data["bus"]["$bus_id"]["terminals"] = load_connections
+    data["bus"]["$bus_id"]["grounded"] = data["bus"]["$bus_id"]["grounded"][load_connections]
+    conn_branches = find_branch_t_bus(data["branch"], bus_id)
+    for br_id in conn_branches
+        data["branch"][br_id]["t_connections"] = load_connections
+    end
+end
+
+function get_load_info(data::Dict, exclude=[])
+    load_buses = []
+    load_idx = []
+    for (l, load) in data["load"]
+        if load["load_bus"] ∉ exclude
+            push!(load_buses, load["load_bus"])
+            push!(load_idx, l)
+        end
+    end
+    loads_per_bus = [count(x->(x == i), load_buses) for i in load_buses]
+    return zip(load_buses, load_idx, loads_per_bus)
+end
+
+function find_branch_t_bus(branches, bus_id)
+    conn_branches = []
+    for (b, branch) in branches
+        if branch["t_bus"] == bus_id push!(conn_branches, b) end
+    end
+    !isempty(conn_branches) ? (return conn_branches) : Memento.error(_LOGGER, "Network graph is disconnected")
+end
