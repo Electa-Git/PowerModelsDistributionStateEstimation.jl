@@ -1,6 +1,9 @@
 ## A list of things to do before v0.2.0
 
 - [ ] update code for PMD v0.10.0 (!!!)
+      - rename constraints accordingly
+      - iteration through conductors in all functionalities
+      - deprecate "gmm" for "ga"
 
 - [x] individual SE criterion per measurement ("mixed" criterion) (!!!)
 
@@ -17,6 +20,10 @@
 - [x] code beta distribution with 4 parameters
 
 - [x] increase code coverage for distributions
+
+- [] consider deprecating reduced_ac and reduced_ivr after test against @smart_constraint (especially reduced_ac)
+
+- [] add test for rand(ExtendedBeta) (!!!)
 
 ## TODO before 0.X
 

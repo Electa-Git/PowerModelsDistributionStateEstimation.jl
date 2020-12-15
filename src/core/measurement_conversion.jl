@@ -195,7 +195,7 @@ function no_conversion_needed(pm::_PMD.SDPUBFPowerModel, msr_var::Symbol)
     return msr_var ∈ [:w, :pd, :qd, :pg, :qg]
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw)
 
     new_var_num = []
     for nvn in msr.numerator
@@ -209,12 +209,13 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if typeof(pm) <: _PMD.LinDist3FlowPowerModel
 
         new_var_den = [_PMD.var(pm, nw, msr.denominator, msr.cmp_id)]
 
-        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
                        (sum( d[c] for d in new_var_den))
             )
@@ -230,14 +231,14 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             end
         end
 
-        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
                        (sum( d[c]^2 for d in new_var_den))
             )
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Square; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Square; nw=nw)
 
     new_var = []
     for nvn in msr.elements
@@ -249,19 +250,20 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 
     msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if typeof(pm) <: _PMD.LinDist3FlowPowerModel
-        JuMP.@constraint(pm.model, [c in 1:nph],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c]^2 == (sum( n[c] for n in new_var ))
             )
     else
-        JuMP.@constraint(pm.model, [c in 1:nph],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c]^2 == (sum( n[c]^2 for n in new_var ))
             )
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Multiplication; nw=nw, nph = 3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Multiplication; nw=nw)
 
     m1 = []
     m2 = []
@@ -286,22 +288,24 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
         end
     end
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("p", String(msr.msr_sym))
-        JuMP.@constraint(pm.model, [c in 1:nph],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c] == m1[1][c]*m2[1][c]+m1[2][c]*m2[2][c]
             )
     elseif occursin("q", String(msr.msr_sym))
-        JuMP.@constraint(pm.model, [c in 1:nph],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c] == -m1[2][c]*m2[1][c]+m1[1][c]*m2[2][c]
             )
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Tangent; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Tangent; nw=nw)
     #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
     warn("Performing a Tangent conversion only makes sense for Normal distributions and is in general not advised")
-    for c in 1:nph
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
+    for c in conn
         if _PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c] != 0.0
 
             μ_tan = tan(_DST.mean(_PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c]))
@@ -323,7 +327,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Fraction; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Fraction; nw=nw)
     num = []
     for n in msr.numerator
         if occursin("v", String(n))
@@ -337,13 +341,14 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 
     den = _PMD.var(pm, nw, msr.denominator, msr.bus_ind)
     msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("r", String(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c]*den[c] == num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c])
             )
     elseif occursin("i", String(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c]*den[c] == -num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c])
             )
     else
@@ -352,7 +357,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 end
 
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw, nph=3)
+function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw)
 
     p = []
     v = []
@@ -368,13 +373,14 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 
     msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("cr", string(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c] == (p[1][c]*v[1][c]+p[2][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
     elseif occursin("ci", string(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in 1:nph],
+        JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c] == (-p[2][c]*v[1][c]+p[1][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
     end

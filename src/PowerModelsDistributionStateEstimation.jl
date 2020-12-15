@@ -8,14 +8,13 @@
 module PowerModelsDistributionStateEstimation
 
 # import pkgs
-import Base: minimum, maximum
+import Base: maximum, minimum, rand
 import CSV
 import DataFrames
 import Distributions
 import Distributions: logpdf, gradlogpdf
 import GaussianMixtures
 import InfrastructureModels
-import JuMP
 import LinearAlgebra: diag
 import Memento
 import Optim
@@ -25,13 +24,16 @@ import Random
 import SpecialFunctions
 import Statistics
 
+#import and export so that users do not need to import JuMP to use a solver
+import JuMP: optimizer_with_attributes
+export optimizer_with_attributes
+
 # pkg const
 const _CSV = CSV
 const _DFS = DataFrames
 const _DST = Distributions
 const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
-const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation

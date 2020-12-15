@@ -14,8 +14,8 @@ on the random variable `X`:
     * `wls`: weighted least square (exact)
     * `rwls`: relaxed weighted least square (exact relaxation)
 - `Non-Gaussian`
-    * `gmm`: Gaussian mixture model (approximation)
     * `mle`: maximum likelihood estimation (exact)
+    * `ga`: Gaussian approximation (inexact)
 
 The user has to specify the `criterion` for each measurement individually.
 However, if all measurements can be described by the same criterion, it is sufficient to

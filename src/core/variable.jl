@@ -8,7 +8,7 @@
 """
     variable_mc_residual
 
-This is the residual variable, which is later associated to an equality constraint, depending on the chosen
+This is the residual variable, which is later associated to the residual (in)equality constraint(s), depending on the chosen
 state estimation criterion.
 If bounded, the lower bound is set to zero, while the upper bound defaults to Inf, unless the user provides
 a different value in the measurement dictionary.
@@ -16,17 +16,17 @@ a different value in the measurement dictionary.
 function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
                                 nw::Int=pm.cnw, bounded::Bool=true,
                                 report::Bool=true)
-    cnds = _PMD.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
+
+    connections = Dict(i => length(meas["dst"] for (i,meas) in ref(pm, nw, :meas)) )
 
     res = _PMD.var(pm, nw)[:res] = Dict(i => JuMP.@variable(pm.model,
-        [c in 1:ncnds], base_name = "$(nw)_res_$(i)",
+        [c in 1:connections[i]], base_name = "$(nw)_res_$(i)",
         start = _PMD.comp_start_value(_PMD.ref(pm, nw, :meas, i), "res_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :meas)
     )
 
     if bounded
-        for i in _PMs.ids(pm, nw, :meas), c in _PMD.conductor_ids(pm; nw=nw)
+        for i in _PMs.ids(pm, nw, :meas), c in 1:connections[i]
             JuMP.set_lower_bound(res[i][c], 0.0)
             haskey(_PMs.ref(pm, nw, :meas, i), "res_max") ? res_max = meas["res_max"] : res_max = Inf
             JuMP.set_upper_bound(res[i][c], res_max)
@@ -34,25 +34,6 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
     end
 
     report && _IM.sol_component_value(pm, nw, :meas, :res, _PMs.ids(pm, nw, :meas), res)
-end
-"""
-    variable_mc_gaussian_mixture for gaussian mixture criterion
-"""
-function variable_mc_gaussian_mixture(  pm::_PMs.AbstractPowerModel;
-                                        nw::Int=pm.cnw, bounded::Bool=true,
-                                        report::Bool=true)
-    N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
-    cnds = _PMD.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
-
-    gmmeas = [i for i in _PMD.ids(pm, nw, :meas) if _PMD.ref(pm, nw, :meas, i, "crit") == "gmm"]
-
-    gmv = _PMD.var(pm, nw)[:gmv] = Dict(i => JuMP.@variable(pm.model,
-        [c in 1:ncnds, n = 1:N], base_name = "$(nw)_gmv_$(i)"
-        )   for i in gmmeas
-          )
-
-    report && _IM.sol_component_value(pm, nw, :meas, :gmv, gmmeas, gmv)
 end
 """
     variable_mc_load in terms of power, for ACR and ACP
@@ -64,11 +45,11 @@ end
 
 function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
                                  nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
-    cnds = _PMD.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
+
+    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
 
     pd = _PMD.var(pm, nw)[:pd] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name="$(nw)_pd_$(i)",
+            [c in connections[i]], base_name="$(nw)_pd_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
@@ -76,24 +57,28 @@ function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
     if bounded
         for (i,load) in _PMD.ref(pm, nw, :load)
             if haskey(load, "pmin")
-                JuMP.set_lower_bound.(pd[i], load["pmin"])
+                for (idx, c) in enumerate(connections[i])
+                    JuMP.set_lower_bound(pd[i][c], load["pmin"][idx])
+                end
             end
             if haskey(load, "pmax")
-                JuMP.set_upper_bound.(pd[i], load["pmax"])
+                for (idx, c) in enumerate(connections[i])
+                    JuMP.set_upper_bound(pd[i][c], load["pmax"][idx])
+                end
             end
         end
     end
-0
+
     report && _IM.sol_component_value(pm, nw, :load, :pd, _PMD.ids(pm, nw, :load), pd)
 end
 
 function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
                                    nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
-    cnds = _PMD.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
+
+    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
 
     qd = _PMD.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name="$(nw)_qd_$(i)",
+            [c in connections[i]], base_name="$(nw)_qd_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
@@ -101,10 +86,14 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
     if bounded
         for (i,load) in _PMD.ref(pm, nw, :load)
             if haskey(load, "qmin")
-                JuMP.set_lower_bound.(qd[i], load["qmin"])
+                for (idx, c) in connections[i]
+                    JuMP.set_lower_bound(qd[i][c], load["qmin"][idx])
+                end
             end
             if haskey(load, "qmax")
-                JuMP.set_upper_bound.(qd[i], load["qmax"])
+                for (idx, c) in connections[i]
+                    JuMP.set_upper_bound(qd[i][c], load["qmax"][idx])
+                end
             end
         end
     end
@@ -112,7 +101,6 @@ function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
     report && _IM.sol_component_value(pm, nw, :load, :qd, _PMD.ids(pm, nw, :load), qd)
 
 end
-
 """
     variable_mc_load_current, IVR current equivalent of variable_mc_load
 """
@@ -124,11 +112,11 @@ end
 
 function variable_mc_load_current_real(pm::_PMs.AbstractIVRModel;
                                  nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
-    cnds = _PMD.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
+
+    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
 
     crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name="$(nw)_crd_$(i)",
+            [c in connections[i]], base_name="$(nw)_crd_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
@@ -137,11 +125,11 @@ function variable_mc_load_current_real(pm::_PMs.AbstractIVRModel;
 end
 
 function variable_mc_load_current_imag(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
-    cnds = _PMD.conductor_ids(pm; nw=nw)
-    ncnds = length(cnds)
+
+    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
 
     cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
-            [c in 1:ncnds], base_name="$(nw)_cid_$(i)",
+            [c in connections[i]], base_name="$(nw)_cid_$(i)",
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
@@ -149,7 +137,6 @@ function variable_mc_load_current_imag(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw
     report && _IM.sol_component_value(pm, nw, :load, :cid, _PMD.ids(pm, nw, :load), cid)
 
 end
-
 """
     variable_mc_measurement
 checks for every measurement if the measured
@@ -157,33 +144,31 @@ quantity belongs to the formulation's variable space. If not, the function
 `create_conversion_constraint' is called, that adds a constraint that
 associates the measured quantity to the formulation's variable space.
 """
-
 function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool=false)
     for i in _PMD.ids(pm, nw, :meas)
         msr_var = _PMD.ref(pm, nw, :meas, i, "var")
         cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
         cmp_type = _PMD.ref(pm, nw, :meas, i, "cmp")
-        nph=3
+        connections = get_active_connections(pm, nw, cmp_type, cmp_id)
         if no_conversion_needed(pm, msr_var)
             #no additional variable is created, it is already by default in the formulation
         else
             cmp_type == :branch ? id = (cmp_id, _PMD.ref(pm,nw,:branch, cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch, cmp_id)["t_bus"]) : id = cmp_id
             if haskey(_PMD.var(pm, nw), msr_var)
                 push!(_PMD.var(pm, nw)[msr_var], id => JuMP.@variable(pm.model,
-                    [c in 1:nph], base_name="$(nw)_$(String(msr_var))_$id"))
+                    [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
             else
                 _PMD.var(pm, nw)[msr_var] = Dict(id => JuMP.@variable(pm.model,
-                    [c in 1:nph], base_name="$(nw)_$(String(msr_var))_$id"))
+                    [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
             end
             msr_type = assign_conversion_type_to_msr(pm, i, msr_var; nw=nw)
-            create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw, nph=nph)
+            create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw)
         end
     end
 end
 
-function variable_mc_gen_power_setpoint_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_mc_generator_power_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
     #NB: the difference with PowerModelsDistributions is that pg and qg expressions are not created
     _PMD.variable_mc_gen_current_setpoint_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_gen_current_setpoint_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-
 end

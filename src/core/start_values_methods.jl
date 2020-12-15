@@ -13,20 +13,15 @@ as a starting value to its associated variable.
 """
 function assign_start_to_variables!(data::Dict{String, Any})
     for (_,meas) in data["meas"]
-        msr_cmp = string(meas["cmp"])
-        cmp_id = string(meas["cmp_id"])
-        msr_var = string(meas["var"])
-        any(isa.(meas["dst"], _PMDSE.ExtendedBeta{Float64})) ? pkg_id = _PMDSE : pkg_id = _DST
-        if pkg_id == _DST
-            if msr_var != "w"
-                data[msr_cmp][cmp_id]["$(msr_var)_start"] = pkg_id.mean.(meas["dst"])
+        if all(i -> i ∈ [_DST.Normal{Float64}, Float64], typeof.(meas["dst"]))
+            if string(meas["var"]) != "w"
+                data[string(meas["cmp"])][string(meas["cmp_id"])]["$(msr_var)_start"] = _DST.mean(meas["dst"])
             else
-                data[msr_cmp][cmp_id]["$(msr_var)_start"] = pkg_id.mean.(meas["dst"])[1]
+                data[string(meas["cmp"])][string(meas["cmp_id"])]["$(msr_var)_start"] = _DST.mean(meas["dst"])[1]
             end
         end
     end
 end
-
 """
     assign_start_to_variables!(data, start_values_source)
 

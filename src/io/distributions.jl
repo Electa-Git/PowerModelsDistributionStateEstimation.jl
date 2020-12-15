@@ -132,6 +132,10 @@ end
 function minimum(dst::ExtendedBeta{T}) where T<:Real
     return params(dst)[3]
 end
+
+rand(dst::ExtendedBeta, N::Int) =
+    (dst.max - dst.min) .* rand(Beta(dst.α, dst.β), N) .+ dst.min
+
 ## Gamma
 # functions
 function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real

@@ -67,7 +67,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     _PMDSE.variable_mc_bus_voltage(pm; bounded = true)
     _PMD.variable_mc_branch_power(pm; bounded = true)
     _PMD.variable_mc_transformer_power(pm; bounded = true)
-    _PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
+    _PMD.variable_mc_generator_power(pm; bounded = true)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm; bounded = true)
     variable_mc_measurement(pm; bounded = false)
@@ -75,14 +75,14 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
 
     # Constraints
     for (i,gen) in _PMD.ref(pm, :gen)
-        _PMD.constraint_mc_gen_setpoint(pm, i)
+        _PMD.constraint_mc_generator_power(pm, i)
     end
     for (i,bus) in _PMD.ref(pm, :ref_buses)
         @assert bus["bus_type"] == 3
         _PMD.constraint_mc_theta_ref(pm, i)
     end
     for (i,bus) in _PMD.ref(pm, :bus)
-        _PMDSE.constraint_mc_load_power_balance_se(pm, i)
+        _PMDSE.constraint_mc_power_balance_se(pm, i)
     end
     for (i,branch) in _PMD.ref(pm, :branch)
         _PMD.constraint_mc_ohms_yt_from(pm, i)
@@ -107,7 +107,7 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
     _PMDSE.variable_mc_branch_current(pm, bounded = true)
-    variable_mc_gen_power_setpoint_se(pm, bounded = true)
+    variable_mc_generator_power_se(pm, bounded = true)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
     variable_mc_residual(pm, bounded = true)
@@ -122,11 +122,11 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     # gens should be constrained before KCL, or Pd/Qd undefined
     for id in _PMD.ids(pm, :gen)
-        constraint_mc_gen_setpoint_se(pm, id)
+        constraint_mc_generator_power_se(pm, id)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
-        constraint_mc_load_current_balance_se(pm, i)
+        constraint_mc_current_balance_se(pm, i)
     end
 
     if typeof(pm) <: ReducedIVRPowerModel
@@ -162,7 +162,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_branch_power(pm)
     _PMD.variable_mc_transformer_power(pm; bounded=true)
-    _PMD.variable_mc_gen_power_setpoint(pm; bounded=true)
+    _PMD.variable_mc_generator_power(pm; bounded=true)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
@@ -177,14 +177,14 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     end
 
     for id in _PMD.ids(pm, :gen)
-        _PMD.constraint_mc_gen_setpoint(pm, id)
+        _PMD.constraint_mc_generator_power(pm, id)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
         if typeof(pm) <: _PMD.SDPUBFPowerModel
-            _PMDSE.constraint_mc_load_power_balance_se(pm,i)
+            _PMDSE.constraint_mc_power_balance_se(pm,i)
         else
-            _PMD.constraint_mc_load_power_balance(pm, i)
+            _PMD.constraint_mc_power_balance(pm, i)
         end
     end
 

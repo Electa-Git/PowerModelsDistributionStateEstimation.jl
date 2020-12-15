@@ -5,14 +5,12 @@
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
-
 """
     constraint_mc_residual
 
 Equality constraint that describes the residual definition, which depends on the
 criterion assigned to each individual measurement in data["meas"]["m"]["crit"].
 """
-
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
 
     cmp = get_cmp_id(pm, nw, i)
@@ -21,8 +19,9 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :se_settings)["rescaler"]
     crit = _PMD.ref(pm, nw, :meas, i, "crit")
+    terminals = ref(pm, nw, :bus, i)["terminals"]
 
-    for c in _PMD.conductor_ids(pm; nw=nw)
+    for c in terminals
         if isa(dst[c], Float64)
             JuMP.@constraint(pm.model, var[c] == dst[c])
             JuMP.@constraint(pm.model, res[c] == 0.0)
@@ -49,20 +48,16 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.@constraint(pm.model,
                 res[c] >= - (var[c] - μ) / σ / rsc
             )
-        elseif crit == "gmm"
-            N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
-            gmm = _GMM.GMM(N, rand(dst[c], 10000))
-            gmv = _PMD.var(pm, nw, :gmv, i)
+        elseif crit == "ga"
+            samples = rand(dst[c], 10000)
+            gaussian_fit = _DST.fit(Normal, samples)
+            μ, σ = _DST.mean(gaussian_fit), _DST.std(gaussian_fit)
+
             JuMP.@constraint(pm.model,
-                var[c] == sum(gmm.w[n] * gmv[c,n] for n in 1:N)
+                res[c] >= (var[c] - μ) / σ / rsc
             )
             JuMP.@constraint(pm.model,
-                res[c] >= sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc
-                                        for n in 1:N)
-            )
-            JuMP.@constraint(pm.model,
-                res[c] >= - sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc
-                                        for n in 1:N)
+                res[c] >= - (var[c] - μ) / σ / rsc
             )
         elseif crit == "mle"
             isa(dst[c], ExtendedBeta{Float64}) ? pkg_id = _PMDSE : pkg_id = _DST
