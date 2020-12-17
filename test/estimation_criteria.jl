@@ -71,11 +71,11 @@
     @testset "MLE with normal distr - with error" begin
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.run_acr_red_mc_se(data, ipopt_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}("criterion" => "mle", "rescaler" => rescaler)
-        se_result_mle = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_mle = _PMDSE.run_acr_red_mc_se(data, ipopt_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
         @test se_result_mle["termination_status"] == LOCALLY_SOLVED

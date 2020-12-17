@@ -12,7 +12,7 @@ using Ipopt
 using PowerModels
 using PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
-#using SCS #removed while SDP tests are not ective
+#using SCS #removed while SDP tests are not e
 using Test
 
 # pkg const
@@ -36,8 +36,8 @@ ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                               "tol"=>1e-10,
                                                               "print_level"=>0)
 
-scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
-                                                            "alpha"=>0.4, "verbose"=>0)
+# scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
+#                                                             "alpha"=>0.4, "verbose"=>0) #deactivated while SDP tests not active
 
 
 @testset "PowerModelsDistributionStateEstimation" begin
