@@ -13,13 +13,14 @@ import CSV
 import DataFrames
 import Distributions
 import Distributions: logpdf, gradlogpdf
-import GaussianMixtures
 import InfrastructureModels
+import JuMP
 import LinearAlgebra: diag
 import Memento
 import Optim
 import PowerModels
 import PowerModelsDistribution
+import PowerModelsDistribution: _has_nl_expression #need to use @smart_constraint
 import Random
 import SpecialFunctions
 import Statistics
@@ -32,7 +33,6 @@ export optimizer_with_attributes
 const _CSV = CSV
 const _DFS = DataFrames
 const _DST = Distributions
-const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution

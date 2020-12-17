@@ -12,10 +12,10 @@
         rescaler = 1
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
 
         data["se_settings"] = Dict{String,Any}("criterion" => "wls", "rescaler" => rescaler)
-        se_result_wls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_wls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
 
         @test isapprox(se_result_rwls["objective"]-se_result_wls["objective"], 0.0; atol = 1e-4)
 
@@ -26,11 +26,11 @@
         rescaler = 1
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}("criterion" => "mle", "rescaler" => rescaler)
-        se_result_mle = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_mle = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
         @test se_result_mle["termination_status"] ∈ [LOCALLY_SOLVED, ALMOST_LOCALLY_SOLVED]
@@ -44,7 +44,7 @@
         rescaler = 1
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}("rescaler" => rescaler)
@@ -55,7 +55,7 @@
                _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="rwls")
            end
         end
-        se_result_mixed = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_mixed = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
         @test se_result_mixed["termination_status"] ∈ [LOCALLY_SOLVED, ALMOST_LOCALLY_SOLVED]
@@ -71,11 +71,11 @@
     @testset "MLE with normal distr - with error" begin
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}("criterion" => "mle", "rescaler" => rescaler)
-        se_result_mle = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_mle = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
         @test se_result_mle["termination_status"] == LOCALLY_SOLVED
@@ -86,7 +86,7 @@
     @testset "Mixed mle/rwlav criterion - with error" begin
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}( "rescaler" => rescaler)
@@ -97,7 +97,7 @@
                _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="rwls")
            end
         end
-        se_result_mixed = PowerModelsDistributionStateEstimation.run_acp_red_mc_se(data, ipopt_solver)
+        se_result_mixed = _PMDSE.run_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
         @test se_result_mixed["termination_status"] == LOCALLY_SOLVED

@@ -20,7 +20,6 @@ end
 """
     sample_fake_measurements(meas_row_dst, sorted_args, seed)
 Called within read_measurement!. Samples measurement errors from a distribution.
-Currently available
 """
 function sample_fake_measurements(meas_row_dst, sorted_args, seed)
     meas_row_dst == "ExtendedBeta" ? pkg_id = _PMDSE : pkg_id = _DST
@@ -53,12 +52,6 @@ function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, sample_fake_
     end
     meas_row[:dst] == "ExtendedBeta" ? pkg_id = _PMDSE : pkg_id = _DST
     data["dst"] = [getfield(pkg_id, Symbol(meas_row[:dst]))(tuple(sa...)...) for sa in sorted_args]
-    #NB code below to change with PMD10.0
-    if length(meas_row[:phase]) == 1
-        save_dst = data["dst"][1]
-        data["dst"] = Any[0.0, 0.0, 0.0]
-        data["dst"][parse(Int64,meas_row[:phase])] = save_dst
-    end
 end
 """
     add_measurements!(data::Dict, meas_file::String; actual_meas::Bool = false, seed::Int=0)
@@ -106,13 +99,7 @@ end
 ## Powerflow results to CSV
 repeated_measurement(df::_DFS.DataFrame, cmp_id::String, cmp_type::String, phases) =
     sum(.&(df[!,:cmp_id].==cmp_id,df[!,:cmp_type].==cmp_type,df[!,:phase].==string(phases))) > 0
-function get_phases(cmp_type::String, cmp_data::Dict{String,Any})
-    if cmp_type == "gen"  return [1, 2, 3] end
-    if cmp_type == "load"
-        phases = [1, 2, 3][.&(cmp_data["pd"] .!= 0,cmp_data["qd"] .!= 0)]
-        return length(phases) == 1 ? phases[1] : phases ;
-    end
-end
+
 function get_measures(model::DataType, cmp_type::String)
     if model <: _PMs.AbstractACPModel
         if cmp_type == "bus"  return ["vm"] end
@@ -158,6 +145,14 @@ init_measurements() =
 """
 function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String, cmp_type::String, cmp_data::Dict{String,Any},
                                         cmp_res::Dict{String,Any}, phases; exclude::Vector{String}=String[], σ::Float64)
+
+    if length(phases) == 1
+        phases = phases[1]
+        ph = 1
+    else
+        ph = [1,2,3]
+    end
+
     if !repeated_measurement(df, cmp_id, cmp_type, phases)
         config = get_configuration(cmp_type, cmp_data)
         for meas_var in get_measures(model, cmp_type) if !(meas_var in exclude)
@@ -168,7 +163,7 @@ function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String,
                        reduce_name(meas_var),                 # meas_var
                        string(phases),                        # phase
                        "Normal",                              # dst
-                       string(cmp_res[meas_var][phases]),     # par_1
+                       string(cmp_res[meas_var][ph]),     # par_1
                        string(get_sigma(σ, meas_var,phases)), # par_2
                         missing, missing, missing             #par_3,4,crit
                       ])
@@ -180,13 +175,13 @@ function write_cmp_measurements!(df::_DFS.DataFrame, model::Type, cmp_type::Stri
     for (cmp_id, cmp_res) in pf_results["solution"][cmp_type]
         # write the properties for the component
         cmp_data = data[cmp_type][cmp_id]
-        phases = get_phases(cmp_type,cmp_data)
+        phases = cmp_data["connections"]
         write_cmp_measurement!(df, model, cmp_id, cmp_type, cmp_data, cmp_res, phases, exclude = exclude, σ = σ)
         # write the properties for its bus
         cmp_id = string(cmp_data["$(cmp_type)_bus"])
         cmp_data = data["bus"][cmp_id]
         cmp_res = pf_results["solution"]["bus"][cmp_id]
-        write_cmp_measurement!(df, model, cmp_id, "bus", cmp_data, cmp_res, [1, 2, 3], exclude = exclude, σ = σ)
+        write_cmp_measurement!(df, model, cmp_id, "bus", cmp_data, cmp_res, cmp_data["terminals"], exclude = exclude, σ = σ)
     end
 end
 """
@@ -194,7 +189,7 @@ end
 
 Function to write a csv file with measurements, to be used to run state estimation calculations. The
 file is built starting from power flow results from PowerModelsDistribution.jl (or any dictionary with
-the same format). The mesurements consist of the voltage and power/current injection in correspondence
+the same format). The measurements consist of voltage and power/current injections in correspondence
 of all generators and loads. The exact measurement type depends on the chosen power flow formulation,
 e.g., with the AC Polar formulation, these are voltage magnitude and active and reactive power.
 # Arguments
@@ -228,16 +223,12 @@ This function can be run after add_measurements! for the cases in which only pow
 function add_voltage_measurement!(data::Dict, pf_result::Dict, sigma::Float64)
 
     first_key =  first(keys(pf_result["solution"]["bus"]))
-    if haskey(pf_result["solution"]["bus"][first_key], "vm")
-        #do nothing
-    elseif haskey(pf_result["solution"]["bus"][first_key], "w")
-        #do nothing
-    else
+    if !(haskey(pf_result["solution"]["bus"][first_key], "vm") || haskey(pf_result["solution"]["bus"][first_key], "w"))
         vm = sqrt.(pf_result["solution"]["bus"][first_key]["vi"].^2+pf_result["solution"]["bus"][first_key]["vr"].^2)
         voltage_meas_idx = string(maximum(parse(Int64,i) for i in keys(data["meas"]) ) + 1)
         bus_idx = parse(Int64, first_key)
         data["meas"][voltage_meas_idx] = Dict{String, Any}("var"=>:vm,"cmp"=>:bus,
-                                        "dst"=>[Distributions.Normal{Float64}(vm[1], sigma), Distributions.Normal{Float64}(vm[2], sigma), Distributions.Normal{Float64}(vm[3], sigma)],
+                                        "dst"=>[Distributions.Normal{Float64}(v_ph, sigma) for v_ph in vm],
                                         "cmp_id"=>bus_idx)
     end
 end
@@ -260,12 +251,19 @@ function write_measurements_and_pseudo!(model::Type, data::Dict, pf_results::Dic
     di_df = _CSV.read(distribution_info)
     for cmp_type in ["gen", "load"]
         for (cmp_id, cmp) in data[cmp_type]
-            phases = get_phases(cmp_type, data[cmp_type][cmp_id])
+            phases = data[cmp_type][cmp_id]["connections"]
             if haskey(cmp,"pseudo")
                 write_cmp_pseudo!(df, model, cmp_type, cmp_id, data, di_df, phases, exclude)
             else
                 write_cmp_measurement!(df, model, cmp_id, cmp_type, data[cmp_type][cmp_id], pf_results["solution"][cmp_type][cmp_id],
                                                     phases, exclude = exclude, σ = σ)
+                #if this is an actualy measurement, also add voltage measurement
+                bus_id = data[cmp_type][cmp_id]["$(cmp_type)_bus"]
+                phases = data["bus"][bus_id]["terminals"]
+                if !repeated_measurement(df, bus_id, "bus", phases)
+                    write_cmp_measurement!(df, model, bus_id, "bus", data["bus"][bus_id], pf_results["solution"][cmp_type][cmp_id],
+                                                    phases, exclude = exclude, σ = σ)
+                end
             end
         end
     end

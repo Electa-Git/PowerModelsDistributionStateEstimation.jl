@@ -71,7 +71,6 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm; bounded = true)
     variable_mc_measurement(pm; bounded = false)
-    variable_mc_gaussian_mixture(pm; bounded = false)
 
     # Constraints
     for (i,gen) in _PMD.ref(pm, :gen)
@@ -107,12 +106,11 @@ function build_mc_se(pm::_PMs.AbstractIVRModel)
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
     _PMDSE.variable_mc_branch_current(pm, bounded = true)
-    variable_mc_generator_power_se(pm, bounded = true)
+    variable_mc_generator_current_se(pm, bounded = true)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     variable_mc_load_current(pm, bounded = false)#TODO bug in the bounds assignment
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
-    variable_mc_gaussian_mixture(pm; bounded = false)
 
     # Constraints
     for (i,bus) in _PMD.ref(pm, :ref_buses)
@@ -166,7 +164,6 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     variable_mc_load(pm; report = true)
     variable_mc_residual(pm, bounded = true)
     variable_mc_measurement(pm, bounded = false)
-    variable_mc_gaussian_mixture(pm; bounded = false)
 
     #Constraints
     _PMD.constraint_mc_model_current(pm)
@@ -181,11 +178,7 @@ function build_mc_se(pm::_PMD.AbstractUBFModels)
     end
 
     for (i,bus) in _PMD.ref(pm, :bus)
-        if typeof(pm) <: _PMD.SDPUBFPowerModel
-            _PMDSE.constraint_mc_power_balance_se(pm,i)
-        else
-            _PMD.constraint_mc_power_balance(pm, i)
-        end
+        _PMDSE.constraint_mc_power_balance_se(pm,i)
     end
 
     for i in _PMD.ids(pm, :branch)

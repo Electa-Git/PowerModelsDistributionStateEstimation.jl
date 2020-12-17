@@ -1,4 +1,4 @@
-@testset "Add pseudo+measurements, run mixed SE" begin
+@testset "Add pseudo + measurements, run mixed SE" begin
 
     # set measurement path
     msr_path = joinpath(mktempdir(),"temp.csv")

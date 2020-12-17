@@ -232,8 +232,8 @@ function constraint_mc_bus_voltage_drop(pm::ReducedIVRPowerModel, i::Int; nw::In
     vr_to = [_PMD.var(pm, nw, :vr, t_bus)[c] for c in branch["t_connections"]]
     vi_to = [_PMD.var(pm, nw, :vi, t_bus)[c] for c in branch["t_connections"]]
 
-    cr_fr = [var(pm, nw, :cr, f_idx)[c] for c in branch["f_connections"]]
-    ci_fr = [var(pm, nw, :ci, f_idx)[c] for c in branch["f_connections"]]
+    cr_fr = [_PMD.var(pm, nw, :cr, f_idx)[c] for c in branch["f_connections"]]
+    ci_fr = [_PMD.var(pm, nw, :ci, f_idx)[c] for c in branch["f_connections"]]
 
     JuMP.@constraint(pm.model, vr_to .== vr_fr - r*cr_fr + x*ci_fr)
     JuMP.@constraint(pm.model, vi_to .== vi_fr - r*ci_fr - x*cr_fr)
@@ -252,8 +252,8 @@ function constraint_current_to_from(pm::ReducedIVRPowerModel, i::Int; nw::Int=pm
     cr_fr = [_PMD.var(pm, nw, :cr, f_arc)[c] for c in branch["f_connections"]]
     ci_fr = [_PMD.var(pm, nw, :ci, f_arc)[c] for c in branch["f_connections"]]
 
-    cr_to = [_PMD.var(pm, n, :cr, t_arc)[c] for c in branch["t_connections"]]
-    ci_to = [_PMD.var(pm, n, :ci, t_arc)[c] for c in branch["t_connections"]]
+    cr_to = [_PMD.var(pm, nw, :cr, t_arc)[c] for c in branch["t_connections"]]
+    ci_to = [_PMD.var(pm, nw, :ci, t_arc)[c] for c in branch["t_connections"]]
 
     JuMP.@constraint(pm.model, cr_fr .== -cr_to)
     JuMP.@constraint(pm.model, ci_fr .== -ci_to)

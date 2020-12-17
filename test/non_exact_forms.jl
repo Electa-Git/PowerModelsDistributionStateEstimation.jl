@@ -154,10 +154,10 @@
         _PMDSE.vm_to_w_conversion!(sdp_data)
 
         sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
-        se_result_sdp_wlav = PowerModelsDistributionStateEstimation.run_sdp_mc_se(sdp_data, scs_solver)
+        se_result_sdp_wlav = _PMDSE.run_sdp_mc_se(sdp_data, scs_solver)
 
         sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1)
-        se_result_sdp_wls = PowerModelsDistributionStateEstimation.run_sdp_mc_se(sdp_data, scs_solver)
+        se_result_sdp_wls = _PMDSE.run_sdp_mc_se(sdp_data, scs_solver)
 
         #delta_wlav, max_err_wlav, avg_wlav = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
         delta_wls, max_err_wls, avg_wls = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)

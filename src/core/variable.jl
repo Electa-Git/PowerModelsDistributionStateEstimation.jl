@@ -17,7 +17,7 @@ function variable_mc_residual(  pm::_PMs.AbstractPowerModel;
                                 nw::Int=pm.cnw, bounded::Bool=true,
                                 report::Bool=true)
 
-    connections = Dict(i => length(meas["dst"] for (i,meas) in ref(pm, nw, :meas)) )
+    connections = Dict(i => length(meas["dst"]) for (i,meas) in _PMD.ref(pm, nw, :meas) )
 
     res = _PMD.var(pm, nw)[:res] = Dict(i => JuMP.@variable(pm.model,
         [c in 1:connections[i]], base_name = "$(nw)_res_$(i)",
@@ -46,11 +46,11 @@ end
 function variable_mc_load_active(pm::_PMs.AbstractPowerModel;
                                  nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
 
-    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
+    connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
     pd = _PMD.var(pm, nw)[:pd] = Dict(i => JuMP.@variable(pm.model,
-            [c in connections[i]], base_name="$(nw)_pd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start",c, 0.0)
+            [c in connections[i]], base_name="$(nw)_pd_$(i)"
+            #,start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "pd_start", c, 0.0) #findall(idx -> idx == c, connections[i])[1]
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -75,23 +75,23 @@ end
 function variable_mc_load_reactive(pm::_PMs.AbstractPowerModel;
                                    nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
 
-    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
+    connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
     qd = _PMD.var(pm, nw)[:qd] = Dict(i => JuMP.@variable(pm.model,
-            [c in connections[i]], base_name="$(nw)_qd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start",c, 0.0)
+            [c in connections[i]], base_name="$(nw)_qd_$(i)"
+            #,start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "qd_start", c, 0.0) #findall(idx -> idx == c, connections[i])[1]
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
     if bounded
         for (i,load) in _PMD.ref(pm, nw, :load)
             if haskey(load, "qmin")
-                for (idx, c) in connections[i]
+                for (idx, c) in enumerate(connections[i])
                     JuMP.set_lower_bound(qd[i][c], load["qmin"][idx])
                 end
             end
             if haskey(load, "qmax")
-                for (idx, c) in connections[i]
+                for (idx, c) in enumerate(connections[i])
                     JuMP.set_upper_bound(qd[i][c], load["qmax"][idx])
                 end
             end
@@ -113,11 +113,11 @@ end
 function variable_mc_load_current_real(pm::_PMs.AbstractIVRModel;
                                  nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true)
 
-    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
+    connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
     crd = _PMD.var(pm, nw)[:crd] = Dict(i => JuMP.@variable(pm.model,
-            [c in connections[i]], base_name="$(nw)_crd_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)
+            [c in connections[i]], base_name="$(nw)_crd_$(i)"
+            #,start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -126,11 +126,11 @@ end
 
 function variable_mc_load_current_imag(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
 
-    connections = Dict(i => load["connections"] for (i,load) in ref(pm, nw, :load))
+    connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
     cid = _PMD.var(pm, nw)[:cid] = Dict(i => JuMP.@variable(pm.model,
-            [c in connections[i]], base_name="$(nw)_cid_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)
+            [c in connections[i]], base_name="$(nw)_cid_$(i)"
+            #,start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start",c, 0.0)
         ) for i in _PMD.ids(pm, nw, :load)
     )
 
@@ -167,8 +167,8 @@ function variable_mc_measurement(pm::_PMs.AbstractPowerModel; nw::Int=pm.cnw, bo
     end
 end
 
-function variable_mc_generator_power_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_mc_generator_current_se(pm::_PMs.AbstractIVRModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
     #NB: the difference with PowerModelsDistributions is that pg and qg expressions are not created
-    _PMD.variable_mc_gen_current_setpoint_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMD.variable_mc_gen_current_setpoint_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMD.variable_mc_generator_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMD.variable_mc_generator_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end

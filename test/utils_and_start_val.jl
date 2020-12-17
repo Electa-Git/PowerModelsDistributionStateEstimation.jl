@@ -72,7 +72,7 @@ data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbala
     @testset "start values" begin
         assign_start_to_variables!(data)
         @test isapprox(data["bus"]["4"]["vm_start"][1], 0.9959; atol = 1e-7)
-        @test isapprox(data["load"]["1"]["qd_start"][2], 0.006; atol = 1e-7)
+        @test isapprox(data["load"]["1"]["qd_start"][1], 0.006; atol = 1e-7)
 
         assign_start_to_variables!(data, pf_result)
         @test isapprox(data["bus"]["3"]["vm_start"][2], 0.981757; atol = 1e-7)

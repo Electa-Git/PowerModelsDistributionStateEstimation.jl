@@ -108,7 +108,7 @@ function constraint_mc_current_balance_se(pm::_PMs.AbstractIVRModel, nw::Int, i:
     crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
     cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
 
-    Gt, Bt = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
+    Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
     ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
 
@@ -120,7 +120,7 @@ function constraint_mc_current_balance_se(pm::_PMs.AbstractIVRModel, nw::Int, i:
                                       sum(crg[g][t]         for (g, conns) in bus_gens if t in conns)
                                     - sum(crs[s][t]         for (s, conns) in bus_storage if t in conns)
                                     - sum(crd[d][t]         for (d, conns) in bus_loads if t in conns)
-                                    - sum( Gt[idx,jdx]*vr[u] -Bt[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals) # shunts
+                                    - sum( Gs[idx,jdx]*vr[u] -Bs[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals) # shunts
                                     )
         JuMP.@NLconstraint(pm.model, sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
                                     + sum(cisw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
@@ -129,21 +129,21 @@ function constraint_mc_current_balance_se(pm::_PMs.AbstractIVRModel, nw::Int, i:
                                       sum(cig[g][t]         for (g, conns) in bus_gens if t in conns)
                                     - sum(cis[s][t]         for (s, conns) in bus_storage if t in conns)
                                     - sum(cid[d][t]         for (d, conns) in bus_loads if t in conns)
-                                    - sum( Gt[idx,jdx]*vi[u] +Bt[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals) # shunts
+                                    - sum( Gs[idx,jdx]*vi[u] +Bs[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals) # shunts
                                     )
     end
 end
 #####
 # "KCL including transformer arcs and load variables."
 function constraint_mc_power_balance_se(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    bus = ref(pm, nw, :bus, i)
-    bus_arcs = ref(pm, nw, :bus_arcs_conns_branch, i)
-    bus_arcs_sw = ref(pm, nw, :bus_arcs_conns_switch, i)
-    bus_arcs_trans = ref(pm, nw, :bus_arcs_conns_transformer, i)
-    bus_gens = ref(pm, nw, :bus_conns_gen, i)
-    bus_storage = ref(pm, nw, :bus_conns_storage, i)
-    bus_loads = ref(pm, nw, :bus_conns_load, i)
-    bus_shunts = ref(pm, nw, :bus_conns_shunt, i)
+    bus = _PMD.ref(pm, nw, :bus, i)
+    bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
+    bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_conns_switch, i)
+    bus_arcs_trans = _PMD.ref(pm, nw, :bus_arcs_conns_transformer, i)
+    bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
+    bus_storage = _PMD.ref(pm, nw, :bus_conns_storage, i)
+    bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
+    bus_shunts = _PMD.ref(pm, nw, :bus_conns_shunt, i)
 
     constraint_mc_power_balance_se(pm, nw, i, bus["terminals"], bus["grounded"], bus_arcs, bus_arcs_sw, bus_arcs_trans, bus_gens, bus_storage, bus_loads, bus_shunts)
 end
@@ -166,7 +166,7 @@ function constraint_mc_power_balance_se(pm::_PMs.AbstractACRModel, nw::Int, i::I
     pd   = get(_PMD.var(pm, nw), :pd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "active power",   "load")
     qd   = get(_PMD.var(pm, nw), :qd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "reactive power", "load")
 
-    Gt, Bt = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
+    Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
     cstr_p = []
     cstr_q = []
@@ -183,8 +183,8 @@ function constraint_mc_power_balance_se(pm::_PMs.AbstractACRModel, nw::Int, i::I
               sum(pg[gen][t] for (gen, conns) in bus_gens if t in conns)
             - sum(ps[strg][t] for (strg, conns) in bus_storage if t in conns)
             - sum(pd[load][t] for (load, conns) in bus_loads if t in conns)
-            + ( -vr[t] * sum(Gt[idx,jdx]*vr[u]-Bt[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals)
-                -vi[t] * sum(Gt[idx,jdx]*vi[u]+Bt[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals)
+            + ( -vr[t] * sum(Gs[idx,jdx]*vr[u]-Bs[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals)
+                -vi[t] * sum(Gs[idx,jdx]*vi[u]+Bs[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals)
             )
         )
         push!(cstr_p, cp)
@@ -197,8 +197,8 @@ function constraint_mc_power_balance_se(pm::_PMs.AbstractACRModel, nw::Int, i::I
               sum(qg[gen][t] for (gen, conns) in bus_gens if t in conns)
             - sum(qd[load][t] for (load, conns) in bus_loads if t in conns)
             - sum(qs[strg][t] for (strg, conns) in bus_storage if t in conns)
-            + ( vr[t] * sum(Gt[idx,jdx]*vi[u]+Bt[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals)
-               -vi[t] * sum(Gt[idx,jdx]*vr[u]-Bt[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals)
+            + ( vr[t] * sum(Gs[idx,jdx]*vi[u]+Bs[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals)
+               -vi[t] * sum(Gs[idx,jdx]*vr[u]-Bs[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals)
             )
         )
         push!(cstr_q, cq)
@@ -222,7 +222,7 @@ function constraint_mc_power_balance_se(pm::_PMs.AbstractACPModel, nw::Int, i::I
     pd   = get(_PMD.var(pm, nw), :pd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "active power",   "load")
     qd   = get(_PMD.var(pm, nw), :qd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "reactive power", "load")
 
-    Gt, Bt = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
+    Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
     cstr_p = []
     cstr_q = []
@@ -313,7 +313,7 @@ function constraint_mc_power_balance_se(pm::_PMD.SDPUBFPowerModel, nw::Int, i::I
     ps   = get(_PMD.var(pm, nw),   :ps, Dict()); _PMs._check_var_keys(ps, bus_storage, "active power", "storage")
     qs   = get(_PMD.var(pm, nw),   :qs, Dict()); _PMs._check_var_keys(qs, bus_storage, "reactive power", "storage")
 
-    Gt, Bt = _build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
+    Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
     cstr_p = []
     cstr_q = []
@@ -329,7 +329,7 @@ function constraint_mc_power_balance_se(pm::_PMD.SDPUBFPowerModel, nw::Int, i::I
             sum(pg[g][t] for (g, conns) in bus_gens if t in conns)
             - sum(ps[s][t] for (s, conns) in bus_storage if t in conns)
             - sum(pd[d][t] for (d, conns) in bus_loads if t in conns)
-            - diag(Wr*Gt'+Wi*Bt')[idx]
+            - diag(Wr*Gs'+Wi*Bs')[idx]
         )
         push!(cstr_p, cp)
 
@@ -341,8 +341,57 @@ function constraint_mc_power_balance_se(pm::_PMD.SDPUBFPowerModel, nw::Int, i::I
             sum(qg[g][t] for (g, conns) in bus_gens if t in conns)
             - sum(qs[s][t] for (s, conns) in bus_storage if t in conns)
             - sum(qd[d][t] for (d, conns) in bus_loads if t in conns)
-            - diag(-Wr*Bt'+Wi*Gt')[idx]
+            - diag(-Wr*Bs'+Wi*Gs')[idx]
         )
         push!(cstr_q, cq)
     end
+end
+
+function constraint_mc_power_balance_se(pm::_PMD.LPUBFDiagModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
+    w = _PMD.var(pm, nw, :w, i)
+    p   = get(_PMD.var(pm, nw),      :p,   Dict()); _PMs._check_var_keys(p,   bus_arcs, "active power", "branch")
+    q   = get(_PMD.var(pm, nw),      :q,   Dict()); _PMs._check_var_keys(q,   bus_arcs, "reactive power", "branch")
+    psw = get(_PMD.var(pm, nw),    :psw, Dict()); _PMs._check_var_keys(psw, bus_arcs_sw, "active power", "switch")
+    qsw = get(_PMD.var(pm, nw),    :qsw, Dict()); _PMs._check_var_keys(qsw, bus_arcs_sw, "reactive power", "switch")
+    pt  = get(_PMD.var(pm, nw),     :pt,  Dict()); _PMs._check_var_keys(pt,  bus_arcs_trans, "active power", "transformer")
+    qt  = get(_PMD.var(pm, nw),     :qt,  Dict()); _PMs._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
+    pg  = get(_PMD.var(pm, nw),     :pg,  Dict()); _PMs._check_var_keys(pg,  bus_gens, "active power", "generator")
+    qg  = get(_PMD.var(pm, nw),     :qg,  Dict()); _PMs._check_var_keys(qg,  bus_gens, "reactive power", "generator")
+    ps  = get(_PMD.var(pm, nw),     :ps,  Dict()); _PMs._check_var_keys(ps,  bus_storage, "active power", "storage")
+    qs  = get(_PMD.var(pm, nw),     :qs,  Dict()); _PMs._check_var_keys(qs,  bus_storage, "reactive power", "storage")
+    pd  = get(_PMD.var(pm, nw),     :pd,  Dict()); _PMs._check_var_keys(pd,  bus_loads, "active power", "load")
+    qd  = get(_PMD.var(pm, nw),     :qd,  Dict()); _PMs._check_var_keys(qd,  bus_loads, "reactive power", "load")
+
+    cstr_p = []
+    cstr_q = []
+
+    ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
+
+    for (idx,t) in ungrounded_terminals
+        cp = JuMP.@constraint(pm.model,
+              sum(  p[a][t] for (a, conns) in bus_arcs if t in conns)
+            + sum(psw[a][t] for (a, conns) in bus_arcs_sw if t in conns)
+            + sum( pt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
+            - sum( pg[g][t] for (g, conns) in bus_gens if t in conns)
+            + sum( ps[s][t] for (s, conns) in bus_storage if t in conns)
+            + sum( pd[d][t] for (d, conns) in bus_loads if t in conns)
+            + sum(diag(ref(pm, nw, :shunt, sh, "gs"))[findfirst(isequal(t), conns)]*w[t] for (sh, conns) in bus_shunts if t in conns)
+            ==
+            0.0
+        )
+        push!(cstr_p, cp)
+
+        cq = JuMP.@constraint(pm.model,
+              sum(  q[a][t] for (a, conns) in bus_arcs if t in conns)
+            + sum(qsw[a][t] for (a, conns) in bus_arcs_sw if t in conns)
+            + sum( qt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
+            - sum( qg[g][t] for (g, conns) in bus_gens if t in conns)
+            + sum( qs[s][t] for (s, conns) in bus_storage if t in conns)
+            + sum( qd[d][t] for (d, conns) in bus_loads if t in conns)
+            - sum(diag(_PMD.ref(pm, nw, :shunt, sh, "bs"))[findfirst(isequal(t), conns)]*w[t] for (sh, conns) in bus_shunts if t in conns)
+            ==
+            0.0
+        )
+        push!(cstr_q, cq)
+   end
 end

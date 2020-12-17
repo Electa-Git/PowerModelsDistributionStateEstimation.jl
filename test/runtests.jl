@@ -9,11 +9,10 @@
 # using pkgs
 using Distributions
 using Ipopt
-using JuMP
 using PowerModels
 using PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
-using SCS
+#using SCS #removed while SDP tests are not ective
 using Test
 
 # pkg const
@@ -41,15 +40,15 @@ scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=
                                                             "alpha"=>0.4, "verbose"=>0)
 
 
-# @testset "PowerModelsDistributionStateEstimation" begin
-#
-#     include("distributions.jl")
-#     include("estimation_criteria.jl")
-#     include("mixed_measurements.jl")
-#     include("non_exact_forms.jl")
-#     include("power_flow.jl")
-#     include("pseudo_measurements.jl")
-#     include("utils_and_start_val.jl")
-#     include("with_errors.jl")
-#
-# end
+@testset "PowerModelsDistributionStateEstimation" begin
+
+    include("distributions.jl")
+    include("estimation_criteria.jl")
+    include("mixed_measurements.jl")
+    include("non_exact_forms.jl")
+    include("power_flow.jl")
+    include("pseudo_measurements.jl")
+    include("utils_and_start_val.jl")
+    include("with_errors.jl")
+
+end
