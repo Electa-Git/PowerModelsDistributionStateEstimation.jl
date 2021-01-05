@@ -37,7 +37,6 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=p
 
     ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
 
-    # pd/qd can be NLexpressions, so cannot be vectorized
     for (idx,t) in ungrounded_terminals
         cp = JuMP.@constraint(pm.model,
         sum(  p[a][t] for (a, conns) in bus_arcs if t in conns)
