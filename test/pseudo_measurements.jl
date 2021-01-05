@@ -4,8 +4,6 @@
     msr_path = joinpath(mktempdir(),"temp.csv")
     pseudo_path = joinpath(BASE_DIR, "test/data/extra/measurements/distr_example.csv")
 
-    model = _PMs.ACPPowerModel
-
     # load data
     data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
     if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
@@ -35,7 +33,7 @@
     _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
 
     for (m, meas) in data["meas"]
-        if meas["cmp"] == :load && m ∉ ["21", "22"]
+        if meas["cmp"] == :load && m ∉ ["21", "22", "30", "31"]
             for phase in 1:length(meas["dst"])
                 if isa(meas["dst"][phase], _DST.Normal{Float64})
                     @test mean(meas["dst"][phase]) == data["load"]["$(meas["cmp_id"])"][string(meas["var"])][phase]
@@ -49,5 +47,5 @@
     # solve the state estimation
     se_result = _PMDSE.run_mc_se(data, _PMs.ACPPowerModel, ipopt_solver)
     @test se_result["termination_status"] == LOCALLY_SOLVED
-    @test isapprox( se_result["objective"], 0.215375; atol = 1e-6)
+    @test isapprox( se_result["objective"], 1.41998; atol = 1e-5)
 end

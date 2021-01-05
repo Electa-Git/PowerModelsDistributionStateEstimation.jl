@@ -48,19 +48,8 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.@constraint(pm.model,
                 res[idx] >= - (var[c] - μ) / σ / rsc
             )
-        elseif crit == "ga"
-            samples = rand(dst[idx], 10000)
-            gaussian_fit = _DST.fit(Normal, samples)
-            μ, σ = _DST.mean(gaussian_fit), _DST.std(gaussian_fit)
-
-            JuMP.@constraint(pm.model,
-                res[idx] >= (var[c] - μ) / σ / rsc
-            )
-            JuMP.@constraint(pm.model,
-                res[idx] >= - (var[c] - μ) / σ / rsc
-            )
         elseif crit == "mle"
-            isa(dst[idx], ExtendedBeta{Float64}) ? pkg_id = _PMDSE : pkg_id = _DST
+            ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? pkg_id = _PMDSE : pkg_id = _DST
             minimum(dst[idx]) > -Inf ? lb = minimum(dst[idx]) : lb = -10
             maximum(dst[idx]) <  Inf ? ub = maximum(dst[idx]) : ub = 10
             shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[idx],x),lb,ub).minimum)

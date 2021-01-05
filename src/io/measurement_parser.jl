@@ -257,11 +257,11 @@ function write_measurements_and_pseudo!(model::Type, data::Dict, pf_results::Dic
             else
                 write_cmp_measurement!(df, model, cmp_id, cmp_type, data[cmp_type][cmp_id], pf_results["solution"][cmp_type][cmp_id],
                                                     phases, exclude = exclude, σ = σ)
-                #if this is an actualy measurement, also add voltage measurement
-                bus_id = data[cmp_type][cmp_id]["$(cmp_type)_bus"]
+                #if this is an actual measurement, also add voltage measurement
+                bus_id = string(data[cmp_type][cmp_id]["$(cmp_type)_bus"])
                 phases = data["bus"][bus_id]["terminals"]
                 if !repeated_measurement(df, bus_id, "bus", phases)
-                    write_cmp_measurement!(df, model, bus_id, "bus", data["bus"][bus_id], pf_results["solution"][cmp_type][cmp_id],
+                    write_cmp_measurement!(df, model, bus_id, "bus", data["bus"][bus_id], pf_results["solution"]["bus"][bus_id],
                                                     phases, exclude = exclude, σ = σ)
                 end
             end
