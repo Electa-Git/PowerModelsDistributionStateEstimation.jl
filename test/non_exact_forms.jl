@@ -121,46 +121,46 @@
         @test isapprox(avg, 0.0; atol = 1e-8)
     end
 
-    @testset "SDP with rwlav and rwls" begin
+    # @testset "SDP with rwlav and rwls" begin
 
-        sdp_data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
-        sdp_data["settings"]["sbase_default"] = 0.001 * 1e3
-        merge!(sdp_data["voltage_source"]["source"], Dict{String,Any}(
-            "cost_pg_parameters" => [0.0, 100.0, 0.0],
-            "pg_lb" => fill(  0.0, 3),
-            "pg_ub" => fill( 10.0, 3),
-            "qg_lb" => fill(-5.0, 3),
-            "qg_ub" => fill( 5.0, 3),
-            )
-        )
+        # sdp_data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
+        # sdp_data["settings"]["sbase_default"] = 0.001 * 1e3
+        # merge!(sdp_data["voltage_source"]["source"], Dict{String,Any}(
+        #     "cost_pg_parameters" => [0.0, 100.0, 0.0],
+        #     "pg_lb" => fill(  0.0, 3),
+        #     "pg_ub" => fill( 10.0, 3),
+        #     "qg_lb" => fill(-5.0, 3),
+        #     "qg_ub" => fill( 5.0, 3),
+        #     )
+        # )
 
-        for (_,line) in sdp_data["line"]
-            line["sm_ub"] = fill(10.0, 3)
-        end
+        # for (_,line) in sdp_data["line"]
+        #     line["sm_ub"] = fill(10.0, 3)
+        # end
 
-        sdp_data = transform_data_model(sdp_data)
+        # sdp_data = transform_data_model(sdp_data)
 
-        for (_,bus) in sdp_data["bus"]
-            if bus["name"] != "sourcebus"
-                bus["vmin"] = fill(0.95, 3)
-                bus["vmax"] = fill(1.0, 3)
-            end
-        end
+        # for (_,bus) in sdp_data["bus"]
+        #     if bus["name"] != "sourcebus"
+        #         bus["vmin"] = fill(0.95, 3)
+        #         bus["vmax"] = fill(1.0, 3)
+        #     end
+        # end
 
-        pf_result = _PMD.run_mc_pf(sdp_data, _PMD.SDPUBFPowerModel, scs_solver)
-        _PMDSE.write_measurements!(_PMD.SDPUBFPowerModel, sdp_data, pf_result, msr_path)
-        _PMDSE.add_measurements!(sdp_data, msr_path, actual_meas = true)
-        _PMDSE.assign_start_to_variables!(sdp_data)
-        _PMDSE.vm_to_w_conversion!(sdp_data)
+        # pf_result = _PMD.run_mc_pf(sdp_data, _PMD.SDPUBFPowerModel, scs_solver)
+        # _PMDSE.write_measurements!(_PMD.SDPUBFPowerModel, sdp_data, pf_result, msr_path)
+        # _PMDSE.add_measurements!(sdp_data, msr_path, actual_meas = true)
+        # _PMDSE.assign_start_to_variables!(sdp_data)
+        # _PMDSE.vm_to_w_conversion!(sdp_data)
 
-        sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
-        se_result_sdp_wlav = PowerModelsDistributionStateEstimation.run_sdp_mc_se(sdp_data, scs_solver)
+        # sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
+        # se_result_sdp_wlav = _PMDSE.run_sdp_mc_se(sdp_data, scs_solver)
 
-        sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1)
-        se_result_sdp_wls = PowerModelsDistributionStateEstimation.run_sdp_mc_se(sdp_data, scs_solver)
+        # sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1)
+        # se_result_sdp_wls = _PMDSE.run_sdp_mc_se(sdp_data, scs_solver)
 
         #delta_wlav, max_err_wlav, avg_wlav = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
-        delta_wls, max_err_wls, avg_wls = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)
+        # delta_wls, max_err_wls, avg_wls = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)
 
         # @test se_result_sdp_wlav["termination_status"] == ALMOST_OPTIMAL
         # @test se_result_sdp_wls["termination_status"] == OPTIMAL
@@ -170,5 +170,5 @@
         #@test isapprox(max_err_wlav, 0.046954; atol=2e-1)
         #@test isapprox(avg_wlav, 0.012229; atol=1e-1)
         #@test isapprox(se_result_sdp_wlav["objective"], 0.00732792; atol=1e-2)
-    end
+    # end
 end

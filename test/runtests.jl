@@ -8,19 +8,15 @@
 
 # using pkgs
 using Distributions
-using GaussianMixtures
 using Ipopt
-using JuMP
 using PowerModels
 using PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
-using SCS
+#using SCS #removed while SDP tests are not e
 using Test
 
 # pkg const
 const _DST = Distributions
-const _GMM = GaussianMixtures
-const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
@@ -36,19 +32,18 @@ rm_transfo = true
 rd_lines   = true
 
 # set solvers
-ipopt_solver = _JMP.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
+ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                               "tol"=>1e-10,
                                                               "print_level"=>0)
 
-scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
-                                                            "alpha"=>0.4, "verbose"=>0)
+# scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
+#                                                             "alpha"=>0.4, "verbose"=>0) #deactivated while SDP tests not active
 
 
 @testset "PowerModelsDistributionStateEstimation" begin
 
     include("distributions.jl")
     include("estimation_criteria.jl")
-    include("gaussian_mixture.jl")
     include("mixed_measurements.jl")
     include("non_exact_forms.jl")
     include("power_flow.jl")

@@ -14,7 +14,7 @@ The functions preceded by a "_PMD." are imported from PowerModelsDistributions.j
 PowerModelsDistributionStateEstimation.variable_mc_bus_voltage(pm; bounded = true)
 _PMD.variable_mc_branch_power(pm; bounded = true)
 _PMD.variable_mc_transformer_power(pm; bounded = true)
-_PMD.variable_mc_gen_power_setpoint(pm; bounded = true)
+_PMD.variable_mc_generator_power(pm; bounded = true)
 variable_mc_load(pm; report = true)
 variable_mc_residual(pm, bounded = true)
 variable_mc_measurement(pm, bounded = false)
@@ -34,7 +34,7 @@ for (i,bus) in _PMD.ref(pm, :ref_buses)
     _PMD.constraint_mc_theta_ref(pm, i)
 end
 for (i,bus) in _PMD.ref(pm, :bus)
-    PowerModelsDistributionStateEstimation.constraint_mc_load_power_balance_se(pm, i)
+    PowerModelsDistributionStateEstimation.constraint_power_balance_se(pm, i)
 end
 for (i,branch) in _PMD.ref(pm, :branch)
     _PMD.constraint_mc_ohms_yt_from(pm, i)

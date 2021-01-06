@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -15,13 +15,13 @@ AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
 These formulation are exact for networks like those made available in the ENWL database,
 where there are no gound admittance, storage elements and active switches.
 Other than this, the function is the same as the constraint_mc_load_power_balance defined in PowerModelsDistribution "
-function constraint_mc_load_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=pm.cnw)
 
     bus = _PMD.ref(pm, nw, :bus, i)
-    bus_arcs = _PMD.ref(pm, nw, :bus_arcs, i)
-    bus_arcs_trans = _PMD.ref(pm, nw, :bus_arcs_trans, i)
-    bus_gens = _PMD.ref(pm, nw, :bus_gens, i)
-    bus_loads = _PMD.ref(pm, nw, :bus_loads, i)
+    bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
+    bus_arcs_trans = _PMD.ref(pm, nw, :bus_arcs_conns_transformer, i)
+    bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
+    bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
 
     p    = get(_PMD.var(pm, nw),    :p, Dict()); _PMs._check_var_keys(p, bus_arcs, "active power", "branch")
     q    = get(_PMD.var(pm, nw),    :q, Dict()); _PMs._check_var_keys(q, bus_arcs, "reactive power", "branch")
@@ -32,29 +32,33 @@ function constraint_mc_load_power_balance(pm::AbstractReducedModel, i::Int; nw::
     pd   = get(_PMD.var(pm, nw),  :pd, Dict()); _PMs._check_var_keys(pd, bus_loads, "active power", "load")
     qd   = get(_PMD.var(pm, nw),  :qd, Dict()); _PMs._check_var_keys(pd, bus_loads, "reactive power", "load")
 
-    # pd/qd can be NLexpressions, so cannot be vectorized
-    for c in _PMs.conductor_ids(pm; nw=nw)
+    terminals = bus["terminals"]
+    grounded =  bus["grounded"]
+
+    ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
+
+    for (idx,t) in ungrounded_terminals
         cp = JuMP.@constraint(pm.model,
-            sum(p[a][c] for a in bus_arcs)
-            + sum(pt[a_trans][c] for a_trans in bus_arcs_trans)
-            ==
-            sum(pg[g][c] for g in bus_gens)
-            - sum(pd[l][c] for l in bus_loads)
-        )
+        sum(  p[a][t] for (a, conns) in bus_arcs if t in conns)
+      + sum( pt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
+      - sum( pg[g][t] for (g, conns) in bus_gens if t in conns)
+      + sum( pd[l][t] for (l, conns) in bus_loads if t in conns)
+      == 0.0
+      )
 
         cq = JuMP.@constraint(pm.model,
-            sum(q[a][c] for a in bus_arcs)
-            + sum(qt[a_trans][c] for a_trans in bus_arcs_trans)
-            ==
-            sum(qg[g][c] for g in bus_gens)
-            - sum(qd[l][c] for l in bus_loads)
-        )
-    end
+        sum(  q[a][t] for (a, conns) in bus_arcs if t in conns)
+      + sum( qt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
+      - sum( qg[g][t] for (g, conns) in bus_gens if t in conns)
+      + sum( qd[l][t] for (l, conns) in bus_loads if t in conns)
+      == 0.0
+      )
+   end
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function constraint_mc_load_power_balance(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
-    _PMD.constraint_mc_load_power_balance(pm, i; nw=nw)
+function constraint_mc_power_balance(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+    _PMD.constraint_mc_power_balance(pm, i; nw=nw)
 end
 
 function variable_mc_bus_voltage(pm::ReducedACPPowerModel; bounded = true)

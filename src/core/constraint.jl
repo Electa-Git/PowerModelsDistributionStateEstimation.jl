@@ -5,77 +5,61 @@
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
-
 """
     constraint_mc_residual
 
 Equality constraint that describes the residual definition, which depends on the
 criterion assigned to each individual measurement in data["meas"]["m"]["crit"].
 """
-
 function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
 
-    cmp = get_cmp_id(pm, nw, i)
+    cmp_id = get_cmp_id(pm, nw, i)
     res = _PMD.var(pm, nw, :res, i)
-    var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp)
+    var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp_id)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :se_settings)["rescaler"]
     crit = _PMD.ref(pm, nw, :meas, i, "crit")
+    conns = get_active_connections(pm, nw, _PMD.ref(pm, nw, :meas, i, "cmp"), cmp_id)
 
-    for c in _PMD.conductor_ids(pm; nw=nw)
-        if isa(dst[c], Float64)
-            JuMP.@constraint(pm.model, var[c] == dst[c])
-            JuMP.@constraint(pm.model, res[c] == 0.0)
-        elseif crit == "wls" && isa(dst[c], _DST.Normal)
-            μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
+    for (idx, c) in enumerate(conns)
+        if isa(dst[idx], Float64)
+            JuMP.@constraint(pm.model, var[c] == dst[idx])
+            JuMP.@constraint(pm.model, res[idx] == 0.0)
+        elseif crit == "wls" && isa(dst[idx], _DST.Normal)
+            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
             JuMP.@constraint(pm.model,
-                res[c] == (var[c] - μ)^2 / σ^2 / rsc
+                res[idx] == (var[c] - μ)^2 / σ^2 / rsc
             )
-        elseif crit == "rwls" && isa(dst[c], _DST.Normal)
-            μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
+        elseif crit == "rwls" && isa(dst[idx], _DST.Normal)
+            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
             JuMP.@constraint(pm.model,
-                res[c] * rsc * σ^2 >= (var[c] - μ)^2
+                res[idx] * rsc * σ^2 >= (var[c] - μ)^2
             )
-        elseif crit == "wlav" && isa(dst[c], _DST.Normal)
-            μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
+        elseif crit == "wlav" && isa(dst[idx], _DST.Normal)
+            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
             JuMP.@NLconstraint(pm.model,
-                res[c] == abs(var[c] - μ) / σ / rsc
+                res[idx] == abs(var[c] - μ) / σ / rsc
             )
-        elseif crit == "rwlav" && isa(dst[c], _DST.Normal)
-            μ, σ = _DST.mean(dst[c]), _DST.std(dst[c])
+        elseif crit == "rwlav" && isa(dst[idx], _DST.Normal)
+            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
             JuMP.@constraint(pm.model,
-                res[c] >= (var[c] - μ) / σ / rsc
-            )
-            JuMP.@constraint(pm.model,
-                res[c] >= - (var[c] - μ) / σ / rsc
-            )
-        elseif crit == "gmm"
-            N   = _PMD.ref(pm, nw, :se_settings)["number_of_gaussian"]
-            gmm = _GMM.GMM(N, rand(dst[c], 10000))
-            gmv = _PMD.var(pm, nw, :gmv, i)
-            JuMP.@constraint(pm.model,
-                var[c] == sum(gmm.w[n] * gmv[c,n] for n in 1:N)
+                res[idx] >= (var[c] - μ) / σ / rsc
             )
             JuMP.@constraint(pm.model,
-                res[c] >= sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc
-                                        for n in 1:N)
-            )
-            JuMP.@constraint(pm.model,
-                res[c] >= - sum(gmm.w[n] * (gmv[c,n] - gmm.μ[n]) / gmm.Σ[n] / rsc
-                                        for n in 1:N)
+                res[idx] >= - (var[c] - μ) / σ / rsc
             )
         elseif crit == "mle"
-            isa(dst[c], ExtendedBeta{Float64}) ? pkg_id = _PMDSE : pkg_id = _DST
-            minimum(dst[c]) > -Inf ? lb = minimum(dst[c]) : lb = -10
-            maximum(dst[c]) <  Inf ? ub = maximum(dst[c]) : ub = 10
-            shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[c],x),lb,ub).minimum)
+            ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? pkg_id = _PMDSE : pkg_id = _DST
+            minimum(dst[idx]) > -Inf ? lb = minimum(dst[idx]) : lb = -10
+            maximum(dst[idx]) <  Inf ? ub = maximum(dst[idx]) : ub = 10
+            shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[idx],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
 
-            fun(x) = rsc * ( - shf + pkg_id.logpdf(dst[c],x) )
-            grd(x) = pkg_id.gradlogpdf(dst[c],x)
-            hes(x) = heslogpdf(dst[c],x)
+            fun(x) = rsc * ( - shf + pkg_id.logpdf(dst[idx],x) )
+            grd(x) = pkg_id.gradlogpdf(dst[idx],x)
+            hes(x) = heslogpdf(dst[idx],x)
             JuMP.register(pm.model, f, 1, fun, grd, hes)
-            JuMP.add_NL_constraint(pm.model, :($(res[c]) == - $(f)($(var[c]))))
+            JuMP.add_NL_constraint(pm.model, :($(res[idx]) == - $(f)($(var[c]))))
         else
             Memento.error(_LOGGER, "SE criterion of measurement $(i) not recognized")
         end

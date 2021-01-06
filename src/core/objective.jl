@@ -1,23 +1,19 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
 """
     objective_mc_se
 """
-# Tom's remarks
-# 1) Is this the most general way of doing this? Because in this case a residual
-#    needs to be present for each of the conductors, which is not necessarily
-#    the case.
 function objective_mc_se(pm::_PMs.AbstractPowerModel)
     return JuMP.@objective(pm.model, Min,
     sum(
         sum(
-            sum(_PMs.var(pm, n, :res, i)[c] for i in _PMs.ids(pm, n, :meas))
-        for c in _PMs.conductor_ids(pm, n) )
-    for (n, nw_ref) in _PMs.nws(pm) )
+            sum(_PMs.var(pm, nw, :res, i)[idx] for idx in 1:length(_PMs.var(pm, nw, :res, i)) )
+        for i in _PMs.ids(pm, nw, :meas))
+    for (nw, nw_ref) in _PMs.nws(pm) )
     )
 end

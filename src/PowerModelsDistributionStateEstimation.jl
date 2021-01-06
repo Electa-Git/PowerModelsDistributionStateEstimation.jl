@@ -8,7 +8,7 @@
 module PowerModelsDistributionStateEstimation
 
 # import pkgs
-import Base: minimum, maximum
+import Base: maximum, minimum, rand
 import CSV
 import DataFrames
 import Distributions
@@ -21,9 +21,14 @@ import Memento
 import Optim
 import PowerModels
 import PowerModelsDistribution
+import PowerModelsDistribution: _has_nl_expression #need this to use @smart_constraint
 import Random
 import SpecialFunctions
 import Statistics
+
+#import and export so that users do not need to import JuMP to use a solver
+import JuMP: optimizer_with_attributes
+export optimizer_with_attributes
 
 # pkg const
 const _CSV = CSV
@@ -31,7 +36,6 @@ const _DFS = DataFrames
 const _DST = Distributions
 const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
-const _JMP = JuMP
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
@@ -42,7 +46,7 @@ const _STT = Statistics
 # paths
 const BASE_DIR = dirname(@__DIR__)
 
-# fix a random seed 
+# fix a random seed
 #_RAN.seed!(1234);
 
 # logger for errors and warnings
@@ -75,6 +79,7 @@ export rm_enwl_transformer!, reduce_enwl_lines_eng!
 export add_measurements!, write_measurements!, assign_load_pseudo_measurement_info!
 export assign_unique_individual_criterion!, assign_basic_individual_criteria!
 export assign_start_to_variables!, assign_residual_ub!
+export reduce_single_phase_loadbuses!
 export calculate_voltage_magnitude_error
 export update_load_bounds!, update_voltage_bounds!, update_generator_bounds!, update_all_bounds!
 export ExtendedBeta

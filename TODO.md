@@ -1,12 +1,8 @@
-## A list of things to do before v0.2.0
+## A list of things to do for v0.2.1
 
-- [ ] update code for PMD v0.10.0 (!!!)
-
-- [x] individual SE criterion per measurement ("mixed" criterion) (!!!)
-
-- [x] add rho max speed up comp time (if infeasible, bad data identification possible?) (!!!)
-
-- [x] automated non gaussian measurement creation (!!!)
+- [ ] update code for PMD v0.10.1 once it is released (!)
+      - unlock single-phase buses and branches
+      - re-introduce start_values in tests and enable ubuntu tests back
 
 - [ ] quantify rescaler for non-gaussian
 
@@ -14,9 +10,14 @@
 
 - [ ] input through array of measurements rather then csv
 
-- [x] code beta distribution with 4 parameters
+- [ ] consider deprecating reduced_ac and reduced_ivr after test against @smart_constraint (especially reduced_ac)
 
-- [x] increase code coverage for distributions
+- [ ] increase coverage, in particular:
+      - test for rand(ExtendedBeta)
+      - test for GMM grad/heslogpdf
+      - bring back test of line 49-50 in pseudo_measurements.jl
+
+- [ ] Fix missing docstrings and faulty latex in mathematical model, update docs
 
 ## TODO before 0.X
 

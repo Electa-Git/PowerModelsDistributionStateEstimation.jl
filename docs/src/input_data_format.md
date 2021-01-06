@@ -176,7 +176,7 @@ The `number_of_gaussian` is an Int and is only resorted to when the Gaussian Mix
 ```julia
 "se_settings" => Dict{String,Any}(
     "rescaler" => 10,
-    "criterion" => "gmm", #only for global criterion assignment
+    "criterion" => "ga", #only for global criterion assignment
     "number_of_gaussian" => 6
 )
 ```
