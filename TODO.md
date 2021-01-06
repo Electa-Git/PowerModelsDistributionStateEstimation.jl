@@ -1,7 +1,8 @@
 ## A list of things to do for v0.2.1
 
 - [ ] update code for PMD v0.10.1 once it is released (!)
-      - to unlock single-phase buses and branches
+      - unlock single-phase buses and branches
+      - re-introduce start_values in tests and enable ubuntu tests back
 
 - [ ] quantify rescaler for non-gaussian
 
