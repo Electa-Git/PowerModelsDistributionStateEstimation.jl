@@ -14,6 +14,7 @@
 - [ ] increase coverage, in particular:
       - test for rand(ExtendedBeta)
       - test for GMM grad/heslogpdf
+      - bring back test of line 49-50 in pseudo_measurements.jl
 
 - [ ] Fix missing docstrings and faulty latex in mathematical model, update docs
 
