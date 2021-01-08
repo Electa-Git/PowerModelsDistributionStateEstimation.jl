@@ -2,6 +2,7 @@
 *.jl.cov
 *.jl.mem
 .DS_Store
+*.csv
 deps/deps.jl
 docs/build/
 /Manifest.toml

@@ -147,9 +147,16 @@ function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
     end
 end
 
-## gradpdf and hespdf for Gaussian mixture
+## logpdf, gradlogpdf and heslogpdf for Gaussian mixture
 #  The GMM type is from package GaussianMixtures
-function gradlogpdf(d::_GMM.GMM, x::Real)
+function logpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
+    σ = sqrt.(d.Σ)
+    μ = d.μ
+    g = _DST.Normal.(μ, σ)
+    sum([d.w[i]*_DST.pdf(g[i],x) for i in 1:d.n])
+end
+
+function gradlogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
     σ = sqrt.(d.Σ)
     μ = d.μ
     γ = d.w./(sqrt(2*π)*σ)
@@ -157,7 +164,7 @@ function gradlogpdf(d::_GMM.GMM, x::Real)
     sum([-γ[i]*(x-μ[i])*_DST.pdf(g[i],x)*σ[i]^(-2) for i in 1:d.n])/sum([γ[i]*_DST.pdf(g[i],x) for i in 1:d.n])
 end
 
-function heslogpdf(d::_GMM.GMM, x::Real)
+function heslogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
     σ = sqrt.(d.Σ)
     μ = d.μ
     γ = d.w./(sqrt(2*π)*σ)

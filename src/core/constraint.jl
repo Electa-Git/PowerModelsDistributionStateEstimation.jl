@@ -50,8 +50,11 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             )
         elseif crit == "mle"
             ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? pkg_id = _PMDSE : pkg_id = _DST
-            minimum(dst[idx]) > -Inf ? lb = minimum(dst[idx]) : lb = -10
-            maximum(dst[idx]) <  Inf ? ub = maximum(dst[idx]) : ub = 10
+            ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.minimum(dst[idx])) ) ? lb = pkg_id.minimum(dst[idx]) : lb = -10
+            ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.maximum(dst[idx])) ) ? ub = pkg_id.maximum(dst[idx]) : ub = 10
+            if isa(dst[idx], _GMM.GMM) lb = _PMD.ref(pm, nw, :meas, i, "min") end
+            if isa(dst[idx], _GMM.GMM) ub = _PMD.ref(pm, nw, :meas, i, "max") end
+            
             shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[idx],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)
 

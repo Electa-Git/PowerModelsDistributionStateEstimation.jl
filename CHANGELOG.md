@@ -1,3 +1,6 @@
+## v0.2.1
+- Bugfix: use of gaussian mixture models led to invalid JuMP models (Inf logpdf/NaN gradlogpdf and heslogpdf)
+
 ## v0.2.0
 - Add: possibility to set upper bound on residuals
 - Add: support for easier non gaussian measurement creation
