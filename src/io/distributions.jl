@@ -134,7 +134,7 @@ function minimum(dst::ExtendedBeta{T}) where T<:Real
 end
 
 rand(dst::ExtendedBeta, N::Int) =
-    (dst.max - dst.min) .* rand(Beta(dst.α, dst.β), N) .+ dst.min
+    (dst.max - dst.min) .* rand(_DST.Beta(dst.α, dst.β), N) .+ dst.min
 
 ## Gamma
 # functions
