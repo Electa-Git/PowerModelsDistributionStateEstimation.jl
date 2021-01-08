@@ -153,7 +153,7 @@ function logpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
     σ = sqrt.(d.Σ)
     μ = d.μ
     g = _DST.Normal.(μ, σ)
-    sum([d.w[i]*_DST.pdf(g[i],x) for i in 1:d.n])
+    log(sum([d.w[i]*_DST.pdf(g[i],x) for i in 1:d.n]))
 end
 
 function gradlogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
