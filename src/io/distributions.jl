@@ -160,17 +160,16 @@ function gradlogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
     σ = sqrt.(d.Σ)
     μ = d.μ
     γ = d.w./(sqrt(2*π)*σ)
-    g = _DST.Normal.(μ, σ)
-    sum([-γ[i]*(x-μ[i])*_DST.pdf(g[i],x)*σ[i]^(-2) for i in 1:d.n])/sum([γ[i]*_DST.pdf(g[i],x) for i in 1:d.n])
+    sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])/sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])
 end
 
 function heslogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
     σ = sqrt.(d.Σ)
     μ = d.μ
     γ = d.w./(sqrt(2*π)*σ)
-    g = _DST.Normal.(μ, σ)
-    sum( [ ( γ[i]*(x-μ[i])^2*_DST.pdf(g[i],x)*σ[i]^(-4) - _DST.pdf(g[i],x)*σ[i]^(-1) ) for i in 1:d.n])/
-    sum([γ[i]*_DST.pdf(g[i],x) for i in 1:d.n]) 
-    - ( sum([-γ[i]*(x-μ[i])*_DST.pdf(g[i],x)*σ[i]^(-2) for i in 1:d.n])^2/
-    sum([γ[i]*_DST.pdf(g[i],x) for i in 1:d.n]) )
+    p1 = sum([γ[i]*(x-μ[i])^2*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-4) - γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])    
+    p2 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n]) 
+    p3 = sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])^2 
+    p4 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])^2
+    return p1/p2-p3/p4
 end

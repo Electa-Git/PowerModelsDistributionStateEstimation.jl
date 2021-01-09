@@ -7,7 +7,7 @@
 ################################################################################
 
 # using pkgs
-using Distributions
+using Distributions, GaussianMixtures
 using Ipopt
 using PowerModels
 using PowerModelsDistribution
@@ -17,6 +17,7 @@ using Test
 
 # pkg const
 const _DST = Distributions
+const _GMM = GaussianMixtures
 const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
@@ -43,12 +44,12 @@ ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
 @testset "PowerModelsDistributionStateEstimation" begin
 
     include("distributions.jl")
-    include("estimation_criteria.jl")
-    include("mixed_measurements.jl")
-    include("non_exact_forms.jl")
-    include("power_flow.jl")
-    include("pseudo_measurements.jl")
-    include("utils_and_start_val.jl")
-    include("with_errors.jl")
+    # include("estimation_criteria.jl")
+    # include("mixed_measurements.jl")
+    # include("non_exact_forms.jl")
+    # include("power_flow.jl")
+    # include("pseudo_measurements.jl")
+    # include("utils_and_start_val.jl")
+    # include("with_errors.jl")
 
 end
