@@ -77,6 +77,7 @@ export BASE_DIR
 export minimum, maximum
 export logpdf, gradlogpdf, heslogpdf
 export run_mc_se, run_acp_mc_se, run_acr_mc_se, run_ivr_mc_se
+export solve_mc_se, solve_acp_mc_se, solve_acr_mc_se, solve_ivr_mc_se
 export rm_enwl_transformer!, reduce_enwl_lines_eng!
 export add_measurements!, write_measurements!, assign_load_pseudo_measurement_info!
 export assign_unique_individual_criterion!, assign_basic_individual_criteria!

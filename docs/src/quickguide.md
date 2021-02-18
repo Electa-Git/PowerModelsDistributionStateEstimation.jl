@@ -23,15 +23,15 @@ data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
 slv = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 #run state estimation
-se_result = run_acp_mc_se(data, slv)
+se_result = solve_acp_mc_se(data, slv)
 ```
 The run commands return detailed results in the form of a dictionary, following PowerModels format, and can be saved for future processing, like in `se_result` above.
 
 ## Accessing Different Formulations
 
-Different run functions correspond to different formulations. The function `run_acp_mc_se` uses the AC Polar form, `run_acr_mc_se` uses the AC rectangular, etc. Alternatively, the formulation type can directly be passed to the generic `run_mc_se` function:
+Different run functions correspond to different formulations. The function `solve_acp_mc_se` uses the AC Polar form, `solve_acr_mc_se` uses the AC rectangular, etc. Alternatively, the formulation type can directly be passed to the generic `solve_mc_se` function:
 ```julia
-run_mc_se(data, ACPPowerModel, slv)
+solve_mc_se(data, ACPPowerModel, slv)
 ```
 It should be noted that not all solvers can handle all problem types. For example, to use the SDP formulation, you have to use a SDP-capable solver, such as the open-source solver SCS.
 

@@ -1,4 +1,10 @@
-## v0.2.1
+## v0.2.4
+- depreciates run_ functions in favor of solve_ (with warns)
+- adds support for `relax_integrality` (InfrastructureModels ~0.5.4)
+- adds logo
+
+## v0.2.1-3
+- Bugfix: minor bugfixes for non-gaussian SE
 - Bugfix: use of gaussian mixture models led to invalid JuMP models (Inf logpdf/NaN gradlogpdf and heslogpdf)
 
 ## v0.2.0

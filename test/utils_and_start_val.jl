@@ -26,7 +26,7 @@ data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbala
     end
 
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-    pf_result= _PMD.run_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
+    pf_result= _PMD.solve_mc_pf(data, _PMD.ACPPowerModel, ipopt_solver)
 
     @testset "other utils" begin
 

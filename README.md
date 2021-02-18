@@ -1,5 +1,7 @@
 # PowerModelsDistributionStateEstimation.jl
 
+![logo](https://raw.githubusercontent.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/master/examples/assets/PMDSE_logo.PNG)
+
 <a href="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/actions?query=workflow%3ACI"><img src="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/workflows/CI/badge.svg"></img></a>
 <a href="https://codecov.io/gh/Electa-Git/PowerModelsDistributionStateEstimation.jl"><img src="https://img.shields.io/codecov/c/github/Electa-Git/PowerModelsDistributionStateEstimation.jl?logo=Codecov"></img></a>
 <a href="https://electa-git.github.io/PowerModelsDistributionStateEstimation.jl/stable/"><img src="https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl/workflows/Documentation/badge.svg"></img></a>

@@ -23,7 +23,7 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
@@ -38,7 +38,7 @@
                                            "rescaler" => 100)
 
         # solve the state estimation
-        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+        se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
         # tests
         delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -61,7 +61,7 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
@@ -76,7 +76,7 @@
                                            "rescaler" => 100)
 
         # solve the state estimation
-        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+        se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
         # tests
         delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -98,7 +98,7 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
@@ -113,7 +113,7 @@
                                            "rescaler" => 100)
 
         # solve the state estimation
-        se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+        se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
         # tests
         delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -147,17 +147,17 @@
         #     end
         # end
 
-        # pf_result = _PMD.run_mc_pf(sdp_data, _PMD.SDPUBFPowerModel, scs_solver)
+        # pf_result = _PMD.solve_mc_pf(sdp_data, _PMD.SDPUBFPowerModel, scs_solver)
         # _PMDSE.write_measurements!(_PMD.SDPUBFPowerModel, sdp_data, pf_result, msr_path)
         # _PMDSE.add_measurements!(sdp_data, msr_path, actual_meas = true)
         # _PMDSE.assign_start_to_variables!(sdp_data)
         # _PMDSE.vm_to_w_conversion!(sdp_data)
 
         # sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
-        # se_result_sdp_wlav = _PMDSE.run_sdp_mc_se(sdp_data, scs_solver)
+        # se_result_sdp_wlav = _PMDSE.solve_sdp_mc_se(sdp_data, scs_solver)
 
         # sdp_data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1)
-        # se_result_sdp_wls = _PMDSE.run_sdp_mc_se(sdp_data, scs_solver)
+        # se_result_sdp_wls = _PMDSE.solve_sdp_mc_se(sdp_data, scs_solver)
 
         #delta_wlav, max_err_wlav, avg_wlav = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wlav, pf_result)
         # delta_wls, max_err_wls, avg_wls = _PMDSE.calculate_voltage_magnitude_error(se_result_sdp_wls, pf_result)

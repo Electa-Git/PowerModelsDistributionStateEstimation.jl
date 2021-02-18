@@ -1,8 +1,14 @@
-## A list of things to do for v0.2.1
+## A list of things to do for v0.3.0
 
-- [ ] update code for PMD v0.10.1 once it is released (!)
+- [ ] update code for PMD v0.10.2 once it is released (!)
       - unlock single-phase buses and branches
       - re-introduce start_values in tests and enable ubuntu tests back
+
+- [ ] fix StatsPlots dependency
+
+- [ ] update to InfrastructureModels 0.6.0
+
+- [ ] update Pluto notebook
 
 - [ ] quantify rescaler for non-gaussian
 

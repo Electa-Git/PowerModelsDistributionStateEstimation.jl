@@ -21,7 +21,7 @@
 
         for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -36,7 +36,7 @@
                                                "rescaler" => 1)
 
             # solve the state estimation
-            se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -61,7 +61,7 @@
 
         for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -76,7 +76,7 @@
                                                "rescaler" => 1)
 
             # solve the state estimation
-            se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -101,7 +101,7 @@
 
         for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -117,7 +117,7 @@
                                                "rescaler" => 1)
 
             # solve the state estimation
-            se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -143,7 +143,7 @@
 
         for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -158,7 +158,7 @@
                                                "rescaler" => 1)
 
             # solve the state estimation
-            se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -184,7 +184,7 @@
 
         for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -199,7 +199,7 @@
                                                "rescaler" => 1)
 
             # solve the state estimation
-            se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
@@ -225,7 +225,7 @@
 
         for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -240,7 +240,7 @@
                                                "rescaler" => 1)
 
             # solve the state estimation
-            se_result = _PMDSE.run_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
