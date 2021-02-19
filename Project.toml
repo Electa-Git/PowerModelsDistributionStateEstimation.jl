@@ -24,7 +24,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [compat]
 CSV = "~0.6.1"
 DataFrames = "~0.21.0"
-Distributions = "0.22.3"
+Distributions = "0.22.3 - 0.24.14"
 GaussianMixtures = "0.3.2"
 InfrastructureModels = "~0.5.4"
 Ipopt = "~0.6"

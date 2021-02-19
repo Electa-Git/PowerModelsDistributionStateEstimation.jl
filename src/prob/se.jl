@@ -112,7 +112,7 @@ function solve_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, s
         data["se_settings"]["number_of_gaussian"] = 10
         Memento.warn(_LOGGER, "Estimation criterion set to default value, edit data dictionary if you wish to change it.")
     end
-    return _PMD.solve_mc_model(data, model_type, solver, build_mc_se; kwargs...)
+    return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end
 
 "specification of the state estimation problem for a bus injection model - ACP and ACR formulations"
