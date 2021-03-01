@@ -1,23 +1,26 @@
 ### A Pluto.jl notebook ###
-# v0.12.10
+# v0.12.21
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 40c02a40-226c-11eb-22d7-35ac77bf3138
-using JuMP, Ipopt #Adding many packages on one line might cause long loading times
-
-# ╔═╡ 5b2f8ba0-2276-11eb-0724-71fd0a3b22b7
-using PowerModels, PowerModelsDistribution   
-
-# ╔═╡ 9b3b01c0-226c-11eb-2d4e-b35bc9ba3937
-using PowerModelsDistributionStateEstimation
-
-# ╔═╡ 9abdfbb0-28d1-11eb-03bc-95a35ed6a561
-using Plots
-
-# ╔═╡ a23b0510-25b4-11eb-057f-3f0aaddfba1d
-using CSV
+# ╔═╡ 88d07650-7a69-11eb-0a3c-4168940f5e2d
+begin
+	import Pkg
+	Pkg.activate(mktempdir())
+	Pkg.add([
+			Pkg.PackageSpec(name="PowerModelsDistributionStateEstimation",   version="0.2.3"),
+			Pkg.PackageSpec(name="PowerModelsDistribution", version="0.10.2"),
+		Pkg.PackageSpec(name="Ipopt", version="0.6.5"),
+			Pkg.PackageSpec(name="Plots"), Pkg.PackageSpec(name="CSV")])
+	 Pkg.build("Plots")
+	using PowerModelsDistributionStateEstimation
+	using PowerModelsDistribution
+	using Ipopt
+	using Plots
+	using CSV
+	nothing
+end
 
 # ╔═╡ 39a2e490-25bf-11eb-2d3a-05fda8c6ecd4
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]));
@@ -27,9 +30,9 @@ md""" ## ⚡ Power System State Estimation ⚡    with _PowerModelsDistributionS
 """
 
 # ╔═╡ 44035512-2271-11eb-2ffb-2f3c2b8ea231
-md"This tutorial is made with Pluto notebooks. You can find details on Pluto on its [github page](https://github.com/fonsp/Pluto.jl) or have a look at the [JuliaCon2020 presentation](https://www.youtube.com/watch?v=IAF8DjrQSSk&ab_channel=TheJuliaProgrammingLanguage). This notebook is available within the PowerModelsDistributionStateEstimation package, in the /example folder.  
+md"This tutorial is made with Pluto notebooks. You can find details on Pluto.jl (and hence on how to run this notebook) on its [github page](https://github.com/fonsp/Pluto.jl) or have a look at the [JuliaCon2020 presentation](https://www.youtube.com/watch?v=IAF8DjrQSSk&ab_channel=TheJuliaProgrammingLanguage). This notebook is available within the PowerModelsDistributionStateEstimation package, in the /example folder.  
 
-⚠️⚠️ Warning! ⚠️⚠️ This notebook refers to version 0.1.2 of the package. The package is in active development. The idea is that we improve functionalities in the future, without breaking the old ones. But you never know..
+⚠️⚠️ Warning! ⚠️⚠️ This notebook refers to version 0.2.3 of the package. The package is in active development. The idea is that we improve functionalities in the future, without breaking the old ones. But you never know..
 "
 
 # ╔═╡ 94c4f342-2277-11eb-2932-89244e8ce3c9
@@ -41,22 +44,15 @@ md"### Let's get started: install and call packages"
 # ╔═╡ fa6b2e80-226d-11eb-0500-b7b51a64a01b
 md"The following packages are needed for your first state estimation script:   
 1) PowerModelsDistributionStateEstimation.jl to build a state estimation model/problem,     
-2) A solver (e.g., Ipopt), to solve the state estimation problem,  
-3) JuMP.jl, to assign the solver settings, 
-4) PowerModelsDistribution.jl, to parse the network data, and
-5) Powermodels.jl, to access different formulations,
-6) Plots.jl, because visuals can make things clearer, 
-7) CSV.jl, to read CSV files, we need it towards the end of the notebook.
+2) PowerModelsDistribution.jl, for power flow calculations and to parse network data, 
+3) A solver (in this case Ipopt), to solve the state estimation problem,  
+4) Plots.jl, because visuals can make things clearer, 
+5) CSV.jl, to read CSV files, we need it towards the end of the notebook.
+Note, the packages are installed in a temporary environment (see cell below). This might take a while to compile if it is the first time you run this notebook.
 "
 
-# ╔═╡ 0d37befe-2274-11eb-089e-33d8d6086786
-md"If you don't have some of these packages in your current environment, you can add them directly from the notebook using **Pkg**, but it is really not recommended as it might last quite long. For example, the code below took 225 s on my machine: 
-
-```julia
-using Pkg
-Pkg.add(\"PowerModelsDistribution\")  
-```
-"
+# ╔═╡ 7626c130-7a91-11eb-1f0a-a14118b621b4
+PMDSE = PowerModelsDistributionStateEstimation
 
 # ╔═╡ 1cffc500-258e-11eb-217b-053f1ced96ae
 md"_________________________________________________________________________________  
@@ -67,13 +63,13 @@ md"_____________________________________________________________________________
 md"Let's choose a simple network to design a state estimator for. There is one stored in PMDSE, in test/data/extra/network, we just need to find the path. PMDSE exports the 'BASE_DIR' constant, which allows you to figure out where your installation of the package is located. You can create a new cell and display the value of this variable. Otherwise, let's just define the network path:"
 
 # ╔═╡ 1863f5be-258e-11eb-3b21-1d852ef2601e
-ntw_path = joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss")
+ntw_path = joinpath(PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss")
 
 # ╔═╡ fcb32f32-258d-11eb-2d1b-d5a2629873cb
 md"Similarly, you can access the measurement file relative to this network, in test/data/extra/measurements. The name of the file is `case3_meas.csv`. Call the path `msr_path`."
 
 # ╔═╡ c0672120-258e-11eb-142c-b52038715ee9
-msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
+msr_path = joinpath(PMDSE.BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
 
 # ╔═╡ cdaf7070-258f-11eb-0325-dfc2acfc139b
 	md"Our network data is an OpenDSS file. Then, we can use the PowerModelsDistribution parser to obtain the data dictionary in the format required for our calculations. You should parse to a `MATHEMATICAL_MODEL`, because what we do next is adding the measurement data on top of the network data. This can't be done on the `ENGINEERING_MODEL`. Mathematical and Engineering models are standard input network data representations. If you are not familiar with them, you should probably read the relative documentation in PowerModelsDistribution, see [this](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/math-model/), and [this](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/eng-data-model/) and the sections thereafter."
@@ -110,13 +106,13 @@ data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
 md"To solve the SE problem, we need a solver. We previously picked Ipopt, because it's free and can solve nonlinear problems. Let's call it and set some solver parameters:"
 
 # ╔═╡ 0447f220-2599-11eb-043b-d33b03eec478
-slv = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
+slv = PMDSE.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 # ╔═╡ 115d6710-2599-11eb-1d41-2326cd36aa9f
 md"Finally, the last thing to decide is the power flow formulation that describes our problem. Let's go for a classic 'AC' formulation in polar coordinates. It can be chosen it in two different ways: either calling the generic `solve_mc_se(data, model_type, solver)` and passing the formulation, e.g. `_PMs.ACPPowerModel` as argument `model_type` or by calling the function that directly involves that formulation, as follows:"
 
 # ╔═╡ 490720c0-2599-11eb-0282-67d4a9d8605f
-se_result = solve_acp_mc_se(data, slv)
+se_result = run_acp_mc_se(data, slv)
 
 # ╔═╡ 83950ea0-2599-11eb-302d-2759e4f60de4
 md"_________________________________________________________________________________  
@@ -139,7 +135,7 @@ md"There's virtually no error on the loads! This makes me suspect that the those
 
 # ╔═╡ 6ef98650-259a-11eb-3d7f-9dab68152f5d
 begin 
-	pf_results = PowerModelsDistribution.solve_mc_pf(data, PowerModels.ACPPowerModel, slv)
+	pf_results = PowerModelsDistribution.run_mc_pf(data, PowerModelsDistribution.ACPPowerModel, slv)
 	pf_results["solution"]["bus"]
 end
 
@@ -156,7 +152,9 @@ md"We can even plot it:"
 scatter(delta, xlabel="Index [-]", ylabel="ϵ [p.u.]", ylims = [0, max_err*1.05], title="Absolute voltage difference ϵ", legend = false)
 
 # ╔═╡ a7e4eaf0-259e-11eb-0797-6d7b6db230c3
-md"There is basically no error. This is too good to be true. That measurement file must have been created artificially from power flow results! How and why?"
+md"There is basically no error. This is too good to be true. That measurement file must have been created artificially from power flow results! How and why are explained in the next section. 
+
+⚠️**NB**⚠️: if it is the first time you run this and you get errors > e-7, you might want to manually re-run the cells above where ipopt is called and state estimation and power flow are run (you do this by clicking the triangle symbol at the bottom right of the cells). Sometimes something goes wrong in the solution process at the first go."
 
 # ╔═╡ 8fa94df0-259e-11eb-1c60-8f8662091210
 md"________________________________________________________________________________  
@@ -168,7 +166,7 @@ md"Probably that simple small network doesn't really exist. Or maybe it exists b
 # ╔═╡ 8ee68da0-25b3-11eb-02f7-5b3909402ce9
 begin
 	different_msr_path = pwd()*"//tmp_meas.csv"
-	write_measurements!(PowerModels.ACPPowerModel, data, pf_results, different_msr_path)
+	write_measurements!(PowerModelsDistribution.ACPPowerModel, data, pf_results, different_msr_path)
 end
 
 # ╔═╡ dbdb3790-25b4-11eb-36e2-a3b2074002f4
@@ -242,11 +240,8 @@ md" Finally, PowerModelsDistributionStateEstimation is designed to be flexible a
 # ╟─94c4f342-2277-11eb-2932-89244e8ce3c9
 # ╟─9ef21550-2277-11eb-070f-af3e43b62fef
 # ╟─fa6b2e80-226d-11eb-0500-b7b51a64a01b
-# ╠═40c02a40-226c-11eb-22d7-35ac77bf3138
-# ╠═5b2f8ba0-2276-11eb-0724-71fd0a3b22b7
-# ╠═9b3b01c0-226c-11eb-2d4e-b35bc9ba3937
-# ╠═9abdfbb0-28d1-11eb-03bc-95a35ed6a561
-# ╟─0d37befe-2274-11eb-089e-33d8d6086786
+# ╠═88d07650-7a69-11eb-0a3c-4168940f5e2d
+# ╟─7626c130-7a91-11eb-1f0a-a14118b621b4
 # ╟─1cffc500-258e-11eb-217b-053f1ced96ae
 # ╟─c8874710-258c-11eb-0447-49d7bc03eb39
 # ╠═1863f5be-258e-11eb-3b21-1d852ef2601e
@@ -280,7 +275,6 @@ md" Finally, PowerModelsDistributionStateEstimation is designed to be flexible a
 # ╟─65dcb0e0-259c-11eb-0df5-9781707c96a9
 # ╠═8ee68da0-25b3-11eb-02f7-5b3909402ce9
 # ╟─dbdb3790-25b4-11eb-36e2-a3b2074002f4
-# ╠═a23b0510-25b4-11eb-057f-3f0aaddfba1d
 # ╠═c3334430-25b4-11eb-1c17-bb32bd1dfe59
 # ╟─fbbe5d30-25b4-11eb-1319-ddf94502c717
 # ╠═97d180ce-25b5-11eb-1ae4-4f6681b31964

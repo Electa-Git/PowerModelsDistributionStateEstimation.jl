@@ -1,4 +1,6 @@
 ## v0.2.4
+-improves PMDSE_intro notebook
+- fixes StatsPlots dep allowing more recent _DST versions
 - depreciates run_ functions in favor of solve_ (with warns)
 - adds support for `relax_integrality` (InfrastructureModels ~0.5.4)
 - adds logo
