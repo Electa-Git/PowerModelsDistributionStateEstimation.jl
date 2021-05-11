@@ -1,3 +1,8 @@
+## staged
+- removes PowerModels dependency, all functions imported via PowerModelsDistribution
+- removes Memento dependency, logging is made consistent with PowerModelsDistribution v0.11
+- adds short bad data consideration to Readme
+
 ## v0.2.4
 -improves PMDSE_intro notebook
 - fixes StatsPlots dep allowing more recent _DST versions
