@@ -77,5 +77,5 @@ This code is provided under a BSD license.
 ## Notes
 
 - The intention of this package is not to provide the fastest SE algorithms, but a framework to facilitate the distribution SE design process. If faster solution times are crucial, a customized algorithm can be developed afterwards, once the optimal design is chosen
-- The focus is on the state estimation model itself, and bad data detection techniques and observability considerations are not dealt with.
-- Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to include the medium voltage network in the analysis. Extending the package to host these models is scheduled for future releases. If you would like to use realistic load/transformer models already, you are welcome to contribute to the package.
+- The focus is on the state estimation model itself, and bad data detection techniques and observability functions are not implemented yet. Nevertheless, it is easy for the user to manipulate the result dictionary to, e.g., perform a Chi square test.
+- Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to include the medium voltage network in the analysis. Extending the package to host these models is scheduled for future releases.
