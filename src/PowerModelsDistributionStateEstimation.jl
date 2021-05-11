@@ -36,7 +36,6 @@ const _DFS = DataFrames
 const _DST = Distributions
 const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
-const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
 const _RAN = Random

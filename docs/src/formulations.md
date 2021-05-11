@@ -16,17 +16,17 @@ abstract type PowerModels.AbstractIVRModel <: PowerModels.AbstractACRModel end
 Abstract Models types are then used as the type parameter for `PowerModels`:
 
 ```julia
-mutable struct PowerModels.ACPPowerModel <: PowerModels.AbstractACPModel PowerModels.@pm_fields end
-mutable struct PowerModels.ACRPowerModel <: PowerModels.AbstractACRModel PowerModels.@pm_fields end
-mutable struct PowerModels.IVRPowerModel <: PowerModels.AbstractIVRModel PowerModels.@pm_fields end
+mutable struct PowerModels.ACPPowerModel <: PowerModels.AbstractACPModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModels.ACRPowerModel <: PowerModels.AbstractACRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModels.IVRPowerModel <: PowerModels.AbstractIVRModel PowerModelsDistribution.@pmd_fields end
 ```
 
 A "reduced" version of each of the three formulations above is derived in PowerModelsDistributionStateEstimation:
 
 ```julia
-mutable struct PowerModelsDistributionStateEstimation.ReducedACPPowerModel <: PowerModels.AbstractACPModel PowerModels.@pm_fields end
-mutable struct PowerModelsDistributionStateEstimation.ReducedACRPowerModel <: PowerModels.AbstractACRModel PowerModels.@pm_fields end
-mutable struct PowerModelsDistributionStateEstimation.ReducedIVRPowerModel <: PowerModels.AbstractIVRModel PowerModels.@pm_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACPPowerModel <: PowerModels.AbstractACPModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACRPowerModel <: PowerModels.AbstractACRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedIVRPowerModel <: PowerModels.AbstractIVRModel PowerModelsDistribution.@pmd_fields end
 
 AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
 ```
@@ -40,7 +40,7 @@ abstract type PowerModels.AbstractBFConicModel <: PowerModels.AbstractBFModel en
 abstract type PowerModelsDistribution.AbstractConicUBFModel <: PowerModels.AbstractBFConicModel end
 abstract type PowerModelsDistribution.SDPUBFModel <: PowerModelsDistribution.AbstractConicUBFModel end
 
-mutable struct PowerModelsDistribution.SDPUBFPowerModel <: PowerModelsDistribution.SDPUBFModel PowerModels.@pm_fields end
+mutable struct PowerModelsDistribution.SDPUBFPowerModel <: PowerModelsDistribution.SDPUBFModel PowerModelsDistribution.@pmd_fields end
 ```
 where `UBF` stands for unbalanced branch flow. Finally, a linear unbalanced branch flow model is available for state estimation: the `LPUBFDiagModel`, better known as `LinDist3FlowModel`.
 
@@ -49,7 +49,7 @@ abstract type PowerModelsDistribution.AbstractLPUBFModel <: PowerModelsDistribut
 abstract type PowerModelsDistribution.LPUBFDiagModel <: PowerModelsDistribution.AbstractLPUBFModel end
 const PowerModelsDistribution.LinDist3FlowModel = PowerModelsDistribution.LPUBFDiagModel
 
-mutable struct PowerModelsDistribution.LPUBFDiagPowerModel <: PowerModelsDistribution.LPUBFDiagModel PowerModels.@pm_fields end
+mutable struct PowerModelsDistribution.LPUBFDiagPowerModel <: PowerModelsDistribution.LPUBFDiagModel PowerModelsDistribution.@pmd_fields end
 const PowerModelsDistribution.LinDist3FlowPowerModel = PowerModelsDistribution.LPUBFDiagPowerModel
 ```
 

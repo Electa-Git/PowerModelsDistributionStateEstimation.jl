@@ -18,7 +18,6 @@ using Test
 # pkg const
 const _DST = Distributions
 const _GMM = GaussianMixtures
-const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
 

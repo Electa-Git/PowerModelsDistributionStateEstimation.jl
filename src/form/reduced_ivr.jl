@@ -5,7 +5,7 @@
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
-mutable struct ReducedIVRPowerModel <: _PMs.AbstractIVRModel _PMs.@pm_fields end
+mutable struct ReducedIVRPowerModel <: _PMD.AbstractUnbalancedIVRModel _PMD.@pmd_fields end
 
 "only total current variables defined over the bus_arcs in PMD are considered: with no shunt admittance, these are
 equivalent to the series current defined over the branches."
@@ -15,11 +15,11 @@ function variable_mc_branch_current(pm::ReducedIVRPowerModel; nw::Int=pm.cnw, bo
 end
 
 "if the formulation is not reduced, it is delegated back to PMD"
-function variable_mc_branch_current(pm::_PMs.IVRPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_mc_branch_current(pm::_PMD.IVRUPowerModel; nw::Int=pm.cnw, bounded::Bool=true, report::Bool=true, kwargs...)
     _PMD.variable_mc_branch_current(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end
 
-"constraint_mc_generator_power is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
+"constraint_mc_generator_power is re-defined here because in PMD the same function only accepts pm::_PMD.IVRUPowerModel.
 The content of the function is otherwise identical"
 function constraint_mc_generator_power(pm::ReducedIVRPowerModel, id::Int; nw::Int=pm.cnw, report::Bool=true, bounded::Bool=true)
 
@@ -39,7 +39,7 @@ function constraint_mc_generator_power(pm::ReducedIVRPowerModel, id::Int; nw::In
     end
 end
 
-"constraint_mc_generator_power_wye is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
+"constraint_mc_generator_power_wye is re-defined here because in PMD the same function only accepts pm::_PMD.IVRUPowerModel.
 The content of the function is otherwise identical"
 function constraint_mc_generator_power_wye(pm::ReducedIVRPowerModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector{<:Real}, pmax::Vector{<:Real}, qmin::Vector{<:Real}, qmax::Vector{<:Real}; report::Bool=true, bounded::Bool=true)
 
@@ -77,7 +77,7 @@ function constraint_mc_generator_power_wye(pm::ReducedIVRPowerModel, nw::Int, id
    _PMD.var(pm, nw, :qg)[id] = JuMP.Containers.DenseAxisArray(qg, connections)
 
 end
-"constraint_mc_generator_power_delta is re-defined here because in PMD the same function only accepts pm::_PMs.IVRPowerModel.
+"constraint_mc_generator_power_delta is re-defined here because in PMD the same function only accepts pm::_PMD.IVRUPowerModel.
 The content of the function is otherwise identical"
 function constraint_mc_generator_power_delta(pm::ReducedIVRPowerModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector{<:Real}, pmax::Vector{<:Real}, qmin::Vector{<:Real}, qmax::Vector{<:Real}; report::Bool=true, bounded::Bool=true)
     vr = _PMD.var(pm, nw, :vr, bus_id)
@@ -141,14 +141,14 @@ function constraint_mc_current_balance_se(pm::_PMDSE.ReducedIVRPowerModel, i::In
     bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
     bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
 
-    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
-    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
-    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
-    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
-    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
-    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
-    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
-    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMD._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMD._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMD._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMD._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMD._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMD._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMD._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMD._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
 
     terminals = bus["terminals"]
     grounded =  bus["grounded"]
@@ -181,14 +181,14 @@ function constraint_mc_current_balance(pm::_PMDSE.ReducedIVRPowerModel, i::Int; 
     bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
     bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
 
-    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
-    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
-    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
-    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
-    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
-    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
-    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
-    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMD._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMD._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMD._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMD._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMD._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMD._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMD._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMD._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
 
     terminals = bus["terminals"]
     grounded =  bus["grounded"]

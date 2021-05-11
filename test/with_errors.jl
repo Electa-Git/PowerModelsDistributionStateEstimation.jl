@@ -19,7 +19,7 @@
     @testset "ACP input-rwlav" begin
         # set model
         crit     = "rwlav"
-        model    = _PMs.ACPPowerModel #this is going to be used for the SE
+        model    = _PMD.ACPUPowerModel #this is going to be used for the SE
 
         # solve the power flow
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
@@ -39,7 +39,7 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
 
             # solve the state estimation
             se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
@@ -53,7 +53,7 @@
     @testset "ACP input-WLS" begin
         # set model
         crit     = "wls"
-        model    = _PMs.ACPPowerModel #this is going to be used for the SE
+        model    = _PMD.ACPUPowerModel #this is going to be used for the SE
 
         # solve the power flow
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
@@ -73,7 +73,7 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
 
             # solve the state estimation
             se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
@@ -87,7 +87,7 @@
     @testset "ACR input-rwlav" begin
         # set model
         crit     = "rwlav"
-        model    = _PMs.ACRPowerModel #this is going to be used for the SE
+        model    = _PMD.ACRUPowerModel #this is going to be used for the SE
 
         # solve the power flow
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
@@ -107,7 +107,7 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
 
             # solve the state estimation
             se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
@@ -121,7 +121,7 @@
     @testset "ACR input-WLS" begin
         # set model
         crit     = "wls"
-        model    = _PMs.ACRPowerModel #this is going to be used for the SE
+        model    = _PMD.ACRUPowerModel #this is going to be used for the SE
 
         # solve the power flow
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
@@ -141,7 +141,7 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
 
             # solve the state estimation
             se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
@@ -155,7 +155,7 @@
     @testset "IVR input-rwlav" begin
         # set model
         crit     = "rwlav"
-        model    = _PMs.IVRPowerModel #this is going to be used for the SE
+        model    = _PMD.IVRUPowerModel #this is going to be used for the SE
 
         # solve the power flow
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
@@ -175,7 +175,7 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
 
             # solve the state estimation
             se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
@@ -189,7 +189,7 @@
     @testset "IVR input-WLS" begin
         # set model
         crit     = "wls"
-        model    = _PMs.IVRPowerModel #this is going to be used for the SE
+        model    = _PMD.IVRUPowerModel #this is going to be used for the SE
 
         # solve the power flow
         pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
@@ -209,7 +209,7 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
 
             # solve the state estimation
             se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)

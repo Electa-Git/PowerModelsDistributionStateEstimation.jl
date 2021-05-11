@@ -8,7 +8,7 @@
 
 @enum ConnConfig WYE DELTA
 
-function constraint_mc_generator_power_se(pm::_PMs.AbstractIVRModel, id::Int; nw::Int=pm.cnw, report::Bool=true, bounded::Bool=true)
+function constraint_mc_generator_power_se(pm::_PMD.AbstractUnbalancedIVRModel, id::Int; nw::Int=pm.cnw, report::Bool=true, bounded::Bool=true)
     generator = _PMD.ref(pm, nw, :gen, id)
     bus =  _PMD.ref(pm, nw,:bus, generator["gen_bus"])
 
@@ -26,7 +26,7 @@ function constraint_mc_generator_power_se(pm::_PMs.AbstractIVRModel, id::Int; nw
 end
 
 "wye connected generator setpoint constraint for IVR formulation - SE adaptation"
-function constraint_mc_generator_power_wye_se(pm::_PMs.AbstractIVRModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector, pmax::Vector, qmin::Vector, qmax::Vector; report::Bool=true, bounded::Bool=true)
+function constraint_mc_generator_power_wye_se(pm::_PMD.AbstractUnbalancedIVRModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector, pmax::Vector, qmin::Vector, qmax::Vector; report::Bool=true, bounded::Bool=true)
     vr =  _PMD.var(pm, nw, :vr, bus_id)
     vi =  _PMD.var(pm, nw, :vi, bus_id)
     crg =  _PMD.var(pm, nw, :crg, id)
@@ -51,7 +51,7 @@ function constraint_mc_generator_power_wye_se(pm::_PMs.AbstractIVRModel, nw::Int
 end
 
 "delta connected generator setpoint constraint for IVR formulation - adapted for SE"
-function constraint_mc_generator_power_delta_se(pm::_PMs.AbstractIVRModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector, pmax::Vector, qmin::Vector, qmax::Vector; report::Bool=true, bounded::Bool=true)
+function constraint_mc_generator_power_delta_se(pm::_PMD.AbstractUnbalancedIVRModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector, pmax::Vector, qmin::Vector, qmax::Vector; report::Bool=true, bounded::Bool=true)
     vr =  _PMD.var(pm, nw, :vr, bus_id)
     vi =  _PMD.var(pm, nw, :vi, bus_id)
     crg =  _PMD.var(pm, nw, :crg, id)
@@ -77,7 +77,7 @@ function constraint_mc_generator_power_delta_se(pm::_PMs.AbstractIVRModel, nw::I
     end
 end
 
-function constraint_mc_current_balance_se(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_current_balance_se(pm::_PMD.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
     bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_conns_switch, i)
@@ -90,23 +90,23 @@ function constraint_mc_current_balance_se(pm::_PMs.AbstractPowerModel, i::Int; n
     constraint_mc_current_balance_se(pm, nw, i, bus["terminals"], bus["grounded"], bus_arcs, bus_arcs_sw, bus_arcs_trans, bus_gens, bus_storage, bus_loads, bus_shunts)
 end
 
-function constraint_mc_current_balance_se(pm::_PMs.AbstractIVRModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
+function constraint_mc_current_balance_se(pm::_PMD.AbstractUnbalancedIVRModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
     #NB only difference with pmd is crd_bus replaced by crd, and same with cid
     vr = _PMD.var(pm, nw, :vr, i)
     vi = _PMD.var(pm, nw, :vi, i)
 
-    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMs._check_var_keys(cr, bus_arcs, "real current", "branch")
-    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMs._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
-    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMs._check_var_keys(crd, bus_loads, "real current", "load")
-    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMs._check_var_keys(cid, bus_loads, "imaginary current", "load")
-    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMs._check_var_keys(crg, bus_gens, "real current", "generator")
-    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMs._check_var_keys(cig, bus_gens, "imaginary current", "generator")
-    crs   = get(_PMD.var(pm, nw),   :crs, Dict()); _PMs._check_var_keys(crs, bus_storage, "real currentr", "storage")
-    cis   = get(_PMD.var(pm, nw),   :cis, Dict()); _PMs._check_var_keys(cis, bus_storage, "imaginary current", "storage")
-    crsw  = get(_PMD.var(pm, nw),  :crsw, Dict()); _PMs._check_var_keys(crsw, bus_arcs_sw, "real current", "switch")
-    cisw  = get(_PMD.var(pm, nw),  :cisw, Dict()); _PMs._check_var_keys(cisw, bus_arcs_sw, "imaginary current", "switch")
-    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMs._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
-    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMs._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMD._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMD._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMD._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMD._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMD._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMD._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crs   = get(_PMD.var(pm, nw),   :crs, Dict()); _PMD._check_var_keys(crs, bus_storage, "real currentr", "storage")
+    cis   = get(_PMD.var(pm, nw),   :cis, Dict()); _PMD._check_var_keys(cis, bus_storage, "imaginary current", "storage")
+    crsw  = get(_PMD.var(pm, nw),  :crsw, Dict()); _PMD._check_var_keys(crsw, bus_arcs_sw, "real current", "switch")
+    cisw  = get(_PMD.var(pm, nw),  :cisw, Dict()); _PMD._check_var_keys(cisw, bus_arcs_sw, "imaginary current", "switch")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMD._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMD._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
 
     Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
@@ -135,7 +135,7 @@ function constraint_mc_current_balance_se(pm::_PMs.AbstractIVRModel, nw::Int, i:
 end
 #####
 # "KCL including transformer arcs and load variables."
-function constraint_mc_power_balance_se(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance_se(pm::_PMD.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
     bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_conns_switch, i)
@@ -148,23 +148,23 @@ function constraint_mc_power_balance_se(pm::_PMs.AbstractPowerModel, i::Int; nw:
     constraint_mc_power_balance_se(pm, nw, i, bus["terminals"], bus["grounded"], bus_arcs, bus_arcs_sw, bus_arcs_trans, bus_gens, bus_storage, bus_loads, bus_shunts)
 end
 
-function constraint_mc_power_balance_se(pm::_PMs.AbstractACRModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
+function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACRModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
     #NB only diffeerence is in pd and qd we refer to :qd, :pd instead of :pd_bus, :qd_bus
     vr = _PMD.var(pm, nw, :vr, i)
     vi = _PMD.var(pm, nw, :vi, i)
 
-    p    = get(_PMD.var(pm, nw), :p,      Dict()); _PMs._check_var_keys(p,   bus_arcs,       "active power",   "branch")
-    q    = get(_PMD.var(pm, nw), :q,      Dict()); _PMs._check_var_keys(q,   bus_arcs,       "reactive power", "branch")
-    pg   = get(_PMD.var(pm, nw), :pg, Dict()); _PMs._check_var_keys(pg,  bus_gens,       "active power",   "generator")
-    qg   = get(_PMD.var(pm, nw), :qg, Dict()); _PMs._check_var_keys(qg,  bus_gens,       "reactive power", "generator")
-    ps   = get(_PMD.var(pm, nw), :ps,     Dict()); _PMs._check_var_keys(ps,  bus_storage,    "active power",   "storage")
-    qs   = get(_PMD.var(pm, nw), :qs,     Dict()); _PMs._check_var_keys(qs,  bus_storage,    "reactive power", "storage")
-    psw  = get(_PMD.var(pm, nw), :psw,    Dict()); _PMs._check_var_keys(psw, bus_arcs_sw,    "active power",   "switch")
-    qsw  = get(_PMD.var(pm, nw), :qsw,    Dict()); _PMs._check_var_keys(qsw, bus_arcs_sw,    "reactive power", "switch")
-    pt   = get(_PMD.var(pm, nw), :pt,     Dict()); _PMs._check_var_keys(pt,  bus_arcs_trans, "active power",   "transformer")
-    qt   = get(_PMD.var(pm, nw), :qt,     Dict()); _PMs._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
-    pd   = get(_PMD.var(pm, nw), :pd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "active power",   "load")
-    qd   = get(_PMD.var(pm, nw), :qd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "reactive power", "load")
+    p    = get(_PMD.var(pm, nw), :p,      Dict()); _PMD._check_var_keys(p,   bus_arcs,       "active power",   "branch")
+    q    = get(_PMD.var(pm, nw), :q,      Dict()); _PMD._check_var_keys(q,   bus_arcs,       "reactive power", "branch")
+    pg   = get(_PMD.var(pm, nw), :pg, Dict()); _PMD._check_var_keys(pg,  bus_gens,       "active power",   "generator")
+    qg   = get(_PMD.var(pm, nw), :qg, Dict()); _PMD._check_var_keys(qg,  bus_gens,       "reactive power", "generator")
+    ps   = get(_PMD.var(pm, nw), :ps,     Dict()); _PMD._check_var_keys(ps,  bus_storage,    "active power",   "storage")
+    qs   = get(_PMD.var(pm, nw), :qs,     Dict()); _PMD._check_var_keys(qs,  bus_storage,    "reactive power", "storage")
+    psw  = get(_PMD.var(pm, nw), :psw,    Dict()); _PMD._check_var_keys(psw, bus_arcs_sw,    "active power",   "switch")
+    qsw  = get(_PMD.var(pm, nw), :qsw,    Dict()); _PMD._check_var_keys(qsw, bus_arcs_sw,    "reactive power", "switch")
+    pt   = get(_PMD.var(pm, nw), :pt,     Dict()); _PMD._check_var_keys(pt,  bus_arcs_trans, "active power",   "transformer")
+    qt   = get(_PMD.var(pm, nw), :qt,     Dict()); _PMD._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
+    pd   = get(_PMD.var(pm, nw), :pd, Dict()); _PMD._check_var_keys(pd,  bus_loads,      "active power",   "load")
+    qd   = get(_PMD.var(pm, nw), :qd, Dict()); _PMD._check_var_keys(pd,  bus_loads,      "reactive power", "load")
 
     Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
@@ -205,22 +205,22 @@ function constraint_mc_power_balance_se(pm::_PMs.AbstractACRModel, nw::Int, i::I
     end
 end
 
-function constraint_mc_power_balance_se(pm::_PMs.AbstractACPModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
+function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACPModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
     vm   = _PMD.var(pm, nw, :vm, i)
     va   = _PMD.var(pm, nw, :va, i)
 
-    p    = get(_PMD.var(pm, nw), :p,      Dict()); _PMs._check_var_keys(p,   bus_arcs,       "active power",   "branch")
-    q    = get(_PMD.var(pm, nw), :q,      Dict()); _PMs._check_var_keys(q,   bus_arcs,       "reactive power", "branch")
-    pg   = get(_PMD.var(pm, nw), :pg, Dict()); _PMs._check_var_keys(pg,  bus_gens,       "active power",   "generator")
-    qg   = get(_PMD.var(pm, nw), :qg, Dict()); _PMs._check_var_keys(qg,  bus_gens,       "reactive power", "generator")
-    ps   = get(_PMD.var(pm, nw), :ps,     Dict()); _PMs._check_var_keys(ps,  bus_storage,    "active power",   "storage")
-    qs   = get(_PMD.var(pm, nw), :qs,     Dict()); _PMs._check_var_keys(qs,  bus_storage,    "reactive power", "storage")
-    psw  = get(_PMD.var(pm, nw), :psw,    Dict()); _PMs._check_var_keys(psw, bus_arcs_sw,    "active power",   "switch")
-    qsw  = get(_PMD.var(pm, nw), :qsw,    Dict()); _PMs._check_var_keys(qsw, bus_arcs_sw,    "reactive power", "switch")
-    pt   = get(_PMD.var(pm, nw), :pt,     Dict()); _PMs._check_var_keys(pt,  bus_arcs_trans, "active power",   "transformer")
-    qt   = get(_PMD.var(pm, nw), :qt,     Dict()); _PMs._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
-    pd   = get(_PMD.var(pm, nw), :pd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "active power",   "load")
-    qd   = get(_PMD.var(pm, nw), :qd, Dict()); _PMs._check_var_keys(pd,  bus_loads,      "reactive power", "load")
+    p    = get(_PMD.var(pm, nw), :p,      Dict()); _PMD._check_var_keys(p,   bus_arcs,       "active power",   "branch")
+    q    = get(_PMD.var(pm, nw), :q,      Dict()); _PMD._check_var_keys(q,   bus_arcs,       "reactive power", "branch")
+    pg   = get(_PMD.var(pm, nw), :pg, Dict()); _PMD._check_var_keys(pg,  bus_gens,       "active power",   "generator")
+    qg   = get(_PMD.var(pm, nw), :qg, Dict()); _PMD._check_var_keys(qg,  bus_gens,       "reactive power", "generator")
+    ps   = get(_PMD.var(pm, nw), :ps,     Dict()); _PMD._check_var_keys(ps,  bus_storage,    "active power",   "storage")
+    qs   = get(_PMD.var(pm, nw), :qs,     Dict()); _PMD._check_var_keys(qs,  bus_storage,    "reactive power", "storage")
+    psw  = get(_PMD.var(pm, nw), :psw,    Dict()); _PMD._check_var_keys(psw, bus_arcs_sw,    "active power",   "switch")
+    qsw  = get(_PMD.var(pm, nw), :qsw,    Dict()); _PMD._check_var_keys(qsw, bus_arcs_sw,    "reactive power", "switch")
+    pt   = get(_PMD.var(pm, nw), :pt,     Dict()); _PMD._check_var_keys(pt,  bus_arcs_trans, "active power",   "transformer")
+    qt   = get(_PMD.var(pm, nw), :qt,     Dict()); _PMD._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
+    pd   = get(_PMD.var(pm, nw), :pd, Dict()); _PMD._check_var_keys(pd,  bus_loads,      "active power",   "load")
+    qd   = get(_PMD.var(pm, nw), :qd, Dict()); _PMD._check_var_keys(pd,  bus_loads,      "reactive power", "load")
 
     Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
@@ -299,19 +299,19 @@ end
 function constraint_mc_power_balance_se(pm::_PMD.SDPUBFPowerModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
     Wr = _PMD.var(pm, nw, :Wr, i)
     Wi = _PMD.var(pm, nw, :Wi, i)
-    P = get(_PMD.var(pm, nw), :P, Dict()); _PMs._check_var_keys(P, bus_arcs, "active power", "branch")
-    Q = get(_PMD.var(pm, nw), :Q, Dict()); _PMs._check_var_keys(Q, bus_arcs, "reactive power", "branch")
-    Psw  = get(_PMD.var(pm, nw),  :Psw, Dict()); _PMs._check_var_keys(Psw, bus_arcs_sw, "active power", "switch")
-    Qsw  = get(_PMD.var(pm, nw),  :Qsw, Dict()); _PMs._check_var_keys(Qsw, bus_arcs_sw, "reactive power", "switch")
-    Pt   = get(_PMD.var(pm, nw),   :Pt, Dict()); _PMs._check_var_keys(Pt, bus_arcs_trans, "active power", "transformer")
-    Qt   = get(_PMD.var(pm, nw),   :Qt, Dict()); _PMs._check_var_keys(Qt, bus_arcs_trans, "reactive power", "transformer")
+    P = get(_PMD.var(pm, nw), :P, Dict()); _PMD._check_var_keys(P, bus_arcs, "active power", "branch")
+    Q = get(_PMD.var(pm, nw), :Q, Dict()); _PMD._check_var_keys(Q, bus_arcs, "reactive power", "branch")
+    Psw  = get(_PMD.var(pm, nw),  :Psw, Dict()); _PMD._check_var_keys(Psw, bus_arcs_sw, "active power", "switch")
+    Qsw  = get(_PMD.var(pm, nw),  :Qsw, Dict()); _PMD._check_var_keys(Qsw, bus_arcs_sw, "reactive power", "switch")
+    Pt   = get(_PMD.var(pm, nw),   :Pt, Dict()); _PMD._check_var_keys(Pt, bus_arcs_trans, "active power", "transformer")
+    Qt   = get(_PMD.var(pm, nw),   :Qt, Dict()); _PMD._check_var_keys(Qt, bus_arcs_trans, "reactive power", "transformer")
 
-    pd = get(_PMD.var(pm, nw), :pd, Dict()); _PMs._check_var_keys(pd, bus_loads, "active power", "load")
-    qd = get(_PMD.var(pm, nw), :qd, Dict()); _PMs._check_var_keys(qd, bus_loads, "reactive power", "load")
-    pg = get(_PMD.var(pm, nw), :pg, Dict()); _PMs._check_var_keys(pg, bus_gens, "active power", "generator")
-    qg = get(_PMD.var(pm, nw), :qg, Dict()); _PMs._check_var_keys(qg, bus_gens, "reactive power", "generator")
-    ps   = get(_PMD.var(pm, nw),   :ps, Dict()); _PMs._check_var_keys(ps, bus_storage, "active power", "storage")
-    qs   = get(_PMD.var(pm, nw),   :qs, Dict()); _PMs._check_var_keys(qs, bus_storage, "reactive power", "storage")
+    pd = get(_PMD.var(pm, nw), :pd, Dict()); _PMD._check_var_keys(pd, bus_loads, "active power", "load")
+    qd = get(_PMD.var(pm, nw), :qd, Dict()); _PMD._check_var_keys(qd, bus_loads, "reactive power", "load")
+    pg = get(_PMD.var(pm, nw), :pg, Dict()); _PMD._check_var_keys(pg, bus_gens, "active power", "generator")
+    qg = get(_PMD.var(pm, nw), :qg, Dict()); _PMD._check_var_keys(qg, bus_gens, "reactive power", "generator")
+    ps   = get(_PMD.var(pm, nw),   :ps, Dict()); _PMD._check_var_keys(ps, bus_storage, "active power", "storage")
+    qs   = get(_PMD.var(pm, nw),   :qs, Dict()); _PMD._check_var_keys(qs, bus_storage, "reactive power", "storage")
 
     Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
@@ -349,18 +349,18 @@ end
 
 function constraint_mc_power_balance_se(pm::_PMD.LPUBFDiagModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
     w = _PMD.var(pm, nw, :w, i)
-    p   = get(_PMD.var(pm, nw),      :p,   Dict()); _PMs._check_var_keys(p,   bus_arcs, "active power", "branch")
-    q   = get(_PMD.var(pm, nw),      :q,   Dict()); _PMs._check_var_keys(q,   bus_arcs, "reactive power", "branch")
-    psw = get(_PMD.var(pm, nw),    :psw, Dict()); _PMs._check_var_keys(psw, bus_arcs_sw, "active power", "switch")
-    qsw = get(_PMD.var(pm, nw),    :qsw, Dict()); _PMs._check_var_keys(qsw, bus_arcs_sw, "reactive power", "switch")
-    pt  = get(_PMD.var(pm, nw),     :pt,  Dict()); _PMs._check_var_keys(pt,  bus_arcs_trans, "active power", "transformer")
-    qt  = get(_PMD.var(pm, nw),     :qt,  Dict()); _PMs._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
-    pg  = get(_PMD.var(pm, nw),     :pg,  Dict()); _PMs._check_var_keys(pg,  bus_gens, "active power", "generator")
-    qg  = get(_PMD.var(pm, nw),     :qg,  Dict()); _PMs._check_var_keys(qg,  bus_gens, "reactive power", "generator")
-    ps  = get(_PMD.var(pm, nw),     :ps,  Dict()); _PMs._check_var_keys(ps,  bus_storage, "active power", "storage")
-    qs  = get(_PMD.var(pm, nw),     :qs,  Dict()); _PMs._check_var_keys(qs,  bus_storage, "reactive power", "storage")
-    pd  = get(_PMD.var(pm, nw),     :pd,  Dict()); _PMs._check_var_keys(pd,  bus_loads, "active power", "load")
-    qd  = get(_PMD.var(pm, nw),     :qd,  Dict()); _PMs._check_var_keys(qd,  bus_loads, "reactive power", "load")
+    p   = get(_PMD.var(pm, nw),      :p,   Dict()); _PMD._check_var_keys(p,   bus_arcs, "active power", "branch")
+    q   = get(_PMD.var(pm, nw),      :q,   Dict()); _PMD._check_var_keys(q,   bus_arcs, "reactive power", "branch")
+    psw = get(_PMD.var(pm, nw),    :psw, Dict()); _PMD._check_var_keys(psw, bus_arcs_sw, "active power", "switch")
+    qsw = get(_PMD.var(pm, nw),    :qsw, Dict()); _PMD._check_var_keys(qsw, bus_arcs_sw, "reactive power", "switch")
+    pt  = get(_PMD.var(pm, nw),     :pt,  Dict()); _PMD._check_var_keys(pt,  bus_arcs_trans, "active power", "transformer")
+    qt  = get(_PMD.var(pm, nw),     :qt,  Dict()); _PMD._check_var_keys(qt,  bus_arcs_trans, "reactive power", "transformer")
+    pg  = get(_PMD.var(pm, nw),     :pg,  Dict()); _PMD._check_var_keys(pg,  bus_gens, "active power", "generator")
+    qg  = get(_PMD.var(pm, nw),     :qg,  Dict()); _PMD._check_var_keys(qg,  bus_gens, "reactive power", "generator")
+    ps  = get(_PMD.var(pm, nw),     :ps,  Dict()); _PMD._check_var_keys(ps,  bus_storage, "active power", "storage")
+    qs  = get(_PMD.var(pm, nw),     :qs,  Dict()); _PMD._check_var_keys(qs,  bus_storage, "reactive power", "storage")
+    pd  = get(_PMD.var(pm, nw),     :pd,  Dict()); _PMD._check_var_keys(pd,  bus_loads, "active power", "load")
+    qd  = get(_PMD.var(pm, nw),     :qd,  Dict()); _PMD._check_var_keys(qd,  bus_loads, "reactive power", "load")
 
     cstr_p = []
     cstr_q = []

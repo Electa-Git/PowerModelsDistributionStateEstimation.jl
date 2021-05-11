@@ -235,9 +235,9 @@ version = "0.1.0"
 
 [[InfrastructureModels]]
 deps = ["JuMP", "MathOptInterface", "Memento"]
-git-tree-sha1 = "063b6445c571530af740d46f9dd9d0a5a50bc8c9"
+git-tree-sha1 = "dab3d9518327ccd79e509e596895779877c17cf9"
 uuid = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
-version = "0.5.4"
+version = "0.6.0"
 
 [[IniFile]]
 deps = ["Test"]
@@ -298,9 +298,9 @@ version = "0.3.3"
 
 [[JuMP]]
 deps = ["Calculus", "DataStructures", "ForwardDiff", "JSON", "LinearAlgebra", "MathOptInterface", "MutableArithmetics", "NaNMath", "Random", "SparseArrays", "Statistics"]
-git-tree-sha1 = "57c17a221a55f81890aabf00f478886859e25eaf"
+git-tree-sha1 = "766014f271bd33b7f9d9bdc4847e214ee20ae84d"
 uuid = "4076af6c-e467-56ae-b986-b466b2749572"
-version = "0.21.5"
+version = "0.21.4"
 
 [[LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
@@ -436,12 +436,6 @@ git-tree-sha1 = "50608f411a1e178e0129eab4110bd56efd08816f"
 uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
 version = "7.8.0"
 
-[[NLsolve]]
-deps = ["Distances", "LineSearches", "LinearAlgebra", "NLSolversBase", "Printf", "Reexport"]
-git-tree-sha1 = "019f12e9a1a7880459d0173c182e6a99365d7ac1"
-uuid = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
-version = "4.5.1"
-
 [[NaNMath]]
 git-tree-sha1 = "bfe47e760d60b82b66b61d2d44128b62e3a369fb"
 uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
@@ -517,17 +511,11 @@ git-tree-sha1 = "17275485f373e6673f7e7f97051f703ed5b15b20"
 uuid = "85a6dd25-e78a-55b7-8502-1745935b8125"
 version = "0.2.4"
 
-[[PowerModels]]
-deps = ["InfrastructureModels", "JSON", "JuMP", "LinearAlgebra", "MathOptInterface", "Memento", "NLsolve", "SparseArrays"]
-git-tree-sha1 = "fcfd50529b73d3fb9edd23d8d3173a9c27042bbc"
-uuid = "c36e90e8-916a-50a6-bd94-075b64ef4655"
-version = "0.17.4"
-
 [[PowerModelsDistribution]]
-deps = ["InfrastructureModels", "JSON", "JuMP", "LinearAlgebra", "MathOptInterface", "Memento", "PowerModels", "Statistics"]
-git-tree-sha1 = "bc5d61a1796c39e0c94f08ccc29fda72f5b19c96"
+deps = ["Dates", "InfrastructureModels", "JSON", "JuMP", "LinearAlgebra", "Logging", "LoggingExtras", "MathOptInterface", "Statistics"]
+git-tree-sha1 = "2bf404ec3dab4e74e1351dff6276fa9df8353c21"
 uuid = "d7431456-977f-11e9-2de3-97ff7677985e"
-version = "0.10.1"
+version = "0.11.1"
 
 [[Preferences]]
 deps = ["TOML"]

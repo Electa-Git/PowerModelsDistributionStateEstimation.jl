@@ -6,7 +6,7 @@
     @testset "ACP-rwlav" begin
         # set model
         crit     = "rwlav"
-        model    = _PMs.ACPPowerModel #this is going to be used for the SE
+        model    = _PMD.ACPUPowerModel #this is going to be used for the SE
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -19,7 +19,7 @@
         # transform data model
          data = _PMD.transform_data_model(data);
 
-        for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
             pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
 
@@ -47,7 +47,7 @@
     @testset "ACP-WLS" begin
         # set model
         crit     = "wls"
-        model    = _PMs.ACPPowerModel
+        model    = _PMD.ACPUPowerModel
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
         if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
@@ -59,7 +59,7 @@
         # transform data model
         data = _PMD.transform_data_model(data);
 
-        for data_model in [_PMs.ACRPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
             pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
 
@@ -87,7 +87,7 @@
     @testset "ACR-rwlav" begin
         # set model
         crit     = "rwlav"
-        model    = _PMs.ACRPowerModel
+        model    = _PMD.ACRUPowerModel
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
         if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
@@ -99,7 +99,7 @@
         # transform data model
         data = _PMD.transform_data_model(data);
 
-        for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
             pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
 
@@ -128,7 +128,7 @@
     @testset "ACR-WLS" begin
         # set model
         crit     = "wls"
-        model    = _PMs.ACRPowerModel
+        model    = _PMD.ACRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -141,7 +141,7 @@
         # transform data model
         data = _PMD.transform_data_model(data);
 
-        for data_model in [_PMs.ACPPowerModel,_PMs.IVRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
             pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
 
@@ -169,7 +169,7 @@
     @testset "IVR-rwlav" begin
         # set model
         crit     = "rwlav"
-        model    = _PMs.IVRPowerModel
+        model    = _PMD.IVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -182,7 +182,7 @@
         # transform data model
         data = _PMD.transform_data_model(data);
 
-        for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
             # solve the power flow
             pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
 
@@ -210,7 +210,7 @@
     @testset "IVR-WLS" begin
         # set model
         crit     = "wls"
-        model    = _PMs.IVRPowerModel
+        model    = _PMD.IVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -223,7 +223,7 @@
         # transform data model
         data = _PMD.transform_data_model(data);
 
-        for data_model in [_PMs.ACPPowerModel,_PMs.ACRPowerModel]
+        for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
             # solve the power flow
             pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
 

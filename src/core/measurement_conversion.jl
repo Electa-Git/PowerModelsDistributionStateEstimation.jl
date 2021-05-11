@@ -63,7 +63,7 @@ struct MultiplicationFraction<:ConversionType
     voltage::Array
 end
 
-function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;nw=nw)
+function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACPModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
     if msr == :cm
         msr_type = SquareFraction(i,:branch, cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], [:p, :q], [:vm])
@@ -89,7 +89,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;n
     return msr_type
 end
 
-function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;nw=nw)
+function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACRModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
     if msr == :vm
         msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
@@ -119,7 +119,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     return msr_type
 end
 
-function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;nw=nw)
+function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedIVRModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
     if msr == :vm
         msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
@@ -175,15 +175,15 @@ function assign_conversion_type_to_msr(pm::_PMD.SDPUBFPowerModel,i,msr::Symbol;n
    error("Currently only a limited amount of measurement types is supported for the SDP model, $(msr) is not available")
 end
 
-function no_conversion_needed(pm::_PMs.AbstractACPModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMD.AbstractUnbalancedACPModel, msr_var::Symbol)
   return msr_var ∈ [:vm, :va, :pd, :qd, :pg, :qg, :p, :q]
 end
 
-function no_conversion_needed(pm::_PMs.AbstractACRModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMD.AbstractUnbalancedACRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :pd, :qd, :pg, :qg, :p, :q]
 end
 
-function no_conversion_needed(pm::_PMs.AbstractIVRModel, msr_var::Symbol)
+function no_conversion_needed(pm::_PMD.AbstractUnbalancedIVRModel, msr_var::Symbol)
   return msr_var ∈ [:vr, :vi, :cr, :ci, :crg, :cig, :crd, :cid]
 end
 
@@ -195,7 +195,7 @@ function no_conversion_needed(pm::_PMD.SDPUBFPowerModel, msr_var::Symbol)
     return msr_var ∈ [:w, :pd, :qd, :pg, :qg]
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw)
 
     new_var_num = []
     for nvn in msr.numerator
@@ -238,7 +238,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Square; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Square; nw=nw)
 
     new_var = []
     for nvn in msr.elements
@@ -263,7 +263,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Multiplication; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Multiplication; nw=nw)
 
     m1 = []
     m2 = []
@@ -301,7 +301,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Tangent; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Tangent; nw=nw)
     #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
     @warn "Performing a Tangent conversion only makes sense for Normal distributions and is in general not advised"
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
@@ -327,7 +327,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Fraction; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Fraction; nw=nw)
     num = []
     for n in msr.numerator
         if occursin("v", String(n))
@@ -357,7 +357,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
 end
 
 
-function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw)
 
     p = []
     v = []

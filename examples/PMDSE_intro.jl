@@ -109,7 +109,7 @@ md"To solve the SE problem, we need a solver. We previously picked Ipopt, becaus
 slv = PMDSE.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 # ╔═╡ 115d6710-2599-11eb-1d41-2326cd36aa9f
-md"Finally, the last thing to decide is the power flow formulation that describes our problem. Let's go for a classic 'AC' formulation in polar coordinates. It can be chosen it in two different ways: either calling the generic `solve_mc_se(data, model_type, solver)` and passing the formulation, e.g. `_PMs.ACPPowerModel` as argument `model_type` or by calling the function that directly involves that formulation, as follows:"
+md"Finally, the last thing to decide is the power flow formulation that describes our problem. Let's go for a classic 'AC' formulation in polar coordinates. It can be chosen it in two different ways: either calling the generic `solve_mc_se(data, model_type, solver)` and passing the formulation, e.g. `_PMD.ACPUPowerModel` as argument `model_type` or by calling the function that directly involves that formulation, as follows:"
 
 # ╔═╡ 490720c0-2599-11eb-0282-67d4a9d8605f
 se_result = run_acp_mc_se(data, slv)

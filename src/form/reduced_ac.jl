@@ -6,8 +6,8 @@
 # State Estimation.                                                            #
 ################################################################################
 
-mutable struct ReducedACPPowerModel <: _PMs.AbstractACPModel _PMs.@pm_fields end
-mutable struct ReducedACRPowerModel <: _PMs.AbstractACRModel _PMs.@pm_fields end
+mutable struct ReducedACPPowerModel <: _PMD.AbstractUnbalancedACPModel _PMD.@pmd_fields end
+mutable struct ReducedACRPowerModel <: _PMD.AbstractUnbalancedACRModel _PMD.@pmd_fields end
 
 AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
 
@@ -23,14 +23,14 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=p
     bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
     bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
 
-    p    = get(_PMD.var(pm, nw),    :p, Dict()); _PMs._check_var_keys(p, bus_arcs, "active power", "branch")
-    q    = get(_PMD.var(pm, nw),    :q, Dict()); _PMs._check_var_keys(q, bus_arcs, "reactive power", "branch")
-    pg   = get(_PMD.var(pm, nw),   :pg, Dict()); _PMs._check_var_keys(pg, bus_gens, "active power", "generator")
-    qg   = get(_PMD.var(pm, nw),   :qg, Dict()); _PMs._check_var_keys(qg, bus_gens, "reactive power", "generator")
-    pt   = get(_PMD.var(pm, nw),   :pt, Dict()); _PMs._check_var_keys(pt, bus_arcs_trans, "active power", "transformer")
-    qt   = get(_PMD.var(pm, nw),   :qt, Dict()); _PMs._check_var_keys(qt, bus_arcs_trans, "reactive power", "transformer")
-    pd   = get(_PMD.var(pm, nw),  :pd, Dict()); _PMs._check_var_keys(pd, bus_loads, "active power", "load")
-    qd   = get(_PMD.var(pm, nw),  :qd, Dict()); _PMs._check_var_keys(pd, bus_loads, "reactive power", "load")
+    p    = get(_PMD.var(pm, nw),    :p, Dict()); _PMD._check_var_keys(p, bus_arcs, "active power", "branch")
+    q    = get(_PMD.var(pm, nw),    :q, Dict()); _PMD._check_var_keys(q, bus_arcs, "reactive power", "branch")
+    pg   = get(_PMD.var(pm, nw),   :pg, Dict()); _PMD._check_var_keys(pg, bus_gens, "active power", "generator")
+    qg   = get(_PMD.var(pm, nw),   :qg, Dict()); _PMD._check_var_keys(qg, bus_gens, "reactive power", "generator")
+    pt   = get(_PMD.var(pm, nw),   :pt, Dict()); _PMD._check_var_keys(pt, bus_arcs_trans, "active power", "transformer")
+    qt   = get(_PMD.var(pm, nw),   :qt, Dict()); _PMD._check_var_keys(qt, bus_arcs_trans, "reactive power", "transformer")
+    pd   = get(_PMD.var(pm, nw),  :pd, Dict()); _PMD._check_var_keys(pd, bus_loads, "active power", "load")
+    qd   = get(_PMD.var(pm, nw),  :qd, Dict()); _PMD._check_var_keys(pd, bus_loads, "reactive power", "load")
 
     terminals = bus["terminals"]
     grounded =  bus["grounded"]
@@ -57,7 +57,7 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=p
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function constraint_mc_power_balance(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance(pm::_PMD.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
     _PMD.constraint_mc_power_balance(pm, i; nw=nw)
 end
 
@@ -71,6 +71,6 @@ function variable_mc_bus_voltage(pm::ReducedACRPowerModel; bounded = true)
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function variable_mc_bus_voltage(pm::_PMs.AbstractPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::_PMD.AbstractPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end

@@ -8,35 +8,35 @@
 
 "solves the AC state estimation in polar coordinates (ACP formulation)"
 function solve_acp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return solve_mc_se(data, _PMs.ACPPowerModel, solver; kwargs...)
+    return solve_mc_se(data, _PMD.ACPUPowerModel, solver; kwargs...)
 end
 
 "depreciation message"
 function run_acp_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     @warn "run_acp_mc_se is being depreciated in favor of solve_acp_mc_se, please update your code accordingly"
-    return solve_mc_se(data, _PMs.ACPPowerModel, solver; kwargs...)
+    return solve_mc_se(data, _PMD.ACPUPowerModel, solver; kwargs...)
 end
 
 "solves the AC state estimation in rectangular coordinates (ACR formulation)"
 function solve_acr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return solve_mc_se(data, _PMs.ACRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, _PMD.ACRUPowerModel, solver; kwargs...)
 end
 
 "depreciation message"
 function run_acr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     @warn "run_acr_mc_se is being depreciated in favor of solve_acr_mc_se, please update your code accordingly"
-    return solve_mc_se(data, _PMs.ACRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, _PMD.ACRUPowerModel, solver; kwargs...)
 end
 
 "solves state estimation in current and voltage rectangular coordinates (IVR formulation)"
 function solve_ivr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return solve_mc_se(data, _PMs.IVRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, _PMD.IVRUPowerModel, solver; kwargs...)
 end
 
 "depreciation message"
 function run_ivr_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     @warn "run_ivr_mc_se is being depreciated in favor of solve_ivr_mc_se, please update your code accordingly"
-    return solve_mc_se(data, _PMs.IVRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, _PMD.IVRUPowerModel, solver; kwargs...)
 end
 
 "solves state estimation with a positive semi-definite fomrulation of the power flow equations (SDP formulation)"
@@ -116,7 +116,7 @@ function solve_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, s
 end
 
 "specification of the state estimation problem for a bus injection model - ACP and ACR formulations"
-function build_mc_se(pm::_PMs.AbstractPowerModel)
+function build_mc_se(pm::_PMD.AbstractPowerModel)
 
     # Variables
     _PMDSE.variable_mc_bus_voltage(pm; bounded = true)
@@ -156,7 +156,7 @@ function build_mc_se(pm::_PMs.AbstractPowerModel)
 end
 
 "specification of the state estimation problem for the IVR Flow formulation"
-function build_mc_se(pm::_PMs.AbstractIVRModel)
+function build_mc_se(pm::_PMD.AbstractUnbalancedIVRModel)
     # Variables
 
     _PMD.variable_mc_bus_voltage(pm, bounded = true)

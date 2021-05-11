@@ -16,13 +16,13 @@
     data = _PMD.transform_data_model(data);
 
     # solve the power flow
-    pf_result = _PMD.run_mc_pf(data, _PMs.ACPPowerModel, ipopt_solver)
+    pf_result = _PMD.run_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
     pseudo_loads = [3, 11, 7, 16]
     cluster_list = [1, 2, 1, 3]
     _PMDSE.assign_load_pseudo_measurement_info!(data, pseudo_loads, cluster_list; time_step=1, day=1)
 
     # write measurements based on power flow
-    _PMDSE.write_measurements_and_pseudo!(_PMs.ACPPowerModel, data, pf_result, msr_path, distribution_info=pseudo_path, σ = 0.005)
+    _PMDSE.write_measurements_and_pseudo!(_PMD.ACPUPowerModel, data, pf_result, msr_path, distribution_info=pseudo_path, σ = 0.005)
 
     # read-in measurement data and set initial values
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
@@ -45,7 +45,7 @@
     data["se_settings"] = Dict()
 
     # solve the state estimation
-    se_result = _PMDSE.solve_mc_se(data, _PMs.ACPPowerModel, ipopt_solver)
+    se_result = _PMDSE.solve_mc_se(data, _PMD.ACPUPowerModel, ipopt_solver)
     # @test se_result["termination_status"] == LOCALLY_SOLVED
     # @test isapprox( se_result["objective"], 1.41998; atol = 1e-5)
 end
