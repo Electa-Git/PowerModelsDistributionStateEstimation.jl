@@ -6,16 +6,16 @@
 # State Estimation.                                                            #
 ################################################################################
 
-mutable struct ReducedACPPowerModel <: _PMD.AbstractUnbalancedACPModel _PMD.@pmd_fields end
-mutable struct ReducedACRPowerModel <: _PMD.AbstractUnbalancedACRModel _PMD.@pmd_fields end
+mutable struct ReducedACPUPowerModel <: _PMD.AbstractUnbalancedACPModel _PMD.@pmd_fields end
+mutable struct ReducedACRUPowerModel <: _PMD.AbstractUnbalancedACRModel _PMD.@pmd_fields end
 
-AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
+AbstractReducedModel = Union{ReducedACRUPowerModel, ReducedACPUPowerModel}
 
 "Power balance constraint for the reduced ACR and ACP formulations.
 These formulation are exact for networks like those made available in the ENWL database,
 where there are no gound admittance, storage elements and active switches.
 Other than this, the function is the same as the constraint_mc_load_power_balance defined in PowerModelsDistribution "
-function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=_IM.nw_id_default)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
@@ -57,20 +57,20 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=p
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function constraint_mc_power_balance(pm::_PMD.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
     _PMD.constraint_mc_power_balance(pm, i; nw=nw)
 end
 
-function variable_mc_bus_voltage(pm::ReducedACPPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::ReducedACPUPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage_angle(pm; bounded = bounded)
     _PMD.variable_mc_bus_voltage_magnitude_only(pm; bounded = bounded)
 end
 
-function variable_mc_bus_voltage(pm::ReducedACRPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::ReducedACRUPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function variable_mc_bus_voltage(pm::_PMD.AbstractPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::_PMD.AbstractUnbalancedPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end

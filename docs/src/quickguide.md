@@ -31,7 +31,7 @@ The run commands return detailed results in the form of a dictionary, following 
 
 Different run functions correspond to different formulations. The function `solve_acp_mc_se` uses the AC Polar form, `solve_acr_mc_se` uses the AC rectangular, etc. Alternatively, the formulation type can directly be passed to the generic `solve_mc_se` function:
 ```julia
-solve_mc_se(data, ACPPowerModel, slv)
+solve_mc_se(data, ACPUPowerModel, slv)
 ```
 It should be noted that not all solvers can handle all problem types. For example, to use the SDP formulation, you have to use a SDP-capable solver, such as the open-source solver SCS.
 

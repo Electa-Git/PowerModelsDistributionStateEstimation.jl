@@ -85,7 +85,7 @@
     @testset "rACP-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMDSE.ReducedACPPowerModel
+        model = _PMDSE.ReducedACPUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -124,7 +124,7 @@
     @testset "rACP-WLS" begin
         # set model
         crit = "wls"
-        model = _PMDSE.ReducedACPPowerModel
+        model = _PMDSE.ReducedACPUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -241,7 +241,7 @@
     @testset "rACR-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMDSE.ReducedACRPowerModel
+        model = _PMDSE.ReducedACRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -280,7 +280,7 @@
     @testset "rACR-WLS" begin
         # set model
         crit = "wls"
-        model = _PMDSE.ReducedACRPowerModel
+        model = _PMDSE.ReducedACRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -397,7 +397,7 @@
     @testset "rIVR-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMDSE.ReducedIVRPowerModel
+        model = _PMDSE.ReducedIVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -436,7 +436,7 @@
     @testset "rIVR-WLS" begin
         # set model
         crit = "wls"
-        model = _PMDSE.ReducedIVRPowerModel
+        model = _PMDSE.ReducedIVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))

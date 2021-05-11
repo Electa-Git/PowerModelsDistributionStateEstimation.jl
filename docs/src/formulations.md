@@ -24,18 +24,18 @@ mutable struct PowerModelsDistribution.IVRUPowerModel <: PowerModelsDistribution
 A "reduced" version of each of the three formulations above is derived in PowerModelsDistributionStateEstimation:
 
 ```julia
-mutable struct PowerModelsDistributionStateEstimation.ReducedACPPowerModel <: PowerModelsDistribution.AbstractUnbalancedACPModel PowerModelsDistribution.@pmd_fields end
-mutable struct PowerModelsDistributionStateEstimation.ReducedACRPowerModel <: PowerModelsDistribution.AbstractUnbalancedACRModel PowerModelsDistribution.@pmd_fields end
-mutable struct PowerModelsDistributionStateEstimation.ReducedIVRPowerModel <: PowerModelsDistribution.AbstractUnbalancedIVRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACPUPowerModel <: PowerModelsDistribution.AbstractUnbalancedACPModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACRUPowerModel <: PowerModelsDistribution.AbstractUnbalancedACRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedIVRUPowerModel <: PowerModelsDistribution.AbstractUnbalancedIVRModel PowerModelsDistribution.@pmd_fields end
 
-AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
+AbstractReducedModel = Union{ReducedACRUPowerModel, ReducedACPUPowerModel}
 ```
 
 The reduced models are still exact for networks like those made available in the ENWL database, where there are no cable ground admittance, storage elements and active switches.
 A positive semi-definite (SDP) relaxation is also made available for state estimation in PowerModelsDistributionStateEstimation. The SDP model belongs to the following categories: conic models and branch flow (BF) models, and there relevant type structure is the following:
 
 ```julia
-abstract type PowerModelsDistribution.AbstractUBFModel <: PowerModelsDistribution.AbstractPowerModel end
+abstract type PowerModelsDistribution.AbstractUBFModel <: PowerModelsDistribution.AbstractUnbalancedPowerModel end
 abstract type PowerModelsDistribution.AbstractUBFConicModel <: PowerModelsDistribution.AbstractUBFModel end
 abstract type PowerModelsDistribution.AbstractConicUBFModel <: PowerModels.AbstractBFConicModel end
 abstract type PowerModelsDistribution.SDPUBFModel <: PowerModelsDistribution.AbstractConicUBFModel end

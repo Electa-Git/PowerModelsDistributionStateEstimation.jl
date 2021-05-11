@@ -14,11 +14,7 @@ as a starting value to its associated variable.
 function assign_start_to_variables!(data::Dict{String, Any})
     for (_,meas) in data["meas"]
         if all(i -> i ∈ [_DST.Normal{Float64}, Float64], typeof.(meas["dst"]))
-            if string(meas["var"]) != "w"
-                data[string(meas["cmp"])][string(meas["cmp_id"])]["$(string(meas["var"]))_start"] = _DST.mean.(meas["dst"])
-            else
-                data[string(meas["cmp"])][string(meas["cmp_id"])]["$(string(meas["var"]))_start"] = _DST.mean.(meas["dst"])[1]
-            end
+            data[string(meas["cmp"])][string(meas["cmp_id"])]["$(string(meas["var"]))_start"] = _DST.mean.(meas["dst"])
         end
     end
 end

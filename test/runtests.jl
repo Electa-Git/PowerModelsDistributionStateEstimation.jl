@@ -11,7 +11,7 @@ using Distributions, GaussianMixtures
 using Ipopt
 using PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
-#using SCS #removed while SDP tests are not e
+#using SCS #removed while SDP tests are not active
 using Test
 
 # pkg const

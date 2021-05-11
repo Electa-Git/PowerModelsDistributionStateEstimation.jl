@@ -1,5 +1,5 @@
-"MetaFormatter for ConsoleLogger Inspired by PowerModelsDistribution v0.11"
-function _pmdse_metafmt(level::Logging.LogLevel, _module, file, line)
+"MetaFormatter for ConsoleLogger Inspired by (i.e., shamelessly copy-pasted from) PowerModelsDistribution v0.11"
+function _pmdse_metafmt(level::Logging.LogLevel, _module, group, id, file, line)
     @nospecialize
     color = Logging.default_logcolor(level)
     prefix = "$(_module) | " * (level == Logging.Warn ? "Warning" : string(level)) * " ] :"
@@ -19,7 +19,7 @@ function _pmdse_metafmt(level::Logging.LogLevel, _module, file, line)
 end
 
 
-"Sets loglevel for PMDSE to :Wanr, silencing Info. To be set to :Error after old 1functions in 0.2.4 are deprecated"
+"Sets loglevel for PMDSE to :Warn, silencing Info. PMD starts from :Error"
 function silence!()
     set_logging_level!(:Warn)
 end

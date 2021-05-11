@@ -8,7 +8,7 @@
 """
     objective_mc_se
 """
-function objective_mc_se(pm::_PMD.AbstractPowerModel)
+function objective_mc_se(pm::_PMD.AbstractUnbalancedPowerModel)
     return JuMP.@objective(pm.model, Min,
     sum(
         sum(

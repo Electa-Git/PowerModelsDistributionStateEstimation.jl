@@ -52,35 +52,35 @@ end
 
 "solves the reduced AC state estimation in polar coordinates (ReducedACP formulation)"
 function solve_acp_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return solve_mc_se(data, ReducedACPPowerModel, solver; kwargs...)
+    return solve_mc_se(data, ReducedACPUPowerModel, solver; kwargs...)
 end
 
 "depreciation message"
 function run_acp_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     @warn "run_acp_red_mc_se is being depreciated in favor of solve_acp_red_mc_se, please update your code accordingly"
-    return solve_mc_se(data, ReducedACPPowerModel, solver; kwargs...)
+    return solve_mc_se(data, ReducedACPUPowerModel, solver; kwargs...)
 end
 
 "solves the reduced AC state estimation in rectangular coordinates (ReducedACR formulation)"
 function solve_acr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return solve_mc_se(data, ReducedACRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, ReducedACRUPowerModel, solver; kwargs...)
 end
 
 "depreciation message"
 function run_acr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     @warn "run_acr_red_mc_se is being depreciated in favor of solve_acr_red_mc_se, please update your code accordingly"
-    return solve_mc_se(data, ReducedACRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, ReducedACRUPowerModel, solver; kwargs...)
 end
 
 "solves the reduced state estimation in current and voltage rectangular coordinates (ReducedIVR formulation)"
 function solve_ivr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return solve_mc_se(data, ReducedIVRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, ReducedIVRUPowerModel, solver; kwargs...)
 end
 
 "depreciation message"
 function run_ivr_red_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
     @warn "run_ivr_red_mc_se is being depreciated in favor of solve_ivr_red_mc_se, please update your code accordingly"
-    return solve_mc_se(data, ReducedIVRPowerModel, solver; kwargs...)
+    return solve_mc_se(data, ReducedIVRUPowerModel, solver; kwargs...)
 end
 
 "solves state estimation with a linear approximation of the power flow equations (LinDist3Flow formulation)"
@@ -116,7 +116,7 @@ function solve_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, s
 end
 
 "specification of the state estimation problem for a bus injection model - ACP and ACR formulations"
-function build_mc_se(pm::_PMD.AbstractPowerModel)
+function build_mc_se(pm::_PMD.AbstractUnbalancedPowerModel)
 
     # Variables
     _PMDSE.variable_mc_bus_voltage(pm; bounded = true)
@@ -182,7 +182,7 @@ function build_mc_se(pm::_PMD.AbstractUnbalancedIVRModel)
         constraint_mc_current_balance_se(pm, i)
     end
 
-    if typeof(pm) <: ReducedIVRPowerModel
+    if typeof(pm) <: ReducedIVRUPowerModel
         for i in _PMD.ids(pm, :branch)
             constraint_current_to_from(pm, i)
             constraint_mc_bus_voltage_drop(pm, i)

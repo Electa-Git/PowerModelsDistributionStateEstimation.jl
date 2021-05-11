@@ -1,6 +1,9 @@
 ## staged
+
+- updates to PowerModelsDistribution v0.11.1 and InfrastructureModels 0.6.0 (breaking!)
+- adds `core/export.jl` with all the exported functions instead of keeping them in the _PMDSE module
 - removes PowerModels dependency, all functions imported via PowerModelsDistribution
-- removes Memento dependency, logging is made consistent with PowerModelsDistribution v0.11
+- removes Memento dependency, logging is made consistent with PowerModelsDistribution v0.11 using Julia standard library
 - adds short bad data consideration to Readme
 
 ## v0.2.4

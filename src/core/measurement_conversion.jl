@@ -1,7 +1,7 @@
 ################################################################################
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
-# PowerModelsDistributionStateEstimation.jl                                                             #
+# PowerModelsDistributionStateEstimation.jl                                    #
 # An extention package of PowerModels(Distribution).jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
@@ -195,7 +195,7 @@ function no_conversion_needed(pm::_PMD.SDPUBFPowerModel, msr_var::Symbol)
     return msr_var ∈ [:w, :pd, :qd, :pg, :qg]
 end
 
-function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::SquareFraction; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, original_var, msr::SquareFraction; nw=nw)
 
     new_var_num = []
     for nvn in msr.numerator
@@ -238,7 +238,7 @@ function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Square; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, original_var, msr::Square; nw=nw)
 
     new_var = []
     for nvn in msr.elements
@@ -263,7 +263,7 @@ function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Multiplication; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, original_var, msr::Multiplication; nw=nw)
 
     m1 = []
     m2 = []
@@ -301,7 +301,7 @@ function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Tangent; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, original_var, msr::Tangent; nw=nw)
     #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
     @warn "Performing a Tangent conversion only makes sense for Normal distributions and is in general not advised"
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
@@ -327,7 +327,7 @@ function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var,
     end
 end
 
-function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::Fraction; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, original_var, msr::Fraction; nw=nw)
     num = []
     for n in msr.numerator
         if occursin("v", String(n))
@@ -357,7 +357,7 @@ function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var,
 end
 
 
-function create_conversion_constraint(pm::_PMD.AbstractPowerModel, original_var, msr::MultiplicationFraction; nw=nw)
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, original_var, msr::MultiplicationFraction; nw=nw)
 
     p = []
     v = []

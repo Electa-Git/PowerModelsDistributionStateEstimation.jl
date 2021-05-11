@@ -222,10 +222,10 @@ function find_branch_t_bus(branches, bus_id)
     !isempty(conn_branches) ? (return conn_branches) : error("Network graph is disconnected")
 end
 """
-    function get_active_connections(pm::_PMD.AbstractPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
+    function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
 Returns the list of terminals, connections or t_ and f_connections, depending on the type of the component.
 """
-function get_active_connections(pm::_PMD.AbstractPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
+function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
     if cmp_type == :bus
        active_conn = _PMD.ref(pm, nw, :bus, cmp_id)["terminals"]
    elseif cmp_type ∈ [:gen, :load]
