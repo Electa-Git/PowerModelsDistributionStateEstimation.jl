@@ -84,7 +84,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACPModel,i,msr::Symbol;n
     elseif msr == :cid
         msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
     else
-       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
@@ -114,7 +114,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractACRModel,i,msr::Symbol;n
     elseif msr == :cid
         msr_type = MultiplicationFraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
     else
-       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and will be ignored")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and will be ignored")
     end
     return msr_type
 end
@@ -150,7 +150,7 @@ function assign_conversion_type_to_msr(pm::_PMs.AbstractIVRModel,i,msr::Symbol;n
     elseif msr == :qd
         msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     else
-       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
@@ -166,13 +166,13 @@ function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Sy
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:w])
     else
-       Memento.error(_LOGGER, "the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
+       error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
     return msr_type
 end
 
 function assign_conversion_type_to_msr(pm::_PMD.SDPUBFPowerModel,i,msr::Symbol;nw=nw)
-   Memento.error(_LOGGER, "Currently only a limited amount of measurement types is supported for the SDP model, $(msr) is not available")
+   error("Currently only a limited amount of measurement types is supported for the SDP model, $(msr) is not available")
 end
 
 function no_conversion_needed(pm::_PMs.AbstractACPModel, msr_var::Symbol)
@@ -303,7 +303,7 @@ end
 
 function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var, msr::Tangent; nw=nw)
     #TODO for v0.2.0 this needs to be general to every distribution or we need to provide an exception
-    warn("Performing a Tangent conversion only makes sense for Normal distributions and is in general not advised")
+    @warn "Performing a Tangent conversion only makes sense for Normal distributions and is in general not advised"
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
     for c in conn
         if _PMD.ref(pm, nw, :meas, msr.msr_id, "dst")[c] != 0.0
@@ -352,7 +352,7 @@ function create_conversion_constraint(pm::_PMs.AbstractPowerModel, original_var,
             original_var[id][c]*den[c] == -num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c])
             )
     else
-        Memento.error(_LOGGER, "wrong measurement association")
+        error("wrong measurement association")
     end
 end
 

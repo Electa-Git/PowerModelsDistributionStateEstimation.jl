@@ -106,11 +106,11 @@ function solve_mc_se(data::Union{Dict{String,<:Any},String}, model_type::Type, s
     end
     if !haskey(data["se_settings"], "rescaler")
         data["se_settings"]["rescaler"] = 1
-        Memento.warn(_LOGGER, "Rescaler set to default value, edit data dictionary if you wish to change it.")
+        @warn "Rescaler set to default value, edit data dictionary if you wish to change it."
     end
     if !haskey(data["se_settings"], "number_of_gaussian")
         data["se_settings"]["number_of_gaussian"] = 10
-        Memento.warn(_LOGGER, "Estimation criterion set to default value, edit data dictionary if you wish to change it.")
+        @warn "Estimation criterion set to default value, edit data dictionary if you wish to change it."
     end
     return _PMD.run_mc_model(data, model_type, solver, build_mc_se; kwargs...)
 end

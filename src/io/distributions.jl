@@ -88,7 +88,7 @@ function mode(dst::ExtendedBeta)
     elseif α == 1 && β > 1  return min
     elseif α ≥ 1  && β < 1  return max
     elseif α > 1  && β == 1 return max
-    elseif α ≤ 1  && β ≤ 1  Memento.error(_LOGGER, "mode is defined only when α > 1 and/or β > 1")
+    elseif α ≤ 1  && β ≤ 1  error("mode is defined only when α > 1 and/or β > 1")
     end
 end
 skewness(dst::ExtendedBeta) =

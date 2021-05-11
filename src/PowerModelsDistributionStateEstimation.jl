@@ -17,7 +17,7 @@ import GaussianMixtures
 import InfrastructureModels
 import JuMP
 import LinearAlgebra: diag
-import Memento
+import Logging, LoggingExtras
 import Optim
 import PowerModels
 import PowerModelsDistribution
@@ -49,9 +49,15 @@ const BASE_DIR = dirname(@__DIR__)
 # fix a random seed
 #_RAN.seed!(1234);
 
-# logger for errors and warnings
-const _LOGGER = Memento.getlogger(@__MODULE__)
-__init__() = Memento.register(_LOGGER)
+# logger for errors and warnings, etc.
+
+include("core/logging.jl")
+function __init__()
+    global _DEFAULT_LOGGER = Logging.currentlogger()
+    global _LOGGER = Logging.ConsoleLogger(; meta_formatter = PowerModelsDistributionStateEstimation._pmdse_metafmt)
+    
+    Logging.global_logger(_LOGGER)
+end
 
 # include
 include("core/constraint.jl")

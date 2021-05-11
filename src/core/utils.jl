@@ -90,7 +90,7 @@ function assign_basic_individual_criteria!(data::Dict; chosen_criterion::String=
             data["crit"] = "mle"
         end
     else
-        Memento.error(_LOGGER, "Unrecognized data input.")
+        error("Unrecognized data input.")
     end
 end
 """
@@ -112,7 +112,7 @@ function assign_residual_ub!(data::Dict; chosen_upper_bound::Float64=100.0, resc
     elseif haskey(data, "dst")
         data["res_max"] = upp_bound
     else
-        Memento.error(_LOGGER, "Unrecognized data input.")
+        error("Unrecognized data input.")
     end
 end
 """
@@ -219,7 +219,7 @@ function find_branch_t_bus(branches, bus_id)
     for (b, branch) in branches
         if branch["t_bus"] == bus_id push!(conn_branches, b) end
     end
-    !isempty(conn_branches) ? (return conn_branches) : Memento.error(_LOGGER, "Network graph is disconnected")
+    !isempty(conn_branches) ? (return conn_branches) : error("Network graph is disconnected")
 end
 """
     function get_active_connections(pm::_PMs.AbstractPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
@@ -233,7 +233,7 @@ function get_active_connections(pm::_PMs.AbstractPowerModel, nw::Int, cmp_type::
    elseif cmp_type == :branch
        active_conn = intersect(_PMD.ref(pm, nw, :branch, cmp_id)["f_connections"], _PMD.ref(pm, nw, :branch, cmp_id)["t_connections"])
    else
-       Memento.error(_LOGGER, "Measurements for component of type $cmp_type are not supported")
+       error("Measurements for component of type $cmp_type are not supported")
    end
    return active_conn
 end

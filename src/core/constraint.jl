@@ -64,7 +64,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.register(pm.model, f, 1, fun, grd, hes)
             JuMP.add_NL_constraint(pm.model, :($(res[idx]) == - $(f)($(var[c]))))
         else
-            Memento.error(_LOGGER, "SE criterion of measurement $(i) not recognized")
+            error("SE criterion of measurement $(i) not recognized")
         end
     end
 end

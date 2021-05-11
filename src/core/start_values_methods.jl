@@ -40,7 +40,7 @@ function assign_start_to_variables!(data::Dict{String, Any}, start_values_source
                 data[msr_cmp][cmp_id]["$(msr_var)_start"] = start_values_source["solution"][msr_cmp][cmp_id][msr_var][1]
             end
         else
-            Memento.warn(_LOGGER, "$(msr_var) is not in $(start_values_source), possible formulation mismatch")
+            @warn "$(msr_var) is not in $(start_values_source), possible formulation mismatch"
         end
     end
 end
