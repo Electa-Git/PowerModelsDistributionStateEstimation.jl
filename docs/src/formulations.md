@@ -8,25 +8,25 @@ Formulations (or "PowerModels") follow the type hierarchy of PowerModels and Pow
 At the top of the type hierarchy are abstract types. Three exact nonlinear (non-convex) models are available at the top level:
 
 ```julia
-abstract type PowerModels.AbstractACPModel <: PowerModels.AbstractPowerModel end
-abstract type PowerModels.AbstractACRModel <: PowerModels.AbstractPowerModel end
-abstract type PowerModels.AbstractIVRModel <: PowerModels.AbstractACRModel end
+abstract type PowerModelsDistribution.AbstractUnbalancedACPModel <: PowerModelsDistribution.AbstractUnbalancedPowerModel end
+abstract type PowerModelsDistribution.AbstractUnbalancedACRModel <: PowerModelsDistribution.AbstractUnbalancedPowerModel end
+abstract type PowerModelsDistribution.AbstractUnbalancedIVRModel <: PowerModelsDistribution.AbstractUnbalancedACRModel end
 ```
 
 Abstract Models types are then used as the type parameter for `PowerModels`:
 
 ```julia
-mutable struct PowerModels.ACPPowerModel <: PowerModels.AbstractACPModel PowerModelsDistribution.@pmd_fields end
-mutable struct PowerModels.ACRPowerModel <: PowerModels.AbstractACRModel PowerModelsDistribution.@pmd_fields end
-mutable struct PowerModels.IVRPowerModel <: PowerModels.AbstractIVRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistribution.ACPUPowerModel <: PowerModelsDistribution.AbstractUnbalancedACPModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistribution.ACRUPowerModel <: PowerModelsDistribution.AbstractUnbalancedACRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistribution.IVRUPowerModel <: PowerModelsDistribution.AbstractUnbalancedIVRModel PowerModelsDistribution.@pmd_fields end
 ```
 
 A "reduced" version of each of the three formulations above is derived in PowerModelsDistributionStateEstimation:
 
 ```julia
-mutable struct PowerModelsDistributionStateEstimation.ReducedACPPowerModel <: PowerModels.AbstractACPModel PowerModelsDistribution.@pmd_fields end
-mutable struct PowerModelsDistributionStateEstimation.ReducedACRPowerModel <: PowerModels.AbstractACRModel PowerModelsDistribution.@pmd_fields end
-mutable struct PowerModelsDistributionStateEstimation.ReducedIVRPowerModel <: PowerModels.AbstractIVRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACPPowerModel <: PowerModelsDistribution.AbstractUnbalancedACPModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedACRPowerModel <: PowerModelsDistribution.AbstractUnbalancedACRModel PowerModelsDistribution.@pmd_fields end
+mutable struct PowerModelsDistributionStateEstimation.ReducedIVRPowerModel <: PowerModelsDistribution.AbstractUnbalancedIVRModel PowerModelsDistribution.@pmd_fields end
 
 AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
 ```
@@ -35,8 +35,8 @@ The reduced models are still exact for networks like those made available in the
 A positive semi-definite (SDP) relaxation is also made available for state estimation in PowerModelsDistributionStateEstimation. The SDP model belongs to the following categories: conic models and branch flow (BF) models, and there relevant type structure is the following:
 
 ```julia
-abstract type PowerModels.AbstractBFModel <: PowerModels.AbstractPowerModel end
-abstract type PowerModels.AbstractBFConicModel <: PowerModels.AbstractBFModel end
+abstract type PowerModelsDistribution.AbstractUBFModel <: PowerModelsDistribution.AbstractPowerModel end
+abstract type PowerModelsDistribution.AbstractUBFConicModel <: PowerModelsDistribution.AbstractUBFModel end
 abstract type PowerModelsDistribution.AbstractConicUBFModel <: PowerModels.AbstractBFConicModel end
 abstract type PowerModelsDistribution.SDPUBFModel <: PowerModelsDistribution.AbstractConicUBFModel end
 

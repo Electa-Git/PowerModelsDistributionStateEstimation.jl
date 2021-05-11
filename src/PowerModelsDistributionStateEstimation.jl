@@ -19,7 +19,6 @@ import JuMP
 import LinearAlgebra: diag
 import Logging, LoggingExtras
 import Optim
-import PowerModels
 import PowerModelsDistribution
 import PowerModelsDistribution: _has_nl_expression #need this to use @smart_constraint
 import Random

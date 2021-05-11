@@ -9,7 +9,6 @@
 # using pkgs
 using Distributions, GaussianMixtures
 using Ipopt
-using PowerModels
 using PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
 #using SCS #removed while SDP tests are not e

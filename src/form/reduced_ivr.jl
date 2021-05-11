@@ -2,7 +2,7 @@
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
 # PowerModelsDistributionStateEstimation.jl                                    #
-# An extention package of PowerModels(Distribution).jl for Static Power System #
+# An extention package of PowerModelsDistribution.jl for Static Power System   #
 # State Estimation.                                                            #
 ################################################################################
 mutable struct ReducedIVRPowerModel <: _PMD.AbstractUnbalancedIVRModel _PMD.@pmd_fields end
