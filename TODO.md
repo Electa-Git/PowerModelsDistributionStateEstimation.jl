@@ -1,18 +1,11 @@
 ## A list of things to do for v0.3.0
 
-- [ ] update code for PMD v0.10.2 once it is released (!)
-      - unlock single-phase buses and branches
-      - re-introduce start_values in tests and enable ubuntu tests back
+- [ ] allow single-phase buses and branches measurements in automatic parser and se itself
+      - add test where you parse .m file and solve one-conductor SE
 
-- [ ] fix StatsPlots dependency
+- [ ] re-introduce start_values in tests and enable ubuntu tests back in CI
 
-- [ ] update to InfrastructureModels 0.6.0
-
-- [ ] update Pluto notebook
-
-- [ ] quantify rescaler for non-gaussian
-
-- [ ] investigate techniques to speed up code (continuous effort)
+- [ ] update Pluto notebook, add non-Gaussian notebook
 
 - [ ] input through array of measurements rather then csv
 
