@@ -181,23 +181,33 @@ function reduce_single_phase_loadbuses!(data::Dict; exclude=[])
     for (bus_id,load_id,nr_conn_loads) in load_info
         load_connections = data["load"][load_id]["connections"]
         if nr_conn_loads == 1 && length(load_connections) == 1
-            perform_dimension_reduction(data, bus_id, load_connections)
+            perform_dimension_reduction!(data, bus_id, load_connections)
         elseif nr_conn_loads > 1 && bus_id ∉ already_checked
             push!(already_checked, bus_id)
             loads_at_bus_id = [load_id for (x, load_id, z) in load_info if x == bus_id]
             used_connections = unique([data["load"][lid]["connections"] for lid in loads_at_bus_id])
-            if length(used_connections) == 1 perform_dimension_reduction(data, bus_id, load_connections) end
+            if length(used_connections) == 1 perform_dimension_reduction!(data, bus_id, load_connections) end
         end
     end
 end
 "reduces the dimension of bus terminals and branches f_ and t_connections to match those of the connected load(s)"
-function perform_dimension_reduction(data::Dict, bus_id::Int64, load_connections)
+function perform_dimension_reduction!(data::Dict, bus_id::Int64, load_connections)
     data["bus"]["$bus_id"]["terminals"] = load_connections
     data["bus"]["$bus_id"]["grounded"] = data["bus"]["$bus_id"]["grounded"][load_connections]
     conn_branches = find_branch_t_bus(data["branch"], bus_id)
+    data = parse_file("../test/data/opendss/case3_unbalanced.dss"; data_model = MATHEMATICAL)
+
+    idx = load_connections[1]
+
     for br_id in conn_branches
-        data["branch"][br_id]["f_connections"] = load_connections
-        data["branch"][br_id]["t_connections"] = load_connections
+        branch = data["branch"][br_id]
+        for (key,value) in branch
+            if isa(value, Matrix)
+                branch[key] = reshape([value[idx,idx]], 1, 1)
+            elseif isa(value, Vector)
+                branch[key] = load_connections
+            end
+        end
     end
 end
 "returns a tuple with all loads' information. Every load is assigned a tuple with the following content: (bus the load is connected to, the load index, total number of loads connected to the same bus) "

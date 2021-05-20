@@ -1,9 +1,8 @@
 ## The scope of this test set is to check that the helper functions in core/utils.jl and core/start_values_methods.jl don't break
-
-msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
-data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
-
 @testset "utils and start value methods" begin
+    
+    msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
+    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
 
     @testset "dimension reduction" begin
         #test 1: three active connections, do nothing
@@ -23,6 +22,8 @@ data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbala
         reduce_single_phase_loadbuses!(case3_data, exclude = [])
         @test case3_data["bus"]["3"]["terminals"] == [2]
 
+        pf_result= _PMD.run_mc_pf(case3_data, _PMD.ACPUPowerModel, ipopt_solver)
+        @test pf_result["termination_status"] == LOCALLY_SOLVED 
     end
 
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)

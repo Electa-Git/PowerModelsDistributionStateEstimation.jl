@@ -5,9 +5,9 @@
 
 - [ ] re-introduce start_values in tests and enable ubuntu tests back in CI
 
-- [ ] update Pluto notebook, add non-Gaussian notebook
+- [ ] update basic notebook, add non-Gaussian notebook
 
-- [ ] input through array of measurements rather then csv
+- [ ] input through array of measurements rather than csv
 
 - [ ] consider deprecating reduced_ac and reduced_ivr after test against @smart_constraint (especially reduced_ac)
 
@@ -18,6 +18,8 @@
 
 - [ ] Fix missing docstrings and faulty latex in mathematical model, update docs
 
-## TODO before 0.X
+## Possible TODOs for future releases
 
-- [ ] add loads and transformer models (v0.3?)?
+- [ ] add loads and transformer models    (?)
+- [ ] convex (SDP, SOC?) state estimation (?)
+- [ ] add bad data functionalities        (?)

@@ -9,7 +9,7 @@
 # using pkgs
 using Distributions, GaussianMixtures
 using Ipopt
-using PowerModelsDistribution
+using PowerModels, PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
 #using SCS #removed while SDP tests are not active
 using Test
@@ -41,13 +41,14 @@ ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
 
 @testset "PowerModelsDistributionStateEstimation" begin
 
-    include("distributions.jl")
-    include("estimation_criteria.jl")
-    include("mixed_measurements.jl")
-    include("non_exact_forms.jl")
-    include("power_flow.jl")
-    include("pseudo_measurements.jl")
+    # include("distributions.jl")
+    # include("estimation_criteria.jl")
+    # include("mixed_measurements.jl")
+    # include("non_exact_forms.jl")
+    # include("power_flow.jl")
+    # include("pseudo_measurements.jl")
+    # include("single_conductor_branches.jl")
     include("utils_and_start_val.jl")
-    include("with_errors.jl")
+    # include("with_errors.jl")
 
 end
