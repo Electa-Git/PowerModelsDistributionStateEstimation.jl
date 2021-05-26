@@ -13,7 +13,7 @@
 - [ ] increase coverage, in particular:
       - test for rand(ExtendedBeta)
       - test for GMM grad/heslogpdf
-      - fix test of line 49 in pseudo_measurements.jl: investigate NUMERICAL_ERROR when sol is correct
+      - fix test of line 49-50 in pseudo_measurements.jl: in 50, NUMERICAL_ERROR when sol is correct, in 49 EXCEPTION_ACCESS_VIOLATION at 0x2e2075e6 -- mumps_cst_amf_ in windows CI
 
 - [ ] Add docs on Gaussian Mixture Models! Are the docs fully up to date then?
 
