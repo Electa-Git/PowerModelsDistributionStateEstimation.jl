@@ -195,7 +195,6 @@ function perform_dimension_reduction!(data::Dict, bus_id::Int64, load_connection
     data["bus"]["$bus_id"]["terminals"] = load_connections
     data["bus"]["$bus_id"]["grounded"] = data["bus"]["$bus_id"]["grounded"][load_connections]
     conn_branches = find_branch_t_bus(data["branch"], bus_id)
-    data = parse_file("../test/data/opendss/case3_unbalanced.dss"; data_model = MATHEMATICAL)
 
     idx = load_connections[1]
 

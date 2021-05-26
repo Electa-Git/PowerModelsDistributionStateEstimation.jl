@@ -8,7 +8,7 @@
 
 [![Active Development](https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen.svg)](https://github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl)
 
-PowerModelsDistributionStateEstimation.jl is an extension package of PowerModelsDistribution.jl for Static Power Distribution Network State Estimation. The package is a flexible design tool, enabling benchmarks between different state estimation models. Different state estimation models can be built by using different power flow formulations, state estimation criteria, (in)equality constraints, etc.
+PowerModelsDistributionStateEstimation.jl is an extension package of [PowerModelsDistribution.jl](https://github.com/lanl-ansi/PowerModelsDistribution.jl) for Static Power Distribution Network State Estimation. The package is a flexible design tool, enabling benchmarks between different state estimation models. Different state estimation models can be built by using different power flow formulations, state estimation criteria, (in)equality constraints, etc. The package has [documentation](https://electa-git.github.io/PowerModelsDistributionStateEstimation.jl/stable/), which we try to keep up to date.
 
 A state estimator determines the *most-likely* state of power distribution networks given a set of uncertainties, e.g., measurement errors, pseudo-measurements, etc. These uncertainties may pertain to any quantity of any network component, e.g., voltage magnitude (`vm`) of a `bus`, power demand (`pd`) of a `load`, etc.
 
@@ -39,8 +39,9 @@ Measurement Uncertainties:
 ## Data Formats
 
 To use the package, two type of data inputs are required:
-- Network data: OpenDSS “.dss” files
+- Network data: support exists for OpenDSS “.dss”, matpower ".m" and some specific JSON files 
 - Measurement data: CSV “.csv” files
+See the [relative section of the docs](https://electa-git.github.io/PowerModelsDistributionStateEstimation.jl/stable/input_data_format/) for more info.
 
 ## Examples
 
@@ -78,6 +79,6 @@ This code is provided under a BSD license.
 
 ## Notes
 
-- The intention of this package is not to provide the fastest SE algorithms, but a framework to facilitate the distribution SE design process. If faster solution times are crucial, a customized algorithm can be developed afterwards, once the optimal design is chosen
+- The intention of this package is not to provide the fastest SE algorithms, but a framework to facilitate the distribution SE design process. If faster solution times are crucial, a customized algorithm can be developed afterwards, once the optimal design is chosen.
 - The focus is on the state estimation model itself, and bad data detection techniques and observability functions are not implemented yet. Nevertheless, it is easy for the user to manipulate the result dictionary to, e.g., perform a Chi square test.
-- Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to include the medium voltage network in the analysis. Extending the package to host these models is scheduled for future releases.
+- Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to perform a multi-level MV/LV state estimation. Extending the package to include these models in a more automatic and intuitive manner is scheduled for future releases.

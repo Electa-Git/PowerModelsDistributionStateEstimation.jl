@@ -6,8 +6,8 @@ The data input required by PowerModelsDistributionStateEstimation takes the form
 - Measurement data
 - State estimation settings
 
-The network data contains all the information relative to the physics of the analyzed network: topology, line impedance, power demand and generation, etc..
-The measurement data contains all the information relative to the available (pseudo-)measurements available for that network: number and placement of meters, measured quantities (power, voltage...) and measurement accuracy.
+The network data contains all the information relative to the physics of the analyzed network: topology, line impedance, location and specs of loads, generators, etc..
+The measurement data contains all the information relative to the (pseudo-)measurements available for that network: number and placement of meters, measured quantities (power, voltage...) and measurement accuracy.
 The state estimation settings allow the user to choose the type of estimation criterion to be used (e.g., WLS, WLAV,..) and add a weight rescaler.
 More details on each of the three parts can be found in the following sections of this manual.
 
@@ -18,14 +18,17 @@ In the versions supported by PowerModelsDistributionStateEstimation, PMD allows 
 - The `ENGINEERING` model (extensively documented [here](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/eng-data-model/))
 - The `MATHEMATICAL` model
 The idea behind offering two options is that the `ENGINEERING` model is quite intuitive and allows a non-developer to easily generate data and use the PMD package as made available. The `MATHEMATICAL` model allows developers to explore the details of the PMD package and/or add extra information that can be passed as additional input to go beyond the functionalities that are natively offered in PMD.
-Ultimately, both PMD and PowerModelsDistributionStateEstimation use the `MATHEMATICAL` model to build the input for the calculations, but PMD can be provided directly an `ENGINEERING` model, which is then transformed at runtime.
+Ultimately, both PMD and PowerModelsDistributionStateEstimation use a `MATHEMATICAL` model as input for the calculations, but PMD can be provided directly an `ENGINEERING` model, which is then transformed at runtime.
 This is not the case in PowerModelsDistributionStateEstimation, which requires measurement data and state estimation settings to perform state estimation calculations.
 These two take the form of "sub-dictionaries" that need to be appended to a PMD `MATHEMATICAL` network data model dictionary. If added to the `ENGINEERING` data model, they will be ignored in the transformation to the `MATHEMATICAL` model, returning an error.
-For additional information on the network data input, the user is referred to the [PMD manual](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/).
-The user can build the network data from scratch, for example writing a native julia parser that builds the dictionary starting from external files, or reading an otherwise created JSON file with the right dictionary structure.
-However, to encourage the use and creation of easily reproducible test cases, two network data parsers are made available, for the following files:
-- OpenDSS files, for which we use the parsers from PowerModelsDistribution,
-- A native ENWL files parser, courtesy of Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)).
+For additional information on the structure of the network data input, the user is referred to the [PMD manual](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/).
+The user can build the network data from scratch, for example writing a native julia parser that builds the dictionary starting from external files.
+However, to encourage the use and creation of easily reproducible test cases, PMDSE uses the parsing functionalities of PowerModels and PowerModelsDistribution that allow users to directly read network data from the following file formats:
+- OpenDSS files (".dss"),
+- Matpower files (".m"),
+- JSON files (".json") created from PowerModels.
+
+Furthermore, within PMDSE the network and load/generation data and parsers of the ENWL dataset are available and easy-to-use, courtesy of Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)).
 
 ### Parsing OpenDSS files
 
@@ -79,6 +82,44 @@ PowerModelsDistributionStateEstimation.insert_profiles!(data, season, devices, p
 ```
 
 The ENWL data set features a number of low-carbon technologies profiles: electric vehicles (EV), electric heat pumps (EHP), micro-CHP (uCHP), photovoltaic panels (PV). "load" indicates the "traditional" residential load.
+
+### Parsing Matpower files
+
+Matpower file can be parsed with PowerModels' function: `parse_matpower`. However, this will return network data in PowerModels' format, which is not the same as
+that of PowerModelsDistribution and PowerModelsDistributionStateEstimation. 
+Furthermore, Matpower files are single-conductor networks, which are typically not a good network representation for unbalanced distribution systems, where all phases
+should be explicitly modelled.
+To make the parsed matpower file multiconductor and adapted to the PowerModelsDistribution format, one can use the `make_multiconductor!` function from PowerModelsDistribution. Although this is a "naive" way to make the file suitable, it can be a good starting point.
+
+#### Multiconductor vs single-conductor data
+
+While PowerModelsDistributionStateEstimation is designed with three-phase systems in mind, and thus relies on the PowerModelsDistribution data format, the package also allows to perform state estimation on single-conductor-equivalents or networks where some conductors/components are single-phase and other are three-phase.
+For instance, to perform single-phase state estimation on a Matpower network, it is sufficient to parse it as follows:
+```julia
+number_of_conductors = 1
+pm_path = joinpath(dirname(pathof(PowerModels)), "..")
+case5 = PowerModels.parse_file("$(pm_path)/test/data/matpower/case5.m") 
+PowerModelsDistribution.make_multiconductor!(case5, number_of_conductors)
+```
+if `number_of_conductors` is set to 1, the model will still be a single-phase-equivalent network, but structurally compatible with PowerModelsDistribution.
+if `number_of_conductors` is set to 3, the data will be transformed to a naive three-phase model.
+See examples in `test/single_conductor_branches.jl`.
+
+### Writing and parsing JSON files
+
+You can export/import a PowerModels or PowerModelsDistribution network data dictionary to a JSON file using the following functions:
+
+- For PowerModelsDistribution: 
+    - `print_file` to export, 
+    - `parse_file` to read.
+
+- For PowerModels:
+    - `export_file`
+    - `parse_file`
+
+Clearly, parsing correct network data from a json file with `parse_file` will work if the file itself was created from a correct data 
+dictionary structure (e.g., with the export functionalities above). Trying to parse an otherwise created json file will probably not work, 
+unless created appropriately.
 
 ## Measurement Data
 

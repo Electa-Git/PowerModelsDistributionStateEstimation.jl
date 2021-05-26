@@ -15,12 +15,11 @@ on the random variable `X`:
     * `rwls`: relaxed weighted least square (exact relaxation)
 - `Non-Gaussian`
     * `mle`: maximum likelihood estimation (exact)
-    * `ga`: Gaussian approximation (inexact)
 
 The user has to specify the `criterion` for each measurement individually.
 However, if all measurements can be described by the same criterion, it is sufficient to
 set the criterion name in the `se_settings` ([Input Data Format](@ref)), as PMDSE
-will automatically call assign_unique_individual_criterion!().
+will automatically call `assign_unique_individual_criterion!()`.
 ```@docs
 assign_unique_individual_criterion!(data::Dict)
 ```
@@ -83,28 +82,7 @@ The rWLS criterion relaxes the former as a cone and is given by
 
 ## Non-Gaussian State Estimation Criteria
 
-## Gaussian Mixture Estimation
-
-The Gaussian mixture criterion splits the random variable `X` into `𝓝` Gaussian
-components `Y`, and introduces two constraints. First, the related variable `x`
-is the weighted sum of the variables `y` related to the Gaussian components. Second, the
-overall residual `ρ` equal to the sum of Gaussian components' residuals. The
-`rwlav` criterion is choosen to model the residual of the Gaussian components.
-
-```math
-\begin{eqnarray}
-      x_{m}             &= \sum_{m \to n \in \mathcal{N}} w_{n} y_{n},\quad m \in \mathcal{M}: m \to x_{m} \in \mathcal{X}                                  \\
-      \rho_{m}          &\geq \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{n}},\quad m \in \mathcal{M},     \\
-      \rho_{m}          &\geq - \sum_{m \to n \in \mathcal{N}} \frac{ y_{n} - \mu_{n} }{\text{rsc} \cdot w_{n} \sigma_{m}},\quad m \in \mathcal{M},   \\
-\end{eqnarray}
-```
-where:
-* `w` denotes the weight associated with a Gaussian component.
-
-The user has to specify the `number_of_gaussian` through the `se_settings` ([Input Data Format](@ref)).
-If no number is specified, it will default to `10`.
-
-## Maximum Likelihood Estimation
+### Maximum Likelihood Estimation
 
 The maximum likelihood criterion links the measurement residual to the logpdf of
 the associated distribution and is given by
@@ -132,3 +110,9 @@ the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 ```@docs
 ExtendedBeta
 ```
+Furthermore, a Gaussian Mixture Model (GMM) can also directly be used in the maximum likelihood estimation.
+
+## TODO: add docs on Gaussian Mixture Model
+
+The user has to specify the `number_of_gaussian` through the `se_settings` ([Input Data Format](@ref)).
+If no number is specified, it will default to `10`.

@@ -7,7 +7,6 @@
 ################################################################################
 """
     assign_start_to_variables!(data)
-
 This function gives the measurement value in the data dictionary
 as a starting value to its associated variable.
 """
@@ -20,7 +19,6 @@ function assign_start_to_variables!(data::Dict{String, Any})
 end
 """
     assign_start_to_variables!(data, start_values_source)
-
 This function assigns start values to the problem variables based on a dictionary where they are collected: start_values_source.
 This dictionary must have the form of a powerflow solution dictionary.
 """

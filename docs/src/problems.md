@@ -108,7 +108,7 @@ Objective:
 \begin{equation}
   \text{minimize} \; \; \sum_{\substack{m \in \mathcal{M}}} \boldsymbol{\rho}_{m}.
 \end{equation}
- ```
+```
 The residual $\rho_{m, \phi}$ is a function that allows to represent the uncertainty on a given measurement $m$, performed on conductor $\phi$. In the mathematical description above, it is identified as the function $r$, which is depending on the measurement $\mathbf{z}$, and another function: $f$.
 
 The function $f_{m,\phi}$ are used to handle measurements $z_{m,\phi}$ that are performed on quantities that do not refer to the problems' variable space. There are the measurements conversions described in the [Measurements And Conversions](@ref) section of the documentation.
