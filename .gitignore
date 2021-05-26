@@ -5,5 +5,5 @@
 *.csv
 deps/deps.jl
 docs/build/
-/Manifest.toml
+Manifest.toml
 test/data/enwl/measurements/temp.csv

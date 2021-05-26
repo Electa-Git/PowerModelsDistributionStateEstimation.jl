@@ -2,20 +2,20 @@
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
 # PowerModelsDistributionStateEstimation.jl                                    #
-# An extention package of PowerModels(Distribution).jl for Static Power System #
+# An extention package of PowerModelsDistribution.jl for Static Power System   #
 # State Estimation.                                                            #
 ################################################################################
 
-mutable struct ReducedACPPowerModel <: _PMs.AbstractACPModel _PMs.@pm_fields end
-mutable struct ReducedACRPowerModel <: _PMs.AbstractACRModel _PMs.@pm_fields end
+mutable struct ReducedACPUPowerModel <: _PMD.AbstractUnbalancedACPModel _PMD.@pmd_fields end
+mutable struct ReducedACRUPowerModel <: _PMD.AbstractUnbalancedACRModel _PMD.@pmd_fields end
 
-AbstractReducedModel = Union{ReducedACRPowerModel, ReducedACPPowerModel}
+AbstractReducedModel = Union{ReducedACRUPowerModel, ReducedACPUPowerModel}
 
 "Power balance constraint for the reduced ACR and ACP formulations.
 These formulation are exact for networks like those made available in the ENWL database,
 where there are no gound admittance, storage elements and active switches.
 Other than this, the function is the same as the constraint_mc_load_power_balance defined in PowerModelsDistribution "
-function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=_IM.nw_id_default)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
@@ -23,14 +23,14 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=p
     bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
     bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
 
-    p    = get(_PMD.var(pm, nw),    :p, Dict()); _PMs._check_var_keys(p, bus_arcs, "active power", "branch")
-    q    = get(_PMD.var(pm, nw),    :q, Dict()); _PMs._check_var_keys(q, bus_arcs, "reactive power", "branch")
-    pg   = get(_PMD.var(pm, nw),   :pg, Dict()); _PMs._check_var_keys(pg, bus_gens, "active power", "generator")
-    qg   = get(_PMD.var(pm, nw),   :qg, Dict()); _PMs._check_var_keys(qg, bus_gens, "reactive power", "generator")
-    pt   = get(_PMD.var(pm, nw),   :pt, Dict()); _PMs._check_var_keys(pt, bus_arcs_trans, "active power", "transformer")
-    qt   = get(_PMD.var(pm, nw),   :qt, Dict()); _PMs._check_var_keys(qt, bus_arcs_trans, "reactive power", "transformer")
-    pd   = get(_PMD.var(pm, nw),  :pd, Dict()); _PMs._check_var_keys(pd, bus_loads, "active power", "load")
-    qd   = get(_PMD.var(pm, nw),  :qd, Dict()); _PMs._check_var_keys(pd, bus_loads, "reactive power", "load")
+    p    = get(_PMD.var(pm, nw),    :p, Dict()); _PMD._check_var_keys(p, bus_arcs, "active power", "branch")
+    q    = get(_PMD.var(pm, nw),    :q, Dict()); _PMD._check_var_keys(q, bus_arcs, "reactive power", "branch")
+    pg   = get(_PMD.var(pm, nw),   :pg, Dict()); _PMD._check_var_keys(pg, bus_gens, "active power", "generator")
+    qg   = get(_PMD.var(pm, nw),   :qg, Dict()); _PMD._check_var_keys(qg, bus_gens, "reactive power", "generator")
+    pt   = get(_PMD.var(pm, nw),   :pt, Dict()); _PMD._check_var_keys(pt, bus_arcs_trans, "active power", "transformer")
+    qt   = get(_PMD.var(pm, nw),   :qt, Dict()); _PMD._check_var_keys(qt, bus_arcs_trans, "reactive power", "transformer")
+    pd   = get(_PMD.var(pm, nw),  :pd, Dict()); _PMD._check_var_keys(pd, bus_loads, "active power", "load")
+    qd   = get(_PMD.var(pm, nw),  :qd, Dict()); _PMD._check_var_keys(pd, bus_loads, "reactive power", "load")
 
     terminals = bus["terminals"]
     grounded =  bus["grounded"]
@@ -57,20 +57,20 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=p
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function constraint_mc_power_balance(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_power_balance(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
     _PMD.constraint_mc_power_balance(pm, i; nw=nw)
 end
 
-function variable_mc_bus_voltage(pm::ReducedACPPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::ReducedACPUPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage_angle(pm; bounded = bounded)
     _PMD.variable_mc_bus_voltage_magnitude_only(pm; bounded = bounded)
 end
 
-function variable_mc_bus_voltage(pm::ReducedACRPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::ReducedACRUPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function variable_mc_bus_voltage(pm::_PMs.AbstractPowerModel; bounded = true)
+function variable_mc_bus_voltage(pm::_PMD.AbstractUnbalancedPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end

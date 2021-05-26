@@ -17,9 +17,8 @@ import GaussianMixtures
 import InfrastructureModels
 import JuMP
 import LinearAlgebra: diag
-import Memento
+import Logging, LoggingExtras
 import Optim
-import PowerModels
 import PowerModelsDistribution
 import PowerModelsDistribution: _has_nl_expression #need this to use @smart_constraint
 import Random
@@ -36,7 +35,6 @@ const _DFS = DataFrames
 const _DST = Distributions
 const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
-const _PMs = PowerModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
 const _RAN = Random
@@ -49,9 +47,15 @@ const BASE_DIR = dirname(@__DIR__)
 # fix a random seed
 #_RAN.seed!(1234);
 
-# logger for errors and warnings
-const _LOGGER = Memento.getlogger(@__MODULE__)
-__init__() = Memento.register(_LOGGER)
+# logger for errors and warnings, etc.
+
+include("core/logging.jl")
+function __init__()
+    global _DEFAULT_LOGGER = Logging.current_logger()
+    global _LOGGER = Logging.ConsoleLogger(; meta_formatter = PowerModelsDistributionStateEstimation._pmdse_metafmt)
+    
+    Logging.global_logger(_LOGGER)
+end
 
 # include
 include("core/constraint.jl")
@@ -73,18 +77,6 @@ include("io/postprocessing.jl")
 include("prob/se.jl")
 
 # export
-export BASE_DIR
-export minimum, maximum
-export logpdf, gradlogpdf, heslogpdf
-export run_mc_se, run_acp_mc_se, run_acr_mc_se, run_ivr_mc_se
-export solve_mc_se, solve_acp_mc_se, solve_acr_mc_se, solve_ivr_mc_se
-export rm_enwl_transformer!, reduce_enwl_lines_eng!
-export add_measurements!, write_measurements!, assign_load_pseudo_measurement_info!
-export assign_unique_individual_criterion!, assign_basic_individual_criteria!
-export assign_start_to_variables!, assign_residual_ub!
-export reduce_single_phase_loadbuses!
-export calculate_voltage_magnitude_error
-export update_load_bounds!, update_voltage_bounds!, update_generator_bounds!, update_all_bounds!
-export ExtendedBeta
+include("core/export.jl")
 
 end

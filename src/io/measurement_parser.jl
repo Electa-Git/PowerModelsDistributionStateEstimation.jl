@@ -2,7 +2,7 @@
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
 # PowerModelsDistributionStateEstimation.jl                                    #
-# An extention package of PowerModels(Distribution).jl for Static Power System #
+# An extention package of PowerModelsDistribution.jl for Static Power System #
 # State Estimation.                                                            #
 ################################################################################
 
@@ -101,16 +101,16 @@ repeated_measurement(df::_DFS.DataFrame, cmp_id::String, cmp_type::String, phase
     sum(.&(df[!,:cmp_id].==cmp_id,df[!,:cmp_type].==cmp_type,df[!,:phase].==string(phases))) > 0
 
 function get_measures(model::DataType, cmp_type::String)
-    if model <: _PMs.AbstractACPModel
+    if model <: _PMD.AbstractUnbalancedACPModel
         if cmp_type == "bus"  return ["vm"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
-    elseif model  <: _PMs.AbstractIVRModel
+    elseif model  <: _PMD.AbstractUnbalancedIVRModel
         # NB: IVR is a subtype of ACR, therefore it should preceed ACR
         if cmp_type == "bus"  return ["vr","vi"] end
         if cmp_type == "gen"  return ["crg","cig"] end
         if cmp_type == "load" return ["crd_bus","cid_bus"] end
-    elseif model <: _PMs.AbstractACRModel
+    elseif model <: _PMD.AbstractUnbalancedACRModel
         if cmp_type == "bus"  return ["vr","vi"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
@@ -193,7 +193,7 @@ the same format). The measurements consist of voltage and power/current injectio
 of all generators and loads. The exact measurement type depends on the chosen power flow formulation,
 e.g., with the AC Polar formulation, these are voltage magnitude and active and reactive power.
 # Arguments
--   `model`: power flow type of the generated measurements, e.g., ACPPowerModel.
+-   `model`: power flow type of the generated measurements, e.g., ACPUPowerModel.
              If it does not match the power flow model of the `pf_results`, it might not work.
              `pf_results` can be post-processed, e.g., polar results can be converted in rectangular
              and viceversa, to make the result dictionary compatible.
@@ -201,7 +201,7 @@ e.g., with the AC Polar formulation, these are voltage magnitude and active and 
 -   `pf_results`: PowerModelsDistribution solution dictionary or similar format
 -   `path`: path where the csv file will be generated and stored
 -   `exclude`: select quantities from the `pf_results` dictionary to be excluded from the measurement
-               generation. For example, to ignore generator results with ACPPowerModel,
+               generation. For example, to ignore generator results with ACPUPowerModel,
                set exclude = ["pg", "qg"].
 -   `σ`: standard deviation of demand/generation measurement, for voltage measurements
         this is rescaled in `get_sigma()`

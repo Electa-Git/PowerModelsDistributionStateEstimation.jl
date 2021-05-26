@@ -7,7 +7,7 @@
     @testset "ACP-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMs.ACPPowerModel
+        model = _PMD.ACPUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -46,7 +46,7 @@
     @testset "ACP-WLS" begin
         # set model
         crit = "wls"
-        model = _PMs.ACPPowerModel
+        model = _PMD.ACPUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -85,7 +85,7 @@
     @testset "rACP-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMDSE.ReducedACPPowerModel
+        model = _PMDSE.ReducedACPUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -124,7 +124,7 @@
     @testset "rACP-WLS" begin
         # set model
         crit = "wls"
-        model = _PMDSE.ReducedACPPowerModel
+        model = _PMDSE.ReducedACPUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -163,7 +163,7 @@
     @testset "ACR-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMs.ACRPowerModel
+        model = _PMD.ACRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -202,7 +202,7 @@
     @testset "ACR-WLS" begin
         # set model
         crit = "wls"
-        model = _PMs.ACRPowerModel
+        model = _PMD.ACRUPowerModel
 
         # solve the feeders
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -241,7 +241,7 @@
     @testset "rACR-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMDSE.ReducedACRPowerModel
+        model = _PMDSE.ReducedACRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -255,10 +255,10 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, _PMs.ACRPowerModel, ipopt_solver)
+        pf_result = _PMD.run_mc_pf(data, _PMD.ACRUPowerModel, ipopt_solver)
 
         # write measurements based on power flow
-        _PMDSE.write_measurements!(_PMs.ACRPowerModel, data, pf_result, msr_path)
+        _PMDSE.write_measurements!(_PMD.ACRUPowerModel, data, pf_result, msr_path)
 
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
@@ -280,7 +280,7 @@
     @testset "rACR-WLS" begin
         # set model
         crit = "wls"
-        model = _PMDSE.ReducedACRPowerModel
+        model = _PMDSE.ReducedACRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -294,10 +294,10 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, _PMs.ACRPowerModel, ipopt_solver)
+        pf_result = _PMD.run_mc_pf(data, _PMD.ACRUPowerModel, ipopt_solver)
 
         # write measurements based on power flow
-        _PMDSE.write_measurements!(_PMs.ACRPowerModel, data, pf_result, msr_path)
+        _PMDSE.write_measurements!(_PMD.ACRUPowerModel, data, pf_result, msr_path)
 
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
@@ -319,7 +319,7 @@
     @testset "IVR-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMs.IVRPowerModel
+        model = _PMD.IVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -358,7 +358,7 @@
     @testset "IVR-WLS" begin
         # set model
         crit = "wls"
-        model = _PMs.IVRPowerModel
+        model = _PMD.IVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -397,7 +397,7 @@
     @testset "rIVR-rwlav" begin
         # set model
         crit = "rwlav"
-        model = _PMDSE.ReducedIVRPowerModel
+        model = _PMDSE.ReducedIVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -411,10 +411,10 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, _PMs.IVRPowerModel, ipopt_solver)
+        pf_result = _PMD.run_mc_pf(data, _PMD.IVRUPowerModel, ipopt_solver)
 
         # write measurements based on power flow
-        _PMDSE.write_measurements!(_PMs.IVRPowerModel, data, pf_result, msr_path)
+        _PMDSE.write_measurements!(_PMD.IVRUPowerModel, data, pf_result, msr_path)
 
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
@@ -436,7 +436,7 @@
     @testset "rIVR-WLS" begin
         # set model
         crit = "wls"
-        model = _PMDSE.ReducedIVRPowerModel
+        model = _PMDSE.ReducedIVRUPowerModel
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -450,10 +450,10 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, _PMs.IVRPowerModel, ipopt_solver)
+        pf_result = _PMD.run_mc_pf(data, _PMD.IVRUPowerModel, ipopt_solver)
 
         # write measurements based on power flow
-        _PMDSE.write_measurements!(_PMs.IVRPowerModel, data, pf_result, msr_path)
+        _PMDSE.write_measurements!(_PMD.IVRUPowerModel, data, pf_result, msr_path)
 
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)

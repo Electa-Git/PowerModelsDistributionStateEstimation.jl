@@ -1,5 +1,13 @@
+## v0.3.0
+- adds tests/examples and docs for state estimation with single-phase connections and matpower data parsing 
+- updates to PowerModelsDistribution v0.11.1 and InfrastructureModels 0.6.0 (breaking!)
+- adds `core/export.jl` with all the exported functions instead of keeping them in the _PMDSE module
+- removes PowerModels dependency, all functions imported via PowerModelsDistribution
+- removes Memento dependency, logging is made consistent with PowerModelsDistribution v0.11 using Julia standard library
+- adds short bad data consideration to Readme
+
 ## v0.2.4
--improves PMDSE_intro notebook
+- improves PMDSE_intro notebook
 - fixes StatsPlots dep allowing more recent _DST versions
 - depreciates run_ functions in favor of solve_ (with warns)
 - adds support for `relax_integrality` (InfrastructureModels ~0.5.4)

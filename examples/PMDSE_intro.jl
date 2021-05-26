@@ -109,7 +109,7 @@ md"To solve the SE problem, we need a solver. We previously picked Ipopt, becaus
 slv = PMDSE.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
 
 # ╔═╡ 115d6710-2599-11eb-1d41-2326cd36aa9f
-md"Finally, the last thing to decide is the power flow formulation that describes our problem. Let's go for a classic 'AC' formulation in polar coordinates. It can be chosen it in two different ways: either calling the generic `solve_mc_se(data, model_type, solver)` and passing the formulation, e.g. `_PMs.ACPPowerModel` as argument `model_type` or by calling the function that directly involves that formulation, as follows:"
+md"Finally, the last thing to decide is the power flow formulation that describes our problem. Let's go for a classic 'AC' formulation in polar coordinates. It can be chosen it in two different ways: either calling the generic `solve_mc_se(data, model_type, solver)` and passing the formulation, e.g. `_PMD.ACPUPowerModel` as argument `model_type` or by calling the function that directly involves that formulation, as follows:"
 
 # ╔═╡ 490720c0-2599-11eb-0282-67d4a9d8605f
 se_result = run_acp_mc_se(data, slv)
@@ -135,7 +135,7 @@ md"There's virtually no error on the loads! This makes me suspect that the those
 
 # ╔═╡ 6ef98650-259a-11eb-3d7f-9dab68152f5d
 begin 
-	pf_results = PowerModelsDistribution.run_mc_pf(data, PowerModelsDistribution.ACPPowerModel, slv)
+	pf_results = PowerModelsDistribution.run_mc_pf(data, PowerModelsDistribution.ACPUPowerModel, slv)
 	pf_results["solution"]["bus"]
 end
 
@@ -166,7 +166,7 @@ md"Probably that simple small network doesn't really exist. Or maybe it exists b
 # ╔═╡ 8ee68da0-25b3-11eb-02f7-5b3909402ce9
 begin
 	different_msr_path = pwd()*"//tmp_meas.csv"
-	write_measurements!(PowerModelsDistribution.ACPPowerModel, data, pf_results, different_msr_path)
+	write_measurements!(PowerModelsDistribution.ACPUPowerModel, data, pf_results, different_msr_path)
 end
 
 # ╔═╡ dbdb3790-25b4-11eb-36e2-a3b2074002f4

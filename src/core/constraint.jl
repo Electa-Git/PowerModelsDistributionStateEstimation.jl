@@ -11,11 +11,11 @@
 Equality constraint that describes the residual definition, which depends on the
 criterion assigned to each individual measurement in data["meas"]["m"]["crit"].
 """
-function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.cnw)
+function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
 
     cmp_id = get_cmp_id(pm, nw, i)
     res = _PMD.var(pm, nw, :res, i)
-    var = _PMs.var(pm, nw, _PMs.ref(pm, nw, :meas, i, "var"), cmp_id)
+    var = _PMD.var(pm, nw, _PMD.ref(pm, nw, :meas, i, "var"), cmp_id)
     dst = _PMD.ref(pm, nw, :meas, i, "dst")
     rsc = _PMD.ref(pm, nw, :se_settings)["rescaler"]
     crit = _PMD.ref(pm, nw, :meas, i, "crit")
@@ -64,7 +64,7 @@ function constraint_mc_residual(pm::_PMs.AbstractPowerModel, i::Int; nw::Int=pm.
             JuMP.register(pm.model, f, 1, fun, grd, hes)
             JuMP.add_NL_constraint(pm.model, :($(res[idx]) == - $(f)($(var[c]))))
         else
-            Memento.error(_LOGGER, "SE criterion of measurement $(i) not recognized")
+            error("SE criterion of measurement $(i) not recognized")
         end
     end
 end

@@ -3,7 +3,7 @@
 
 To perform a state estimation (SE), a network data file (e.g. `"case3_unbalanced.dss"` in `../test/data/extra/networks`) needs to be acquired, together with its related measurement file (e.g. `"case3_meas.csv"` in `../test/data/extra/measurements`). The absolute path to the package is provided through the constant `BASE_DIR`. Network and measurement data will be merged and a SE can be run as follows:
 ```julia
-using PowerModels, PowerModelsDistribution, PowerModelsDistributionStateEstimation
+using PowerModelsDistribution, PowerModelsDistributionStateEstimation
 using JuMP, Ipopt
 
 #full paths to files
@@ -25,13 +25,13 @@ slv = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"
 #run state estimation
 se_result = solve_acp_mc_se(data, slv)
 ```
-The run commands return detailed results in the form of a dictionary, following PowerModels format, and can be saved for future processing, like in `se_result` above.
+The run commands return detailed results in the form of a dictionary, following PowerModelsDistribution format, and can be saved for future processing, like in `se_result` above.
 
 ## Accessing Different Formulations
 
 Different run functions correspond to different formulations. The function `solve_acp_mc_se` uses the AC Polar form, `solve_acr_mc_se` uses the AC rectangular, etc. Alternatively, the formulation type can directly be passed to the generic `solve_mc_se` function:
 ```julia
-solve_mc_se(data, ACPPowerModel, slv)
+solve_mc_se(data, ACPUPowerModel, slv)
 ```
 It should be noted that not all solvers can handle all problem types. For example, to use the SDP formulation, you have to use a SDP-capable solver, such as the open-source solver SCS.
 
