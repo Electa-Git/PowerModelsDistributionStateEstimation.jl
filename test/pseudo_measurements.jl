@@ -16,7 +16,7 @@
     data = _PMD.transform_data_model(data);
 
     # solve the power flow
-    pf_result = _PMD.run_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
+    pf_result = _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
     pseudo_loads = [3, 11, 7, 16]
     cluster_list = [1, 2, 1, 3]
     _PMDSE.assign_load_pseudo_measurement_info!(data, pseudo_loads, cluster_list; time_step=1, day=1)

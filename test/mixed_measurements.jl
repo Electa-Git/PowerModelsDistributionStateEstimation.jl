@@ -21,7 +21,7 @@
 
         for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -61,7 +61,7 @@
 
         for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -101,7 +101,7 @@
 
         for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -143,7 +143,7 @@
 
         for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -184,7 +184,7 @@
 
         for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)
@@ -225,7 +225,7 @@
 
         for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.run_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path)

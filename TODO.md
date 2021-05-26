@@ -2,6 +2,8 @@
 
 - [ ] re-introduce start_values in tests and enable ubuntu tests back in CI
 
+- [ ] add `create_measurement` function like in PandaPower
+
 - [ ] update basic notebook, add non-Gaussian notebook and more non-Gaussian docs
 
 - [ ] input through array of measurements/dataframe rather than csv
@@ -21,7 +23,8 @@
 
 ## TODO for future releases
 
-- [ ] remove functions to be deprecated (now are just warnings)
-- [ ] add loads and transformer models    (?)
-- [ ] convex (SDP, SOC?) state estimation (?)
-- [ ] advanced bad data functionalities   (?)
+- [ ] test example notebooks                               (?)
+- [ ] intuitive/automatic inclusion of load/transfo models (?)
+      - or MV/LV notebook?
+- [ ] convex (SDP, SOC?) state estimation                  (?)
+- [ ] advanced bad data functionalities                    (?)

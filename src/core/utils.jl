@@ -43,7 +43,7 @@ function update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64
     end
 end
 """
-    update_load_bounds!(data; p_min, p_max, q_min, q_max)
+    update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
 Function that allows to automatically set upper (p_max, q_max) and lower (p_min, q_min) active and reactive power bounds for all loads.
 It assumes that there are at most four active phases and all have the same bounds
 """

@@ -23,7 +23,7 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
@@ -61,7 +61,7 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
@@ -98,7 +98,7 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.run_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
@@ -147,7 +147,7 @@
         #     end
         # end
 
-        # pf_result = _PMD.run_mc_pf(sdp_data, _PMD.SDPUBFPowerModel, scs_solver)
+        # pf_result = _PMD.solve_mc_pf(sdp_data, _PMD.SDPUBFPowerModel, scs_solver)
         # _PMDSE.write_measurements!(_PMD.SDPUBFPowerModel, sdp_data, pf_result, msr_path)
         # _PMDSE.add_measurements!(sdp_data, msr_path, actual_meas = true)
         # _PMDSE.assign_start_to_variables!(sdp_data)

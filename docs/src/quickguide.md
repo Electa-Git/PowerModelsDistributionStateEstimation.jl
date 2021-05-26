@@ -64,14 +64,14 @@ PowerModelsDistributionStateEstimation has functions that allow to define bounds
 update_voltage_bounds!(data::Dict; v_min=0.0, v_max=Inf)
 ```
 ```@docs
-update_generator_bounds!(data; p_min, p_max, q_min, q_max)
+update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
 ```
 ```@docs
-update_load_bounds!(data; p_min, p_max, q_min, q_max)
+update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
 ```
 or, alternatively, all the above at once:
 ```@docs
-update_all_bounds!(data; v_min, v_max, pg_min, pg_max, qg_min, qg_max, pd_min, pd_max, qd_min, qd_max)
+update_all_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=Inf, pg_min::Float64=0.0, pg_max::Float64=Inf, qg_min::Float64=-Inf, qg_max::Float64=Inf, pd_min::Float64=0.0, pd_max::Float64=Inf, qd_min::Float64=-Inf, qd_max::Float64=Inf)
 ```
 Alternatively, the user can directly assign a value or vector (depending on the dimensions of the variable) in the data dictionary, under the key `variablenamemin`/`variablenamemax`. The example below shows how to do it for the active power.
 ```julia
@@ -84,5 +84,5 @@ Residuals are a type of variable that is specific to the state estimation proble
 While the residuals as defined in the present package are always non-negative (default lower bound is 0), there is no default upper bound.
 A function is available to add customized upper bounds:
 ```@docs
-assign_residual_ub!(data; chosen_upper_bound=100.0, rescale=false)
+assign_residual_ub!(data::Dict; chosen_upper_bound::Float64=100.0, rescale::Bool=false)
 ```

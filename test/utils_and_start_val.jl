@@ -21,13 +21,13 @@
         reduce_single_phase_loadbuses!(case3_data, exclude = [])
         @test case3_data["bus"]["3"]["terminals"] == [2]
 
-        pf_result= _PMD.run_mc_pf(case3_data, _PMD.ACPUPowerModel, ipopt_solver)
+        pf_result= _PMD.solve_mc_pf(case3_data, _PMD.ACPUPowerModel, ipopt_solver)
         @test pf_result["termination_status"] == LOCALLY_SOLVED 
     end
 
     msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-    pf_result= _PMD.run_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
+    pf_result= _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
 
     @testset "other utils" begin
 

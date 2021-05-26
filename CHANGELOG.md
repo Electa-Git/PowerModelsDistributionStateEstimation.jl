@@ -1,3 +1,6 @@
+## staged
+- removes run_mc_ functions in favour of solve_mc_ functions (breaking!)
+
 ## v0.3.0
 - adds tests/examples and docs for state estimation with single-phase connections and matpower data parsing 
 - updates to PowerModelsDistribution v0.11.1 and InfrastructureModels 0.6.0 (breaking!)
