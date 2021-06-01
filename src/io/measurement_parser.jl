@@ -2,7 +2,7 @@
 #  Copyright 2020, Marta Vanin, Tom Van Acker                                  #
 ################################################################################
 # PowerModelsDistributionStateEstimation.jl                                    #
-# An extention package of PowerModelsDistribution.jl for Static Power System #
+# An extention package of PowerModelsDistribution.jl for Static Power System   #
 # State Estimation.                                                            #
 ################################################################################
 
@@ -22,7 +22,7 @@ end
 Called within read_measurement!. Samples measurement errors from a distribution.
 """
 function sample_fake_measurements(meas_row_dst, sorted_args, seed)
-    meas_row_dst == "ExtendedBeta" ? pkg_id = _PMDSE : pkg_id = _DST
+    pkg_id = meas_row_dst == "ExtendedBeta" ? _PMDSE : _DST
     distr = [getfield(pkg_id, Symbol(meas_row_dst))(tuple(sa...)...) for sa in sorted_args]
     randRNG = [_RAN.seed!(seed+i) for i in 1:length(sorted_args)]
     fake_meas = [_RAN.rand(randRNG[i], distr[i]) for i in 1:length(sorted_args)]
@@ -37,7 +37,7 @@ function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, sample_fake_
     dst_params = []
     for nr in 1:4
         if "par_$(nr)" ∈ names(meas_row) && !ismissing(meas_row[Symbol("par_",nr)]) && meas_row[Symbol("par_",nr)] != "missing"
-            isa(meas_row[Symbol("par_",nr)], String) ? par_array = dataString_to_array(meas_row[Symbol("par_",nr)]) : par_array = [meas_row[Symbol("par_",nr)]]
+            par_array = isa(meas_row[Symbol("par_",nr)], String) ? dataString_to_array(meas_row[Symbol("par_",nr)]) : [meas_row[Symbol("par_",nr)]]
             push!(dst_params, par_array)
         end
     end
@@ -81,7 +81,7 @@ function add_measurements!(data::Dict, meas_file::String; actual_meas::Bool=fals
     data["meas"] = Dict{String, Any}()
     [data["meas"]["$m_id"] = Dict{String,Any}() for m_id in meas_df[!,:meas_id]]
     for row in 1:size(meas_df)[1]
-        meas_df[row,:dst] ∈ ["Normal"] ? sample_fake_meas = !actual_meas : sample_fake_meas = false
+        sample_fake_meas = meas_df[row,:dst] ∈ ["Normal"] ? !actual_meas : false
         data["meas"]["$(meas_df[row,:meas_id])"] = Dict{String,Any}()
         data["meas"]["$(meas_df[row,:meas_id])"]["cmp"] = Symbol(meas_df[row,:cmp_type])
         data["meas"]["$(meas_df[row,:meas_id])"]["cmp_id"] = meas_df[row,:cmp_id]
@@ -89,7 +89,7 @@ function add_measurements!(data::Dict, meas_file::String; actual_meas::Bool=fals
         if "crit" ∈ names(meas_df)
             data["meas"]["$(meas_df[row,:meas_id])"]["crit"] = meas_df[row, :crit]
         end
-        if "sample" ∈ names(meas_df) &&  !ismissing(meas_df[row, :sample]) && meas_df[row,:dst] ∈ ["Normal"]
+        if "sample" ∈ names(meas_df) && !ismissing(meas_df[row, :sample]) && meas_df[row,:dst] ∈ ["Normal"]
             sample_fake_meas = meas_df[row, :sample]
         end
         read_measurement!(data["meas"]["$(meas_df[row,:meas_id])"], meas_df[row,:], sample_fake_meas, seed)
@@ -130,7 +130,7 @@ function reduce_name(meas_var::String)
     if meas_var == "cid_bus" return "cid" end
     return meas_var
 end
-function get_sigma(σ, meas_var::String,phases)
+function get_sigma(σ::Float64, meas_var::String,phases)
     sigma = meas_var in ["vm","vr","vi"] ? σ/3 : σ/5/3 ;
     return length(phases) == 1 ? sigma : sigma.*ones(length(phases)) ;
 end
@@ -144,7 +144,7 @@ init_measurements() =
    Function to write the dataframe row for a Normal component
 """
 function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String, cmp_type::String, cmp_data::Dict{String,Any},
-                                        cmp_res::Dict{String,Any}, phases; exclude::Vector{String}=String[], σ::Float64)
+                                        cmp_res::Dict{String,Any}, phases, very_basic_case::Bool; exclude::Vector{String}=String[], σ::Float64)
 
     if length(phases) == 1
         phases = phases[1]
@@ -156,6 +156,7 @@ function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String,
     if !repeated_measurement(df, cmp_id, cmp_type, phases)
         config = get_configuration(cmp_type, cmp_data)
         for meas_var in get_measures(model, cmp_type) if !(meas_var in exclude)
+            par_2 = very_basic_case ? string(get_sigma(σ, meas_var,phases)) : string(length(phases) == 1 ? σ : σ.*ones(length(phases)))
             push!(df, [length(df.meas_id)+1,                  # meas_id
                        cmp_type,                              # cmp_type
                        cmp_id,                                # cmp_id
@@ -163,29 +164,31 @@ function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String,
                        reduce_name(meas_var),                 # meas_var
                        string(phases),                        # phase
                        "Normal",                              # dst
-                       string(cmp_res[meas_var][ph]),     # par_1
-                       string(get_sigma(σ, meas_var,phases)), # par_2
-                        missing, missing, missing             #par_3,4,crit
+                       string(cmp_res[meas_var][ph]),         # par_1
+                       par_2,                                 # par_2
+                       missing, missing, missing             # par_3,4,crit
                       ])
     end end end
 end
 function write_cmp_measurements!(df::_DFS.DataFrame, model::Type, cmp_type::String,
-                                 data::Dict{String,Any}, pf_results::Dict{String,Any};
-                                 exclude::Vector{String}=String[], σ::Float64)
+                                 data::Dict{String,Any}, pf_results::Dict{String,Any}, very_basic_case::Bool;
+                                 exclude::Vector{String}=String[], σ::Union{Float64, Dict})
     for (cmp_id, cmp_res) in pf_results["solution"][cmp_type]
         # write the properties for the component
         cmp_data = data[cmp_type][cmp_id]
         phases = cmp_data["connections"]
-        write_cmp_measurement!(df, model, cmp_id, cmp_type, cmp_data, cmp_res, phases, exclude = exclude, σ = σ)
+        σ_cmp = isa(σ, Dict) ? σ[cmp_type] : σ
+        write_cmp_measurement!(df, model, cmp_id, cmp_type, cmp_data, cmp_res, phases, very_basic_case, exclude = exclude, σ = σ_cmp)
         # write the properties for its bus
         cmp_id = string(cmp_data["$(cmp_type)_bus"])
         cmp_data = data["bus"][cmp_id]
         cmp_res = pf_results["solution"]["bus"][cmp_id]
-        write_cmp_measurement!(df, model, cmp_id, "bus", cmp_data, cmp_res, cmp_data["terminals"], exclude = exclude, σ = σ)
+        σ_cmp = isa(σ, Dict) ? σ["bus"] : σ
+        write_cmp_measurement!(df, model, cmp_id, "bus", cmp_data, cmp_res, cmp_data["terminals"], very_basic_case, exclude = exclude, σ = σ_cmp)
     end
 end
 """
-    write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String; exclude::Vector{String}=String[])
+    write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String; exclude::Vector{String}=String[], σ::Float64=0.005)
 
 Function to write a csv file with measurements, to be used to run state estimation calculations. The
 file is built starting from power flow results from PowerModelsDistribution.jl (or any dictionary with
@@ -203,13 +206,16 @@ e.g., with the AC Polar formulation, these are voltage magnitude and active and 
 -   `exclude`: select quantities from the `pf_results` dictionary to be excluded from the measurement
                generation. For example, to ignore generator results with ACPUPowerModel,
                set exclude = ["pg", "qg"].
--   `σ`: standard deviation of demand/generation measurement, for voltage measurements
-        this is rescaled in `get_sigma()`
+-   `σ`: standard deviation of demand/generation measurements. If a float, their stdev of the relative
+        bus voltage measurements is taken with `get_sigma()`. If a dictionary (recommended option), the
+        individual σ of each measurement quantity is declared.
 """
-function write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String; exclude::Vector{String}=String[], σ::Float64=0.005)
+function write_measurements!(model::Type, data::Dict, pf_results::Dict, path::String; exclude::Vector{String}=String[], σ::Union{Dict, Float64}=0.005)
     df = init_measurements()
     for cmp_type in ["gen", "load"]
-        write_cmp_measurements!(df, model, cmp_type, data, pf_results, exclude = exclude, σ = σ)
+        σ_cmp = isa(σ, Dict) ? σ[cmp_type] : σ
+        very_basic_case = isa(σ, Dict) ? false : true
+        write_cmp_measurements!(df, model, cmp_type, data, pf_results, very_basic_case, exclude = exclude, σ = σ_cmp)
     end
     _CSV.write(path, df)
 end
@@ -217,8 +223,7 @@ end
     add_voltage_measurement!(model::Type, data::Dict, pf_results::Dict, path::String)
 
 This function can be run after add_measurements! for the cases in which only power and/or
-    current measurements are generated. It was observed that adding even only one voltage measurement
-    helps the state estimator converge.
+    current measurements are generated. 
 """
 function add_voltage_measurement!(data::Dict, pf_result::Dict, sigma::Float64)
 
@@ -249,6 +254,7 @@ function write_measurements_and_pseudo!(model::Type, data::Dict, pf_results::Dic
              phase=String[], dst=String[], par_1=Union{String, Missing}[], par_2=Union{String, Missing}[],
              par_3=Union{String, Missing}[], par_4=Union{String, Missing}[], crit=Union{String, Missing}[] )
     di_df = _CSV.read(distribution_info)
+    very_basic_case = true # TO DO: make it an argument?
     for cmp_type in ["gen", "load"]
         for (cmp_id, cmp) in data[cmp_type]
             phases = data[cmp_type][cmp_id]["connections"]
@@ -256,13 +262,13 @@ function write_measurements_and_pseudo!(model::Type, data::Dict, pf_results::Dic
                 write_cmp_pseudo!(df, model, cmp_type, cmp_id, data, di_df, phases, exclude)
             else
                 write_cmp_measurement!(df, model, cmp_id, cmp_type, data[cmp_type][cmp_id], pf_results["solution"][cmp_type][cmp_id],
-                                                    phases, exclude = exclude, σ = σ)
+                                                    phases, very_basic_case, exclude = exclude, σ = σ)
                 #if this is an actual measurement, also add voltage measurement
                 bus_id = string(data[cmp_type][cmp_id]["$(cmp_type)_bus"])
                 phases = data["bus"][bus_id]["terminals"]
                 if !repeated_measurement(df, bus_id, "bus", phases)
                     write_cmp_measurement!(df, model, bus_id, "bus", data["bus"][bus_id], pf_results["solution"]["bus"][bus_id],
-                                                    phases, exclude = exclude, σ = σ)
+                                                    phases, very_basic_case,exclude = exclude, σ = σ)
                 end
             end
         end

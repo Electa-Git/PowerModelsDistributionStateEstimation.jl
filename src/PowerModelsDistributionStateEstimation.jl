@@ -58,6 +58,8 @@ function __init__()
 end
 
 # include
+include("bad_data/chi_squares_test.jl")
+
 include("core/constraint.jl")
 include("core/measurement_conversion.jl")
 include("core/objective.jl")

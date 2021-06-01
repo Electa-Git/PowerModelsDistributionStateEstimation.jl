@@ -1,4 +1,5 @@
 ## staged
+- adds "lav" and "ls" criteria explicitly, i.e., no weights
 - removes run_mc_ functions in favour of solve_mc_ functions (breaking!)
 
 ## v0.3.0

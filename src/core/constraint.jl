@@ -31,7 +31,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
                 res[idx] == (var[c] - μ)^2 / σ^2 / rsc
             )
         elseif crit == "ls" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), fill(1.0, (length(dst[idx]),))
+            μ, σ = _DST.mean(dst[idx]), 1.0
             JuMP.@constraint(pm.model,
                 res[idx] == (var[c] - μ)^2 / σ^2 / rsc
             )
@@ -46,7 +46,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
                 res[idx] == abs(var[c] - μ) / σ / rsc
             )
         elseif crit == "lav" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), fill(1.0, (length(dst[idx]),))
+            μ, σ = _DST.mean(dst[idx]), 1.0
             JuMP.@NLconstraint(pm.model,
                 res[idx] == abs(var[c] - μ) / σ / rsc
             )

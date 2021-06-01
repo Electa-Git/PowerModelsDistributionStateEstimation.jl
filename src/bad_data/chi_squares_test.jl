@@ -5,17 +5,23 @@ Standard bad data detection method that consists of performing a Chi squares ana
 the sum of the residuals. The outcome of the analysis depends on the degrees of freedom of the problem, which are calculated calling
 the `get_degrees_of_freedom` function (see below).
 
-This function returns a Boolean. If `true`, there are probably bad data points, if `false` there probably are not.
+This function returns:
+- a Boolean. If `true`, there are probably bad data points, if `false` there probably are not.
+- the scaled objective of the optimization and the Χ² threshold value. 
 
 Arguments:
 - `sol_dict`: solution dictionary, i.e., the default output dictionary of state estimation calculations,
 - `data`: data input of the state estimation calculations, used to calculate the degrees of freedom,
-- `prob_false`: probability of errors allowed in the Chi squares test.
+- `prob_false`: probability of errors allowed in the Chi squares test,
+- `criterion`: `wlav`, `wls`, etc.,
+- `rescaler`: used rescaler if != 1
+
 """
-function exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::Float64=0.05)::Bool
+function exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::Float64=0.05, criterion::String="wls", rescaler::Int64=1)
     dof = get_degrees_of_freedom(data)
     chi2 = _DST.Chisq(dof)
-    sol_dict["solution"]["objective"] >= quantile(chi2, 1-prob_false)
+    rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
+    return sol_dict["objective_refactored"] >= quantile(chi2, 1-prob_false), sol_dict["objective_refactored"], quantile(chi2, 1-prob_false)
 end
 """
     get_degrees_of_freedom(data::Dict)
@@ -50,4 +56,20 @@ function get_degrees_of_freedom(data::Dict)
     
     return m-n
 
+end
+
+
+function rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
+    if rescaler != 1
+        for (_, meas) in sol_dict["solution"]["meas"]
+            meas["res"]*=rsc
+        end
+    end
+    @assert occursin("w", criterion) "This functionality is only applicable to `weighted` state estimation methods"
+    if criterion == "rwlav"
+        for (m, meas) in sol_dict["solution"]["meas"]
+            meas["res"] = meas["res"].^2
+        end
+    end
+    sol_dict["objective_refactored"] = [sum(sum.(meas["res"] for (m, meas) in sol_dict["solution"]["meas"]))][1]
 end
