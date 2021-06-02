@@ -1,27 +1,26 @@
-Ωᵢᵢ = Rᵢᵢ⋅Sᵢᵢ
-S = I - K
-K = H⋅G⁻¹⋅Hᵀ⋅R⁻¹
+function build_H_matrix(functions::Vector, state::Array)
+    H = Matrix(undef, length(functions), length(state))
+    for row in 1:length(functions)
+        H[row,:] = ForwardDiff.gradient(functions[row], state)
+    end
+    return H
+end
 
-\Omega = S*R = R - H*G^(-1)*H^T
+# NB: G is positive definite
+function build_G_matrix(H::Matrix, R::Matrix)
+    return transpose(H)*inv(R)*H
+end
 
-ref_bus = [bus for (_,bus) in data["bus"] if bus["bus_type"] == 3]
-ref_bus_idx = [b for (b,bus) in data["bus"] if bus["bus_type"] == 3]
-    
-@assert length(ref_bus) == 1 "There is more than one reference bus, double-check model"
-
-load_buses = ["$(load["load_bus"])" for (_, load) in data["load"]] # buses with demand (incl. negative demand, i.e., generation passed as negative load)
-gen_slack_buses = ["$(gen["gen_bus"])" for (_, gen) in data["gen"]] # buses with generators, including the slackbus
-NZIB = unique(vcat(load_buses, gen_slack_buses)) # non-zero-injection buses
-
-@assert !isempty(non_zero_inj_buses) "This network has no active connected component, no point doing state estimation"
-
-Θ = [:(Θ$(b)) for (b, bus) in data["bus"] if b != ref_bus_idx]
-x⁰ = [] # is the variable vector
-
-# is the measurement Jacobian 
-dp_dvm
-dp_dΘ
-dq_dvm
-dq_dΘ
-dvm_dvm = 1
-dvm_dΘ = 0
+function build_R_matrix(data::Dict)
+    meas_row_order = [m for (m, meas) in data["meas"]]
+    R_entries = vcat([_DST.std.(data["meas"][mid]["dst"])[1:length(data["meas"][mid]["dst"])] for mid in meas_row_order]...)
+    return LinearAlgebra.diagm(R_entries.^2)
+end
+"""
+# Ωᵢᵢ = Rᵢᵢ⋅Sᵢᵢ = R - H*G^(-1)*H^T
+# S = I - K       # <- sensitivity matrix, no need to calculate it  
+# K = H⋅G⁻¹⋅Hᵀ⋅R⁻¹ # <- hat matrix, no need to calculate it
+"""
+function build_omega_matrix(R::Matrix, H::Matrix, G::Matrix)
+    return R - H*inv(G)*transpose(H)
+end
