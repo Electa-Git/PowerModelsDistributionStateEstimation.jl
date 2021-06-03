@@ -67,7 +67,7 @@ function rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
     end
     @assert occursin("w", criterion) "This functionality is only applicable to `weighted` state estimation methods"
     if criterion == "rwlav"
-        for (m, meas) in sol_dict["solution"]["meas"]
+        for (_, meas) in sol_dict["solution"]["meas"]
             meas["res"] = meas["res"].^2
         end
     end

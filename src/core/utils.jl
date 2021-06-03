@@ -256,3 +256,35 @@ function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, 
    end
    return active_conn
 end
+"""
+    function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
+Adds zero-injection buses measurements to the "meas" dictionary if they are not present.
+Any bus_id given within `exclude` will not be assigned a virtual measurement.
+The virtual measurements added are :pd = :qd = 0, with high accuracy σ, for each phase 
+of the bus these virtual loads are connected to.
+"""
+function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
+    non_zibs = unique(vcat([load["load_bus"] for (_, load) in data["load"]], [gen["gen_bus"] for (_, gen) in data["gen"]]))
+    zibs = [b for (b,_) in data["bus"] if parse(Int64, b) ∉ non_zibs]
+    measured_buses = [meas["cmp_id"] for (_, meas) in data["meas"] if (meas["cmp"] == :bus)] # to check if the zib virtual measurement is already there 
+    highest_meas_idx = maximum(parse.(Int64, collect(keys(data["meas"]))))
+    highest_load_idx = maximum(parse.(Int64, collect(keys(data["load"]))))
+    for zib in zibs
+        if parse(Int64, zib) ∉ measured_buses && parse(Int64, zib) ∉ exclude 
+            phases = length(data["bus"][zib]["terminals"])
+            data["load"]["$(highest_load_idx+1)"] = Dict("load_bus" => parse(Int64, zib), "note"=>"virtual load")
+            data["meas"]["$(highest_meas_idx+1)"] = Dict( "cmp_id" => "$(highest_load_idx+1)",
+                                                          "cmp" => :load,
+                                                          "var" => :pd,
+                                                          "dst" => fill(_DST.Normal(0.0, σ), (phases,))
+                                                        )
+            data["meas"]["$(highest_meas_idx+2)"] = Dict( "cmp_id" => "$(highest_load_idx+1)",
+                                                          "cmp" => :load,
+                                                          "var" => :qd,
+                                                          "dst" => fill(_DST.Normal(0.0, σ), (phases,))
+                                                        )
+            highest_meas_idx+=2
+            highest_load_idx+=1
+        end
+    end
+end
