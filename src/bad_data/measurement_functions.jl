@@ -52,22 +52,12 @@ function build_measurement_function_array(data::Dict, variable_dict::Dict)
     return functions
 end
 
-function adjacent_buses(bus_idx::Int64, data::Dict)
-    conn_branches = [b for (b, branch) in data["branch"] if (branch["f_bus"] == bus_idx || branch["t_bus"] == bus_idx)] 
-    adj_buses = []
-    for br in conn_branches
-        push!(adj_buses, data["branch"][br]["f_bus"])
-        push!(adj_buses, data["branch"][br]["t_bus"])
-    end
-    return (filter(x->x!=bus_idx, adj_buses) |> unique)
-end
-
-function variables_adjacent_buses(Bi::Array, variable_dict::Dict)
+function variables_of_buses(Bi::Array, variable_dict::Dict)
     vm_indices = []
     va_indices = []
     for bus in Bi
         push!(vm_indices, variable_dict["vm"]["$bus"])
-        push!(va_indices, variable_dict["va"]["$bus"])
+        if haskey(variable_dict["va"], "$bus") push!(va_indices, variable_dict["va"]["$bus"]) end # if it is a ref bus, the key does not exist 
     end
     return vm_indices, va_indices
 end

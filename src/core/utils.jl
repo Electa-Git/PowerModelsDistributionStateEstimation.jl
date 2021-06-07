@@ -288,3 +288,15 @@ function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
         end
     end
 end
+"""
+finds the set of all the buses in `data` which are adjacent to `bus_idx`.
+"""
+function adjacent_branch_and_buses(bus_idx::Int64, data::Dict)
+    conn_branches = [b for (b, branch) in data["branch"] if (branch["f_bus"] == bus_idx || branch["t_bus"] == bus_idx)] 
+    adj_buses = []
+    for br in conn_branches
+        push!(adj_buses, data["branch"][br]["f_bus"])
+        push!(adj_buses, data["branch"][br]["t_bus"])
+    end
+    return conn_branches, (filter(x->x!=bus_idx, adj_buses) |> unique)
+end
