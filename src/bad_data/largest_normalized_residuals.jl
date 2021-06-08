@@ -24,8 +24,8 @@ function normalized_residuals(se_sol::Dict, Ω::Matrix, c::Float64)
     return m, lnr, excd #m is the index of the measurement to delete, lnr the value of the largest normalized residual, excd is a Bool, it states if lnr exceeds the threshold or not
 end
 
-function build_H_matrix(functions::Vector, state::Array)
-    H = Matrix(undef, length(functions), length(state))
+function build_H_matrix(functions::Vector, state::Array)::Matrix{Float64}
+    H = Matrix{Float64}(undef, length(functions), length(state))
     for row in 1:length(functions)
         H[row,:] = ForwardDiff.gradient(functions[row], state)
     end
@@ -33,12 +33,10 @@ function build_H_matrix(functions::Vector, state::Array)
 end
 
 # NB: G is positive definite
-function build_G_matrix(H::Matrix, R::Matrix)
-    return transpose(H)*inv(R)*H
-end
+build_G_matrix(H::Matrix, R::Matrix)::Matrix{Float64} = transpose(H)*inv(R)*H
 
-function build_R_matrix(data::Dict)
-    meas_row_order = [m for (m, meas) in data["meas"]]
+function build_R_matrix(data::Dict)::Matrix{Float64}
+    meas_row_order = [m for (m, _) in data["meas"]]
     R_entries = vcat([_DST.std.(data["meas"][mid]["dst"])[1:length(data["meas"][mid]["dst"])] for mid in meas_row_order]...)
     return LinearAlgebra.diagm(R_entries.^2)
 end
@@ -47,6 +45,4 @@ end
 # S = I - K       # <- sensitivity matrix, no need to calculate it  
 # K = H⋅G⁻¹⋅Hᵀ⋅R⁻¹ # <- hat matrix, no need to calculate it
 """
-function build_omega_matrix(R::Matrix, H::Matrix, G::Matrix)
-    return R - H*inv(G)*transpose(H)
-end
+build_omega_matrix(R::Matrix{Float64}, H::Matrix{Float64}, G::Matrix{Float64}) = R - H*inv(G)*transpose(H)

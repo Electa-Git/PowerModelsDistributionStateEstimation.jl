@@ -68,6 +68,11 @@
         @test data["meas"]["1"]["crit"] == "rwlav"
         @test data["meas"]["2"]["crit"] == "rwlav"
         @test data["meas"]["6"]["crit"] == "rwlav"
+
+        n_meas = length(data["meas"])
+        add_measurement!(data, :p, :branch, 1, [0.0012], [0.0003])
+        @test length(data["meas"]) == n_meas+1
+        @test data["meas"]["$(n_meas+1)"]["var"] == :p 
     end
 
     @testset "start values" begin

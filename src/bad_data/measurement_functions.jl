@@ -20,7 +20,7 @@ function build_variable_dictionary(data::Dict)
     vmcount = 1
     for (b, bus) in data["bus"]
         variable_dict["vm"][b] = Dict{String, Any}()
-        for i in 1:length(bus["terminals"])
+        for i in bus["terminals"]
             variable_dict["vm"][b]["$i"] = Dict{String, Any}()
             variable_dict["vm"][b]["$i"] = vmcount
             vmcount+=1
@@ -31,7 +31,7 @@ function build_variable_dictionary(data::Dict)
     for (b, bus) in data["bus"]
         if b != "$(ref_bus[1])"
             variable_dict["va"][b] = Dict{String, Any}()
-            for i in 1:length(bus["terminals"])
+            for i in bus["terminals"]
                 variable_dict["va"][b]["$i"] = Dict{String, Any}()
                 variable_dict["va"][b]["$i"] = vacount
                 vacount+=1
@@ -44,7 +44,7 @@ end
 function build_measurement_function_array(data::Dict, variable_dict::Dict)
 
     functions = []
-    ref_bus = [bus["index"] for (b, bus) in data["bus"] if bus["bus_type"]==3][1]
+    ref_bus = [bus["index"] for (_, bus) in data["bus"] if bus["bus_type"]==3][1]
 
     for (m, meas) in data["meas"]
         add_h_function!(meas["var"], m, data, ref_bus, variable_dict, functions)

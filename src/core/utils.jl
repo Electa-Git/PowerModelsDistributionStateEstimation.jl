@@ -300,3 +300,16 @@ function adjacent_branch_and_buses(bus_idx::Int64, data::Dict)
     end
     return conn_branches, (filter(x->x!=bus_idx, adj_buses) |> unique)
 end
+"""
+Helper function to add a measurement. Currently can assign Gaussian measurements only.
+"""
+function add_measurement!(data::Dict, var::Symbol, cmp::Symbol, cmp_id::Int64, measured_value::Array, σ::Array; id::String="", crit=missing)
+    m = isempty(id) ? "$(maximum([parse(Int64, m) for (m,meas) in data["meas"]])+1)" : id
+
+    data["meas"][m] = Dict( "var" => var,
+                            "crit" => crit,
+                            "cmp" => cmp,
+                            "dst" => [_DST.Normal(mu, sigma) for(mu, sigma) in zip(measured_value, σ)],
+                            "cmp_id"=> cmp_id   
+                            )
+end

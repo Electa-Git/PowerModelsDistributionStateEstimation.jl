@@ -2,8 +2,6 @@
 
 - [ ] re-introduce start_values in tests and enable ubuntu tests back in CI (and maybe julia 1.0)
 
-- [ ] add `create_measurement` function like in PandaPower
-
 - [ ] update basic notebook (add bad data in it), add non-Gaussian notebook and more non-Gaussian docs
 
 - [ ] input through array of measurements/dataframe rather than csv
