@@ -54,7 +54,7 @@ end
 Function to build multi branch input for the injection functions (as injections can occur at buses with multiple incoming/outcoming branches,
     which is not the case for 'flows', which only refer to a single branch )
 """
-function build_multibranch_input(meas, data, variable_dict)
+function build_multibranch_input(qmeas, meas, data, variable_dict)
 
     cmp_bus = occursin("g", string(qmeas)) ? data["gen"]["$(meas["cmp_id"])"]["gen_bus"] : data["load"]["$(meas["cmp_id"])"]["load_bus"]
     vm_cmp_bus = variable_dict["vm"]["$cmp_bus"]
