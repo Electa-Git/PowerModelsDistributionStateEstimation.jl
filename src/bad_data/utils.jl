@@ -100,3 +100,62 @@ function build_singlebranch_input(meas, data, variable_dict)
     vm_to, va_to = variables_of_buses([t_bus], variable_dict)
     return f_bus, vm_fr, va_fr, [1], [branch["f_connections"]], [branch["t_connections"]], [g], [b], [G_fr], [B_fr], t_bus, vm_to, va_to
 end
+"""
+    Given a state estimation or powerflow result or similar dictionary `se_sol`, and the system variables `variable_dict`,
+    this function builds an array with the numerical state of the system, e.g., variables in `variable_dict`
+        are assigned a scalar that correspond to their value in `se_sol`.
+        The resulting array has the same index order of that of `h_functions`.
+"""
+function build_state_array(sol_dict::Dict, variable_dict::Dict)
+    state_length = sum( length(val) for (_, val) in variable_dict["vm"]) + sum( length(val) for (_, val) in variable_dict["va"])
+    state_array = zeros(Float64, (state_length,) )
+    for (key, val) in variable_dict["vm"]
+        bus_idx = minimum([idx for (_, idx) in val])
+        for i in 1:length(val)
+            state_array[bus_idx+i-1] = sol_dict["solution"]["bus"][key]["vm"][i]
+        end
+    end
+    for (key, val) in variable_dict["va"]
+        bus_idx = minimum([idx for (_, idx) in val])
+        for i in 1:length(val)
+            state_array[bus_idx+i-1] = sol_dict["solution"]["bus"][key]["va"][i]
+        end
+    end
+    return state_array
+end
+"""
+    Given a state estimation or powerflow result or similar dictionary `se_sol`, and the system variables `variable_dict`,
+    this function builds an array with the numerical state of the system, e.g., variables in `variable_dict`
+        are assigned a scalar that correspond to their value in `se_sol`.
+        The resulting array has the same index order of that of `h_functions`.
+"""
+function build_state_array(sol_dict::Dict, variable_dict::Dict)
+    state_length = sum( length(val) for (_, val) in variable_dict["vm"]) + sum( length(val) for (_, val) in variable_dict["va"])
+    state_array = zeros(Float64, (state_length,) )
+    for (key, val) in variable_dict["vm"]
+        bus_idx = minimum([idx for (_, idx) in val])
+        for i in 1:length(val)
+            state_array[bus_idx+i-1] = sol_dict["solution"]["bus"][key]["vm"][i]
+        end
+    end
+    for (key, val) in variable_dict["va"]
+        bus_idx = minimum([idx for (_, idx) in val])
+        for i in 1:length(val)
+            state_array[bus_idx+i-1] = sol_dict["solution"]["bus"][key]["va"][i]
+        end
+    end
+    return state_array
+end
+"""
+Adds "virtual" zero zib residuals to a state estimation solution dictionary `se_sol`.
+The `data` dictionary must have measurement data for these zibs, which can be added 
+    with _PMDSE.add_zib_virtual_meas!
+"""
+function add_zib_virtual_residuals!(se_sol::Dict, data::Dict)
+    original_meas = [m for (m, meas) in se_sol["solution"]["meas"]]
+    for (m, meas) in data["meas"]
+        if m ∉ original_meas
+            se_sol["solution"]["meas"][m] = Dict("res"=>zeros(length(meas["dst"])))
+        end
+    end
+end

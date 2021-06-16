@@ -110,7 +110,10 @@ the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package:
 ```@docs
 ExtendedBeta
 ```
-Furthermore, a Gaussian Mixture Model (GMM) can also directly be used in the maximum likelihood estimation.
+Furthermore, Gaussian Mixture Models (GMM) can also be used in the maximum likelihood estimation. These 
+can be generated via [GaussianMixtures.jl](https://github.com/davidavdav/GaussianMixtures.jl), and PMDSE provides
+`logpdf`,`gradlogpdf` and `heslogpdf` of the resulting GMM. 
+Using GMM are particularly convenient to model non-parametric distributions.
 
 ## TODO: add docs on Gaussian Mixture Model
 

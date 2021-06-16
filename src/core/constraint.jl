@@ -22,36 +22,25 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
     conns = get_active_connections(pm, nw, _PMD.ref(pm, nw, :meas, i, "cmp"), cmp_id)
 
     for (idx, c) in enumerate(conns)
+        if (occursin("ls", crit) || occursin("lav", crit)) && isa(dst[idx], _DST.Normal)
+            μ, σ = occursin("w", crit) ? (_DST.mean(dst[idx]), _DST.std(dst[idx])) :  (_DST.mean(dst[idx]), 1.0)
+        end
         if isa(dst[idx], Float64)
             JuMP.@constraint(pm.model, var[c] == dst[idx])
-            JuMP.@constraint(pm.model, res[idx] == 0.0)
+            JuMP.@constraint(pm.model, res[idx] == 0.0)         
         elseif crit == "wls" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
-            JuMP.@constraint(pm.model,
-                res[idx] == (var[c] - μ)^2 / σ^2 / rsc
-            )
-        elseif crit == "ls" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), 1.0
             JuMP.@constraint(pm.model,
                 res[idx] == (var[c] - μ)^2 / σ^2 / rsc
             )
         elseif crit == "rwls" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
             JuMP.@constraint(pm.model,
                 res[idx] * rsc * σ^2 >= (var[c] - μ)^2
             )
         elseif crit == "wlav" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
-            JuMP.@NLconstraint(pm.model,
-                res[idx] == abs(var[c] - μ) / σ / rsc
-            )
-        elseif crit == "lav" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), 1.0
             JuMP.@NLconstraint(pm.model,
                 res[idx] == abs(var[c] - μ) / σ / rsc
             )
         elseif crit == "rwlav" && isa(dst[idx], _DST.Normal)
-            μ, σ = _DST.mean(dst[idx]), _DST.std(dst[idx])
             JuMP.@constraint(pm.model,
                 res[idx] >= (var[c] - μ) / σ / rsc
             )

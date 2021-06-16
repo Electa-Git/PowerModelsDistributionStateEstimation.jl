@@ -273,12 +273,12 @@ function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
         if parse(Int64, zib) ∉ measured_buses && parse(Int64, zib) ∉ exclude 
             phases = length(data["bus"][zib]["terminals"])
             data["load"]["$(highest_load_idx+1)"] = Dict("load_bus" => parse(Int64, zib), "note"=>"virtual load")
-            data["meas"]["$(highest_meas_idx+1)"] = Dict( "cmp_id" => "$(highest_load_idx+1)",
+            data["meas"]["$(highest_meas_idx+1)"] = Dict( "cmp_id" => highest_load_idx+1,
                                                           "cmp" => :load,
                                                           "var" => :pd,
                                                           "dst" => fill(_DST.Normal(0.0, σ), (phases,))
                                                         )
-            data["meas"]["$(highest_meas_idx+2)"] = Dict( "cmp_id" => "$(highest_load_idx+1)",
+            data["meas"]["$(highest_meas_idx+2)"] = Dict( "cmp_id" => highest_load_idx+1,
                                                           "cmp" => :load,
                                                           "var" => :qd,
                                                           "dst" => fill(_DST.Normal(0.0, σ), (phases,))

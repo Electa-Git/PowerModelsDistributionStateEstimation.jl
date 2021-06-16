@@ -21,7 +21,7 @@ function exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::F
     dof = get_degrees_of_freedom(data)
     chi2 = _DST.Chisq(dof)
     rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
-    return sol_dict["objective_refactored"] >= quantile(chi2, 1-prob_false), sol_dict["objective_refactored"], quantile(chi2, 1-prob_false)
+    return sol_dict["objective_refactored"] >= _STT.quantile(chi2, 1-prob_false), sol_dict["objective_refactored"], _STT.quantile(chi2, 1-prob_false)
 end
 """
     get_degrees_of_freedom(data::Dict)
@@ -62,7 +62,7 @@ end
 function rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
     if rescaler != 1
         for (_, meas) in sol_dict["solution"]["meas"]
-            meas["res"]*=rsc
+            meas["res"]*=rescaler
         end
     end
     @assert occursin("w", criterion) "This functionality is only applicable to `weighted` state estimation methods"

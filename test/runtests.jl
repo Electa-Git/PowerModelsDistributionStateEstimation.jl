@@ -8,6 +8,7 @@
 
 # using pkgs
 using Distributions, GaussianMixtures
+using HDF5
 using Ipopt
 using PowerModels, PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
@@ -41,6 +42,7 @@ ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
 
 @testset "PowerModelsDistributionStateEstimation" begin
 
+    include("bad_data.jl")
     include("distributions.jl")
     include("estimation_criteria.jl")
     include("mixed_measurements.jl")

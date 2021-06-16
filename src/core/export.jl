@@ -1,5 +1,6 @@
 export BASE_DIR
 export minimum, maximum
+export add_measurement!
 export logpdf, gradlogpdf, heslogpdf
 export solve_mc_se, solve_acp_mc_se, solve_acr_mc_se, solve_ivr_mc_se
 export rm_enwl_transformer!, reduce_enwl_lines_eng!
