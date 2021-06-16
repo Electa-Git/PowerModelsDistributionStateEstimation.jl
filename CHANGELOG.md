@@ -1,4 +1,7 @@
-## staged
+## Staged
+
+## v0.4.0
+- adds bad data functionalities and tests
 - adds util to create virtual measurements at zero injection buses
 - adds "lav" and "ls" criteria explicitly, i.e., no weights
 - removes run_mc_ functions in favour of solve_mc_ functions (breaking!)

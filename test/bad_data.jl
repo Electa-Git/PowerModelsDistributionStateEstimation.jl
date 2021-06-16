@@ -201,15 +201,15 @@ end
     h_array = _PMDSE.build_measurement_function_array(data, variable_dict)
     state_array = _PMDSE.build_state_array(pf_result, variable_dict)
 
-    stored_H_matrix = h5open(joinpath(BASE_DIR, "test\\data\\H_matrix.h5"), "r") do file
+    stored_H_matrix = h5open(joinpath(BASE_DIR, "test/data/H_matrix.h5"), "r") do file
         read(file, "H")
     end
 
-    stored_G_matrix = h5open(joinpath(BASE_DIR, "test\\data\\G_matrix.h5"), "r") do file
+    stored_G_matrix = h5open(joinpath(BASE_DIR, "test/data/G_matrix.h5"), "r") do file
         read(file, "G")
     end
 
-    stored_R_matrix = h5open(joinpath(BASE_DIR, "test\\data\\R_matrix.h5"), "r") do file
+    stored_R_matrix = h5open(joinpath(BASE_DIR, "test/data/R_matrix.h5"), "r") do file
         read(file, "R")
     end
 
