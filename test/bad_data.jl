@@ -227,11 +227,11 @@ end
     @test all(isapprox.(G, stored_G_matrix, atol=1))
     @test all(isapprox.(Ω, stored_Ω_matrix, atol=1))
 
-    id, val, exc = _PMDSE.normalized_residuals(se_sol, Ω)
+    id_val, exc = _PMDSE.normalized_residuals(se_result, Ω)
     @test !exc
-    @test id == "3"
-    @test isapprox(val, 0.11035175, atol=e-8)
+    @test id_val[1] == "3"
+    @test isapprox(id_val[2], 0.11035175, atol=1e-8)
 
     _PMDSE.simple_normalized_residuals(data, se_result, "wls")
-    @test haskey(se_sol["solution"]["meas"]["5"], "norm_res")
+    @test haskey(se_result["solution"]["meas"]["5"], "norm_res")
 end
