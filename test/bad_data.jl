@@ -190,7 +190,8 @@ end
     pf_result = _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
     _PMDSE.write_measurements!(_PMD.ACPUPowerModel, data, pf_result, msr_path, exclude = ["vr","vi"])
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-
+    _PMDSE.assign_start_to_variables!(data)
+    
     data["se_settings"] = Dict{String,Any}("criterion" => "wls", "rescaler" => 1)
     se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
     
