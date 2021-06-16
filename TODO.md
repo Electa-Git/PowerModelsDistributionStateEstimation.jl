@@ -14,6 +14,7 @@
       - test for GMM grad/heslogpdf
       - fix test of line 49-50 in pseudo_measurements.jl: in 50, NUMERICAL_ERROR when sol is correct, in 49 EXCEPTION_ACCESS_VIOLATION at 0x2e2075e6 -- mumps_cst_amf_ in windows CI
       - re-introduce start_values in tests and enable ubuntu tests back in CI (and maybe julia 1.0)
+      - G test in bad_data.jl and move atol to 1.1e-3 in with_errors.jl line 186
 
 ## TODO for future releases/research wishlist
 

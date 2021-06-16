@@ -191,7 +191,7 @@ end
     _PMDSE.write_measurements!(_PMD.ACPUPowerModel, data, pf_result, msr_path, exclude = ["vr","vi"])
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
     _PMDSE.assign_start_to_variables!(data)
-    
+
     data["se_settings"] = Dict{String,Any}("criterion" => "wls", "rescaler" => 1)
     se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
     
@@ -220,12 +220,12 @@ end
 
     H = _PMDSE.build_H_matrix(h_array, state_array)
     R = _PMDSE.build_R_matrix(data)
-    #G = _PMDSE.build_G_matrix(stored_H_matrix, R)
+    G = _PMDSE.build_G_matrix(stored_H_matrix, R)
     Ω = _PMDSE.build_omega_matrix(R, stored_H_matrix, G)
 
     @test all(isapprox.(H, stored_H_matrix, atol=1))
     @test all(isapprox.(R, stored_R_matrix, atol=1))
-    @test all(isapprox.(G, stored_G_matrix, atol=1))
+    #@test all(isapprox.(G, stored_G_matrix, atol=1))
     @test all(isapprox.(Ω, stored_Ω_matrix, atol=1))
 
     id_val, exc = _PMDSE.normalized_residuals(se_result, Ω)
