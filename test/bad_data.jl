@@ -213,7 +213,7 @@ end
         read(file, "R")
     end
 
-    stored_Ω_matrix = h5open(joinpath(BASE_DIR, "test\\data\\Ω_matrix.h5"), "r") do file
+    stored_Ω_matrix = h5open(joinpath(BASE_DIR, "test/data/Ω_matrix.h5"), "r") do file
         read(file, "Ω")
     end
 

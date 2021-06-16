@@ -33,7 +33,7 @@ rd_lines   = true
 
 # set solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
-                                                              "tol"=>1e-10,
+                                                              "tol"=>1e-9,
                                                               "print_level"=>0)
 
 # scs_solver = optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,

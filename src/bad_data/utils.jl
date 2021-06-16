@@ -124,29 +124,6 @@ function build_state_array(sol_dict::Dict, variable_dict::Dict)
     return state_array
 end
 """
-    Given a state estimation or powerflow result or similar dictionary `se_sol`, and the system variables `variable_dict`,
-    this function builds an array with the numerical state of the system, e.g., variables in `variable_dict`
-        are assigned a scalar that correspond to their value in `se_sol`.
-        The resulting array has the same index order of that of `h_functions`.
-"""
-function build_state_array(sol_dict::Dict, variable_dict::Dict)
-    state_length = sum( length(val) for (_, val) in variable_dict["vm"]) + sum( length(val) for (_, val) in variable_dict["va"])
-    state_array = zeros(Float64, (state_length,) )
-    for (key, val) in variable_dict["vm"]
-        bus_idx = minimum([idx for (_, idx) in val])
-        for i in 1:length(val)
-            state_array[bus_idx+i-1] = sol_dict["solution"]["bus"][key]["vm"][i]
-        end
-    end
-    for (key, val) in variable_dict["va"]
-        bus_idx = minimum([idx for (_, idx) in val])
-        for i in 1:length(val)
-            state_array[bus_idx+i-1] = sol_dict["solution"]["bus"][key]["va"][i]
-        end
-    end
-    return state_array
-end
-"""
 Adds "virtual" zero zib residuals to a state estimation solution dictionary `se_sol`.
 The `data` dictionary must have measurement data for these zibs, which can be added 
     with _PMDSE.add_zib_virtual_meas!
