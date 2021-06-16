@@ -5,7 +5,7 @@
     msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
     data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-    pf_result = _PMD.run_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
+    pf_result = _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
 
     @testset "Equivalence of WLS-rWLS" begin
 
@@ -17,7 +17,7 @@
         data["se_settings"] = Dict{String,Any}("criterion" => "wls", "rescaler" => rescaler)
         se_result_wls = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
 
-        @test isapprox(se_result_rwls["objective"]-se_result_wls["objective"], 0.0; atol = 1e-4)
+        @test isapprox(se_result_rwls["objective"]-se_result_wls["objective"], 0.0; atol = 1e-5)
 
     end
 
@@ -65,7 +65,7 @@
     end
 
     _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
-    pf_result= _PMD.run_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
+    pf_result= _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
     rescaler = 1
 
     @testset "MLE with normal distr - with error" begin

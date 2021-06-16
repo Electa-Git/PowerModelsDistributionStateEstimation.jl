@@ -37,7 +37,7 @@
             end 
         end
         
-        pf_result = _PMD.run_mc_pf(case5, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(case5, model, ipopt_solver)
         _PMDSE.write_measurements!(_PMD.ACPUPowerModel, case5, pf_result, msr_path, exclude = ["vi","vr"])
         _PMDSE.add_measurements!(case5, msr_path, actual_meas = true)
         _PMDSE.add_voltage_measurement!(case5, pf_result, 0.0005)
@@ -59,7 +59,7 @@
         delete!(data["load"], "2")
         delete!(data["load"], "3")
         reduce_single_phase_loadbuses!(data, exclude = []) #after this, all buses have 3 terminals except bus 3. All branches have 3 connections except branch 1. Thus, dimensions are reduced.
-        pf_result= _PMD.run_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
+        pf_result= _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
         msr_path = joinpath(mktempdir(),"temp.csv")
         _PMDSE.write_measurements!(_PMD.ACPUPowerModel, data, pf_result, msr_path, exclude = ["vr","vi"])
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)

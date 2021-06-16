@@ -30,7 +30,7 @@ where:
 - SF: conversion of type SquareFraction
 - X:  not provided
 
-The N* in the SDP formulation indicates that those variable are only native for
+The N* in the SDP formulation indicates that those variable are only available for
 generators, loads and other devices/extensions, but not for measurements that
 refer to branch flows, yet.
 

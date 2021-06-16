@@ -31,8 +31,9 @@ function update_voltage_bounds!(data::Dict; v_min::Float64=0.0, v_max::Float64=I
 end
 """
     update_generator_bounds!(data; p_min, p_max, q_min, q_max)
-Function that allows to automatically set upper (p_max, q_max) and lower (p_min, q_min) active and reactive power bounds for all generators.
-It assumes that there are at most four active phases and all have the same bounds.
+Function that allows to automatically set upper (p_max, q_max) and lower (p_min, q_min)
+active and reactive power bounds for all generators. It assumes that there are at most 
+four active phases and all have the same bounds.
 """
 function update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
     for (_,gen) in data["gen"]
@@ -43,9 +44,9 @@ function update_generator_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64
     end
 end
 """
-    update_load_bounds!(data; p_min, p_max, q_min, q_max)
+    update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
 Function that allows to automatically set upper (p_max, q_max) and lower (p_min, q_min) active and reactive power bounds for all loads.
-It assumes that there are at most four active phases and all have the same bounds
+It assumes that there are at most four active phases and all have the same bounds.
 """
 function update_load_bounds!(data::Dict; p_min::Float64=0.0, p_max::Float64=Inf, q_min::Float64=-Inf, q_max::Float64=Inf)
     for (_,load) in data["load"]
@@ -181,32 +182,40 @@ function reduce_single_phase_loadbuses!(data::Dict; exclude=[])
     for (bus_id,load_id,nr_conn_loads) in load_info
         load_connections = data["load"][load_id]["connections"]
         if nr_conn_loads == 1 && length(load_connections) == 1
-            perform_dimension_reduction!(data, bus_id, load_connections)
+            perform_dimension_reduction!(data, bus_id, load_id, load_connections)
         elseif nr_conn_loads > 1 && bus_id ∉ already_checked
             push!(already_checked, bus_id)
             loads_at_bus_id = [load_id for (x, load_id, z) in load_info if x == bus_id]
             used_connections = unique([data["load"][lid]["connections"] for lid in loads_at_bus_id])
-            if length(used_connections) == 1 perform_dimension_reduction!(data, bus_id, load_connections) end
+            if length(used_connections) == 1 perform_dimension_reduction!(data, bus_id, load_id, load_connections) end
         end
     end
 end
 "reduces the dimension of bus terminals and branches f_ and t_connections to match those of the connected load(s)"
-function perform_dimension_reduction!(data::Dict, bus_id::Int64, load_connections)
-    data["bus"]["$bus_id"]["terminals"] = load_connections
-    data["bus"]["$bus_id"]["grounded"] = data["bus"]["$bus_id"]["grounded"][load_connections]
+function perform_dimension_reduction!(data::Dict, bus_id::Int64, load_id, load_connections)
+
     conn_branches = find_branch_t_bus(data["branch"], bus_id)
 
     idx = load_connections[1]
 
-    for br_id in conn_branches
-        branch = data["branch"][br_id]
-        for (key,value) in branch
-            if isa(value, Matrix)
-                branch[key] = reshape([value[idx,idx]], 1, 1)
-            elseif isa(value, Vector)
-                branch[key] = load_connections
+    if !isempty(conn_branches)
+        data["bus"]["$bus_id"]["terminals"] = load_connections
+        data["bus"]["$bus_id"]["grounded"] = data["bus"]["$bus_id"]["grounded"][load_connections]
+        for br_id in conn_branches
+            branch = data["branch"][br_id]
+            for (key,value) in branch
+                if isa(value, Matrix)
+                    branch[key] = reshape([value[idx,idx]], 1, 1)
+                elseif isa(value, Vector)
+                    branch[key] = load_connections
+                end
             end
         end
+    else # let's assume for simplicity of calculations of the d.o.f. that if a user is connected to a "f_bus", i.e., three-phase, the user is three phase too
+        for (key, value) in data["load"][load_id]
+            if isa(value, Vector) data["load"][load_id][key] = fill(value[1]/3, (3,)) end
+        end
+        data["load"][load_id]["connections"] = [1,2,3]
     end
 end
 "returns a tuple with all loads' information. Every load is assigned a tuple with the following content: (bus the load is connected to, the load index, total number of loads connected to the same bus) "
@@ -222,13 +231,14 @@ function get_load_info(data::Dict, exclude=[])
     loads_per_bus = [count(x->(x == i), load_buses) for i in load_buses]
     return zip(load_buses, load_idx, loads_per_bus)
 end
-"find the branches that have the load bus as t_bus"
+"find the branches that have the load bus as t_bus. These will be the \"extremities\" of connection cables, so their number of
+connections equals that of the load. If the load is directly connected to the main three-phase cable, this is not the case."
 function find_branch_t_bus(branches, bus_id)
     conn_branches = []
     for (b, branch) in branches
         if branch["t_bus"] == bus_id push!(conn_branches, b) end
     end
-    !isempty(conn_branches) ? (return conn_branches) : error("Network graph is disconnected")
+    return conn_branches
 end
 """
     function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
@@ -245,4 +255,61 @@ function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, 
        error("Measurements for component of type $cmp_type are not supported")
    end
    return active_conn
+end
+"""
+    function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
+Adds zero-injection buses measurements to the "meas" dictionary if they are not present.
+Any bus_id given within `exclude` will not be assigned a virtual measurement.
+The virtual measurements added are :pd = :qd = 0, with high accuracy σ, for each phase 
+of the bus these virtual loads are connected to.
+"""
+function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
+    non_zibs = unique(vcat([load["load_bus"] for (_, load) in data["load"]], [gen["gen_bus"] for (_, gen) in data["gen"]]))
+    zibs = [b for (b,_) in data["bus"] if parse(Int64, b) ∉ non_zibs]
+    measured_buses = [meas["cmp_id"] for (_, meas) in data["meas"] if (meas["cmp"] == :bus)] # to check if the zib virtual measurement is already there 
+    highest_meas_idx = maximum(parse.(Int64, collect(keys(data["meas"]))))
+    highest_load_idx = maximum(parse.(Int64, collect(keys(data["load"]))))
+    for zib in zibs
+        if parse(Int64, zib) ∉ measured_buses && parse(Int64, zib) ∉ exclude 
+            phases = length(data["bus"][zib]["terminals"])
+            data["load"]["$(highest_load_idx+1)"] = Dict("load_bus" => parse(Int64, zib), "note"=>"virtual load")
+            data["meas"]["$(highest_meas_idx+1)"] = Dict( "cmp_id" => highest_load_idx+1,
+                                                          "cmp" => :load,
+                                                          "var" => :pd,
+                                                          "dst" => fill(_DST.Normal(0.0, σ), (phases,))
+                                                        )
+            data["meas"]["$(highest_meas_idx+2)"] = Dict( "cmp_id" => highest_load_idx+1,
+                                                          "cmp" => :load,
+                                                          "var" => :qd,
+                                                          "dst" => fill(_DST.Normal(0.0, σ), (phases,))
+                                                        )
+            highest_meas_idx+=2
+            highest_load_idx+=1
+        end
+    end
+end
+"""
+finds the set of all the buses in `data` which are adjacent to `bus_idx`.
+"""
+function adjacent_branch_and_buses(bus_idx::Int64, data::Dict)
+    conn_branches = [b for (b, branch) in data["branch"] if (branch["f_bus"] == bus_idx || branch["t_bus"] == bus_idx)] 
+    adj_buses = []
+    for br in conn_branches
+        push!(adj_buses, data["branch"][br]["f_bus"])
+        push!(adj_buses, data["branch"][br]["t_bus"])
+    end
+    return conn_branches, (filter(x->x!=bus_idx, adj_buses) |> unique)
+end
+"""
+Helper function to add a measurement. Currently can assign Gaussian measurements only.
+"""
+function add_measurement!(data::Dict, var::Symbol, cmp::Symbol, cmp_id::Int64, measured_value::Array, σ::Array; id::String="", crit=missing)
+    m = isempty(id) ? "$(maximum([parse(Int64, m) for (m,meas) in data["meas"]])+1)" : id
+
+    data["meas"][m] = Dict( "var" => var,
+                            "crit" => crit,
+                            "cmp" => cmp,
+                            "dst" => [_DST.Normal(mu, sigma) for(mu, sigma) in zip(measured_value, σ)],
+                            "cmp_id"=> cmp_id   
+                            )
 end

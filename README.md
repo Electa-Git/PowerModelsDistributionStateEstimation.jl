@@ -41,7 +41,15 @@ Measurement Uncertainties:
 To use the package, two type of data inputs are required:
 - Network data: support exists for OpenDSS “.dss”, matpower ".m" and some specific JSON files 
 - Measurement data: CSV “.csv” files
+
 See the [relative section of the docs](https://electa-git.github.io/PowerModelsDistributionStateEstimation.jl/stable/input_data_format/) for more info.
+
+## Bad Data Detection and Identification
+
+As of version 0.4.0, PMDSE supports the following bad data detection and identification functionalities:
+- Chi-square analysis
+- Largest normalized residuals
+- Analysis of residuals from robust LAV estimation
 
 ## Examples
 
@@ -80,5 +88,4 @@ This code is provided under a BSD license.
 ## Notes
 
 - The intention of this package is not to provide the fastest SE algorithms, but a framework to facilitate the distribution SE design process. If faster solution times are crucial, a customized algorithm can be developed afterwards, once the optimal design is chosen.
-- The focus is on the state estimation model itself, and bad data detection techniques and observability functions are not implemented yet. Nevertheless, it is easy for the user to manipulate the result dictionary to, e.g., perform a Chi square test.
 - Accurate load and transformer models are available on PowerModelsDistribution and can be easily included in this package for state estimation purposes, e.g., to perform a multi-level MV/LV state estimation. Extending the package to include these models in a more automatic and intuitive manner is scheduled for future releases.

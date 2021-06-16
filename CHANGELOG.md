@@ -1,3 +1,11 @@
+## Staged
+
+## v0.4.0
+- adds bad data functionalities and tests
+- adds util to create virtual measurements at zero injection buses
+- adds "lav" and "ls" criteria explicitly, i.e., no weights
+- removes run_mc_ functions in favour of solve_mc_ functions (breaking!)
+
 ## v0.3.0
 - adds tests/examples and docs for state estimation with single-phase connections and matpower data parsing 
 - updates to PowerModelsDistribution v0.11.1 and InfrastructureModels 0.6.0 (breaking!)

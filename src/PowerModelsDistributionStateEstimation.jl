@@ -13,9 +13,11 @@ import CSV
 import DataFrames
 import Distributions
 import Distributions: logpdf, gradlogpdf
+import ForwardDiff
 import GaussianMixtures
 import InfrastructureModels
 import JuMP
+import LinearAlgebra
 import LinearAlgebra: diag
 import Logging, LoggingExtras
 import Optim
@@ -58,6 +60,11 @@ function __init__()
 end
 
 # include
+include("bad_data/chi_squares_test.jl")
+include("bad_data/largest_normalized_residuals.jl")
+include("bad_data/measurement_functions.jl")
+include("bad_data/utils.jl")
+
 include("core/constraint.jl")
 include("core/measurement_conversion.jl")
 include("core/objective.jl")
