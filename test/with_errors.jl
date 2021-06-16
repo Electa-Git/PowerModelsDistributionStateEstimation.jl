@@ -165,7 +165,7 @@
 
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
-        _PMDSE.add_voltage_measurement!(data, pf_result, 0.005)
+        _PMDSE.add_voltage_measurement!(data, pf_result, 0.0005)
         _PMDSE.assign_start_to_variables!(data)
         _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings

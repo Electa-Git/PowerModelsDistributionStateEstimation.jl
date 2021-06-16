@@ -194,7 +194,7 @@ end
     data["se_settings"] = Dict{String,Any}("criterion" => "wls", "rescaler" => 1)
     se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
     
-    _PMDSE.add_zib_virtual_meas!(data, 0.000001, exclude = [2])
+    _PMDSE.add_zib_virtual_meas!(data, 0.00000001, exclude = [2])
     _PMDSE.add_zib_virtual_residuals!(se_result, data)
 
     variable_dict = _PMDSE.build_variable_dictionary(data)
@@ -219,7 +219,7 @@ end
 
     H = _PMDSE.build_H_matrix(h_array, state_array)
     R = _PMDSE.build_R_matrix(data)
-    G = _PMDSE.build_G_matrix(stored_H_matrix, R)
+    #G = _PMDSE.build_G_matrix(stored_H_matrix, R)
     Ω = _PMDSE.build_omega_matrix(R, stored_H_matrix, G)
 
     @test all(isapprox.(H, stored_H_matrix, atol=1))
