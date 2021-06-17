@@ -58,17 +58,15 @@ function get_degrees_of_freedom(data::Dict)
 
 end
 
-
 function rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
-    if rescaler != 1
-        for (_, meas) in sol_dict["solution"]["meas"]
-            meas["res"]*=rescaler
-        end
-    end
     @assert occursin("w", criterion) "This functionality is only applicable to `weighted` state estimation methods"
-    if criterion == "rwlav"
+    if occursin("lav", criterion)
         for (_, meas) in sol_dict["solution"]["meas"]
-            meas["res"] = meas["res"].^2
+            meas["res"] = (meas["res"]*rescaler).^2
+        end
+    else
+        for (_, meas) in sol_dict["solution"]["meas"]
+            meas["res"] = meas["res"]*rescaler^2
         end
     end
     sol_dict["objective_refactored"] = [sum(sum.(meas["res"] for (m, meas) in sol_dict["solution"]["meas"]))][1]

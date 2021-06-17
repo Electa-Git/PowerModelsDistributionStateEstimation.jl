@@ -68,7 +68,7 @@
         _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 10000)
+                                           "rescaler" => 100)
 
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
@@ -136,7 +136,7 @@
         _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
+                                           "rescaler" => 10)
 
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
@@ -204,7 +204,7 @@
         _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
+                                           "rescaler" => 10)
 
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
