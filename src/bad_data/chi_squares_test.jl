@@ -21,6 +21,7 @@ function exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::F
     dof = get_degrees_of_freedom(data)
     chi2 = _DST.Chisq(dof)
     rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
+    sol_dict["objective_refactored"] >= _STT.quantile(chi2, 1-prob_false) ? display("Chi-square test indicates presence of bad data.") : display("No bad data detected by Chi-square test.")
     return sol_dict["objective_refactored"] >= _STT.quantile(chi2, 1-prob_false), sol_dict["objective_refactored"], _STT.quantile(chi2, 1-prob_false)
 end
 """
