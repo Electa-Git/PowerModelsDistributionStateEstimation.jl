@@ -38,7 +38,7 @@
     # read-in measurement data and set initial values
     _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
 
-    rsc = 100
+    rsc = 10
     crit = "rwls"
 
     data["se_settings"] = Dict{String,Any}("criterion" => crit, "rescaler" => rsc)
@@ -47,7 +47,7 @@
     @test _PMDSE.get_degrees_of_freedom(data) == 34
     
     chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data; prob_false=0.05, criterion=crit, rescaler = rsc)
-    @test isapprox(se_result["objective"], 0.120618, atol=1e-4)
+    @test isapprox(se_result["objective"], 0.120618, atol=1e-2)
     @test chi_result[1] == false
     @test isapprox(chi_result[2], 12.06, atol = 1e-2)
     @test isapprox(chi_result[3], 48.60, atol = 1e-2)

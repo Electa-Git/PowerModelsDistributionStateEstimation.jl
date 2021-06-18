@@ -30,7 +30,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
             JuMP.@constraint(pm.model, res[idx] == 0.0)         
         elseif crit ∈ ["wls", "ls"] && isa(dst[idx], _DST.Normal)
             JuMP.@constraint(pm.model,
-                res[idx] *rsc^2 == (var[c] - μ)^2 / σ^2 
+                res[idx] * rsc^2 * σ^2 == (var[c] - μ)^2 
             )
         elseif crit == "rwls" && isa(dst[idx], _DST.Normal)
             JuMP.@constraint(pm.model,
@@ -38,14 +38,14 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
             )
         elseif crit ∈ ["wlav", "lav"] && isa(dst[idx], _DST.Normal)
             JuMP.@NLconstraint(pm.model,
-                res[idx] == abs(var[c] - μ) / σ / rsc
+                res[idx] * rsc * σ == abs(var[c] - μ)
             )
         elseif crit == "rwlav" && isa(dst[idx], _DST.Normal)
             JuMP.@constraint(pm.model,
-                res[idx] >= (var[c] - μ) / σ / rsc
+                res[idx] * rsc * σ >= (var[c] - μ) 
             )
             JuMP.@constraint(pm.model,
-                res[idx] >= - (var[c] - μ) / σ / rsc
+                res[idx] * rsc * σ >= - (var[c] - μ)
             )
         elseif crit == "mle"
             ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? pkg_id = _PMDSE : pkg_id = _DST
