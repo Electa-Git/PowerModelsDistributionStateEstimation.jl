@@ -18,7 +18,7 @@ import GaussianMixtures
 import InfrastructureModels
 import JuMP
 import LinearAlgebra
-import LinearAlgebra: diag
+import LinearAlgebra: diag, diagm, I
 import Logging, LoggingExtras
 import Optim
 import PowerModelsDistribution
