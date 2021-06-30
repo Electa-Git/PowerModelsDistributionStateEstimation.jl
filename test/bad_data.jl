@@ -5,7 +5,7 @@
     data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
     if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
     if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
-
+    data["settings"]["sbase_default"] = 100.0
     # insert the load profiles
     _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
@@ -28,29 +28,33 @@
     # sigma_dict
     σ_dict = Dict("load" => Dict("load" => σ_p,
                                 "bus"   => σ_v),
-                "gen"  => Dict("gen" => σ_p,
-                                "bus" => σ_v)
+                "gen"  => Dict("gen" => σ_p/100,
+                                "bus" => σ_v/100)
                 )
 
     # write measurements based on power flow
     _PMDSE.write_measurements!(_PMD.ACPUPowerModel, data, pf_result, msr_path, exclude = ["vi","vr"], σ = σ_dict)
 
     # read-in measurement data and set initial values
-    _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
+    _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
 
-    rsc = 10
-    crit = "rwls"
-
-    data["se_settings"] = Dict{String,Any}("criterion" => crit, "rescaler" => rsc)
+    data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
     se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
 
     @test _PMDSE.get_degrees_of_freedom(data) == 34
     
-    chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data; prob_false=0.05, criterion=crit, rescaler = rsc)
-    @test isapprox(se_result["objective"], 0.120618, atol=1e-2)
-    @test chi_result[1] == false
-    @test isapprox(chi_result[2], 12.06, atol = 1e-2)
+    chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data)
+    @test chi_result[1] == false 
+    @test isapprox(chi_result[2], 0.0, atol = 1e-8)
     @test isapprox(chi_result[3], 48.60, atol = 1e-2)
+
+    _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
+    se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+    chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data)
+    @test chi_result[1] == true #TODO: there's no real bad data, check whether there is a problem with write_meas
+    @test isapprox(chi_result[2], 963.32, atol = 1e-2)
+    @test isapprox(chi_result[3], 48.60, atol = 1e-2)
+
 end
 
 @testset "h_functions" begin
@@ -228,11 +232,11 @@ end
     #@test all(isapprox.(G, stored_G_matrix, atol=1))
     @test all(isapprox.(Ω, stored_Ω_matrix, atol=1))
 
-    id_val, exc = _PMDSE.normalized_residuals(se_result, Ω)
+    id_val, exc = _PMDSE.normalized_residuals(data, se_result, Ω)
     #@test !exc
     #@test id_val[1] == "3"
     #@test isapprox(id_val[2], 0.11035175, atol=1e-8)
 
-    _PMDSE.simple_normalized_residuals(data, se_result, "wls")
-    @test haskey(se_result["solution"]["meas"]["5"], "norm_res")
+    _PMDSE.simple_normalized_residuals(data, se_result, R)
+    @test haskey(se_result["solution"]["meas"]["5"], "nr")
 end

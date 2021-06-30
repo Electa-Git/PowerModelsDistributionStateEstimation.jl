@@ -1,5 +1,5 @@
 """
-    exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::Float64=0.05)
+    exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::Float64=0.05, suppress_display::Bool=false)
 
 Standard bad data detection method that consists of performing a Chi squares analysis on the objective value, i.e.,
 the sum of the residuals. The outcome of the analysis depends on the degrees of freedom of the problem, which are calculated calling
@@ -7,22 +7,32 @@ the `get_degrees_of_freedom` function (see below).
 
 This function returns:
 - a Boolean. If `true`, there are probably bad data points, if `false` there probably are not.
-- the scaled objective of the optimization and the Χ² threshold value. 
+- the sum of the weighted squares of the residuals (which might be the optimization objective or not, depending on the settings) and the Χ² threshold value. 
 
 Arguments:
 - `sol_dict`: solution dictionary, i.e., the default output dictionary of state estimation calculations,
 - `data`: data input of the state estimation calculations, used to calculate the degrees of freedom,
-- `prob_false`: probability of errors allowed in the Chi squares test,
-- `criterion`: `wlav`, `wls`, etc.,
-- `rescaler`: used rescaler if != 1
+- `prob_false`: probability of errors allowed in the Chi squares test, defaults to 0.05
+- `suppress_display`: if `false`, the function also displays the result of the analysis, otherwise this is suppressed.
 
 """
-function exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::Float64=0.05, criterion::String="wls", rescaler::Int64=1)
+function exceeds_chi_squares_threshold(sol_dict::Dict, data::Dict; prob_false::Float64=0.05, suppress_display::Bool=false)
     dof = get_degrees_of_freedom(data)
     chi2 = _DST.Chisq(dof)
-    rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
-    sol_dict["objective_refactored"] >= _STT.quantile(chi2, 1-prob_false) ? display("Chi-square test indicates presence of bad data.") : display("No bad data detected by Chi-square test.")
-    return sol_dict["objective_refactored"] >= _STT.quantile(chi2, 1-prob_false), sol_dict["objective_refactored"], _STT.quantile(chi2, 1-prob_false)
+    norm_residual = []
+    for (m, meas) in data["meas"]
+        h_x = sol_dict["solution"][string(meas["cmp"])][string(meas["cmp_id"])][string(meas["var"])]
+        z = _DST.mean.(meas["dst"])
+        r = abs.(h_x-z)
+        σ = _DST.std.(meas["dst"])
+        sol_dict["solution"]["meas"][m]["norm_res"] = [r[i]^2/σ[i]^2 for i in 1:length(meas["dst"])]        
+        for i in 1:length(meas["dst"]) push!(norm_residual, r[i]^2/σ[i]^2) end      
+    end
+    sol_dict["J"] = sum(norm_residual)
+    if !suppress_display
+        sol_dict["J"] >= _STT.quantile(chi2, 1-prob_false) ? display("Chi-square test indicates presence of bad data.") : display("No bad data detected by Chi-square test.")
+    end
+    return sol_dict["J"] >= _STT.quantile(chi2, 1-prob_false), sol_dict["J"], _STT.quantile(chi2, 1-prob_false)
 end
 """
     get_degrees_of_freedom(data::Dict)
@@ -40,7 +50,6 @@ included in the calculation of `n`, either. Zero-injection buses are defined as 
 """
 function get_degrees_of_freedom(data::Dict)
 
-    # TODO: for MV/LV add transformer buses to non-zero buses?
     ref_bus = [bus for (_,bus) in data["bus"] if bus["bus_type"] == 3]
     
     @assert length(ref_bus) == 1 "There is more than one reference bus, double-check model"
@@ -57,18 +66,4 @@ function get_degrees_of_freedom(data::Dict)
     
     return m-n
 
-end
-
-function rescale_and_adjust_objective!(sol_dict, rescaler, criterion)
-    @assert occursin("w", criterion) "This functionality is only applicable to `weighted` state estimation methods"
-    if occursin("lav", criterion)
-        for (_, meas) in sol_dict["solution"]["meas"]
-            meas["res"] = (meas["res"]*rescaler).^2
-        end
-    else
-        for (_, meas) in sol_dict["solution"]["meas"]
-            meas["res"] = meas["res"]*rescaler^2
-        end
-    end
-    sol_dict["objective_refactored"] = [sum(sum.(meas["res"] for (m, meas) in sol_dict["solution"]["meas"]))][1]
 end
