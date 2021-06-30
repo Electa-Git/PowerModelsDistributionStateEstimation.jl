@@ -1,5 +1,10 @@
 ## Staged
 
+## v0.4.1-2
+- clean-up of bad data code
+- adds bad data documentation
+- adds util to calculate state estimation vs powerflow voltage difference per individual phase (instead of average of the three)
+
 ## v0.4.0
 - adds bad data functionalities and tests
 - adds util to create virtual measurements at zero injection buses
