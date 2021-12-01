@@ -69,15 +69,15 @@ the following contributors:
 If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [paper](https://arxiv.org/abs/2011.11614):
 
 ```bibtex
-@article{VaninPMDSE,
-	title = {A framework for constrained static state estimation in unbalanced distribution networks},
-	volume = {},
-	number = {},
-	journal = {[Online], arXiv:2011.11614 [eess.SY]  },
-	author = {Vanin, Marta and Van Acker, Tom and D'hulst, Reinhilde and Van Hertem, Dirk},
-	month = {Nov.},
-	year = {2020},
-}
+@ARTICLE{9552554,
+  author={Vanin, Marta and Van Acker, Tom and D'hulst, Reinhilde and Van Hertem, Dirk},
+  journal={IEEE Transactions on Power Systems}, 
+  title={A Framework for Constrained Static State Estimation in Unbalanced Distribution Networks}, 
+  year={2021},
+  volume={},
+  number={},
+  pages={1-1},
+  doi={10.1109/TPWRS.2021.3116291}}
 
 ```
 

@@ -48,9 +48,9 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
                 res[idx] * rsc * σ >= - (var[c] - μ)
             )
         elseif crit == "mle"
-            ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? pkg_id = _PMDSE : pkg_id = _DST
-            ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.minimum(dst[idx])) ) ? lb = pkg_id.minimum(dst[idx]) : lb = -10
-            ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.maximum(dst[idx])) ) ? ub = pkg_id.maximum(dst[idx]) : ub = 10
+            pkg_id = ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? _PMDSE : _DST
+            lb = ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.minimum(dst[idx])) ) ? pkg_id.minimum(dst[idx]) : -10
+            ub = ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.maximum(dst[idx])) ) ? pkg_id.maximum(dst[idx]) : 10
             if isa(dst[idx], _GMM.GMM) lb = _PMD.ref(pm, nw, :meas, i, "min") end
             if isa(dst[idx], _GMM.GMM) ub = _PMD.ref(pm, nw, :meas, i, "max") end
             

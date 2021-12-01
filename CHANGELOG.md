@@ -1,5 +1,10 @@
 ## Staged
 
+## v0.5.0
+- add support JuMP 0.22, PMD 0.12,0.13, IM 0.7
+- nicer ternary operators
+- change cite to IEEE TPWRS early access
+
 ## v0.4.1-2
 - clean-up of bad data code
 - adds bad data documentation
