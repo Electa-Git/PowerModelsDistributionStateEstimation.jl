@@ -105,7 +105,7 @@ The function takes as input either a single measurement dictionary, e.g., `data[
                and their product is used as the upper bound. Otherwise,
 """
 function assign_residual_ub!(data::Dict; chosen_upper_bound::Float64=100.0, rescale::Bool=false)
-    rescale ? upp_bound = chosen_upper_bound*data["se_settings"]["rescaler"] : upp_bound = chosen_upper_bound
+    upp_bound = rescale ? chosen_upper_bound*data["se_settings"]["rescaler"] : chosen_upper_bound
     if haskey(data, "meas")
         for (_, meas) in data["meas"]
             meas["res_max"] = upp_bound

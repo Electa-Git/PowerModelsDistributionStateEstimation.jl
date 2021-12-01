@@ -28,7 +28,7 @@ function variable_mc_residual(  pm::_PMD.AbstractUnbalancedPowerModel;
     if bounded
         for i in _PMD.ids(pm, nw, :meas), c in 1:connections[i]
             JuMP.set_lower_bound(res[i][c], 0.0)
-            haskey(_PMD.ref(pm, nw, :meas, i), "res_max") ? res_max = meas["res_max"] : res_max = Inf
+            res_max = haskey(_PMD.ref(pm, nw, :meas, i), "res_max") ? meas["res_max"] : Inf
             JuMP.set_upper_bound(res[i][c], res_max)
         end
     end
