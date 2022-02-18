@@ -26,14 +26,22 @@ dst = ExtendedBeta(2.0,4.0,10.0,100.0)
 @test isapprox(_PMDSE.heslogpdf(dst,50.0),                -0.001825,      atol=1e-8)
 
 # Testing logpdf/gradlogpdf/heslogpdf of gaussian mixture models
-beta = _PMDSE.ExtendedBeta(1.6339, 20.9022, -1.0e-6, 8.268e-5)
-gmm = _GMM.GMM(1, rand(beta, 100000))
-g1 = _DST.Normal(gmm.μ[1], sqrt(gmm.Σ[1]))
+beta = _PMDSE.ExtendedBeta(1.6339, 20.9022, 0.001, 2.0)
+gmm = _DST.MixtureModel([_DST.Normal(0.14585265, sqrt(0.01144241))], [1.0])
+g1 = _DST.Normal(gmm.components[1].μ, gmm.components[1].σ)
 @test isapprox(_DST.logpdf(g1, beta.min),      _PMDSE.logpdf(gmm, beta.min),     atol = 1e-8)
 @test isapprox(_DST.logpdf(g1, beta.max),      _PMDSE.logpdf(gmm, beta.max),     atol = 1e-8)
 @test isapprox(_DST.gradlogpdf(g1, beta.min),  _PMDSE.gradlogpdf(gmm, beta.min), atol = 1e-8)    
 @test isapprox(_DST.gradlogpdf(g1, beta.max),  _PMDSE.gradlogpdf(gmm, beta.max), atol = 1e-8)
 @test isapprox(_PMDSE.heslogpdf(g1, beta.min), _PMDSE.heslogpdf(gmm, beta.min),  atol = 1e-2)
 @test isapprox(_PMDSE.heslogpdf(g1, beta.max), _PMDSE.heslogpdf(gmm, beta.max),  atol = 1e-2)
+
+p = _Poly.Polynomial([0,1,1])
+@test isapprox(_PMDSE.logpdf(p, 0.0), 0.0, atol=1e-8)
+@test isapprox(_PMDSE.logpdf(p, 1.0), 2.0, atol=1e-8)
+@test isapprox(_PMDSE.gradlogpdf(p, 1.0), 3.0, atol=1e-8)
+@test isapprox(_PMDSE.gradlogpdf(p, 0.0), 1.0, atol=1e-8)
+@test isapprox(_PMDSE.heslogpdf(p, 0.0), 2.0, atol=1e-8)
+@test isapprox(_PMDSE.heslogpdf(p, 1.0), 2.0, atol=1e-8)
 
 end

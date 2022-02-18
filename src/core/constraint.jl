@@ -23,7 +23,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
 
     for (idx, c) in enumerate(conns)
         if (occursin("ls", crit) || occursin("lav", crit)) && isa(dst[idx], _DST.Normal)
-            μ, σ = occursin("w", crit) ? (_DST.mean(dst[idx]), _DST.std(dst[idx])) :  (_DST.mean(dst[idx]), 1.0)
+            μ, σ = occursin("w", crit) ? (_DST.mean(dst[idx]), _DST.std(dst[idx])) : (_DST.mean(dst[idx]), 1.0)
         end
         if isa(dst[idx], Float64)
             JuMP.@constraint(pm.model, var[c] == dst[idx])
@@ -48,11 +48,12 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
                 res[idx] * rsc * σ >= - (var[c] - μ)
             )
         elseif crit == "mle"
-            pkg_id = ( isa(dst[idx], ExtendedBeta{Float64}) || isa(dst[idx], _GMM.GMM) ) ? _PMDSE : _DST
-            lb = ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.minimum(dst[idx])) ) ? pkg_id.minimum(dst[idx]) : -10
-            ub = ( !isa(dst[idx], _GMM.GMM) && !isinf(pkg_id.maximum(dst[idx])) ) ? pkg_id.maximum(dst[idx]) : 10
-            if isa(dst[idx], _GMM.GMM) lb = _PMD.ref(pm, nw, :meas, i, "min") end
-            if isa(dst[idx], _GMM.GMM) ub = _PMD.ref(pm, nw, :meas, i, "max") end
+            #TODO: enforce min and max in the meas dictionary and just with haskey make it optional for extendedbeta
+            pkg_id = any([ dst[idx] isa d for d in [ExtendedBeta{Float64}, _Poly.Polynomial]]) ? _PMDSE : _DST
+            lb = ( !isa(dst[idx], _DST.MixtureModel) && !isinf(pkg_id.minimum(dst[idx])) ) ? pkg_id.minimum(dst[idx]) : -10
+            ub = ( !isa(dst[idx], _DST.MixtureModel) && !isinf(pkg_id.maximum(dst[idx])) ) ? pkg_id.maximum(dst[idx]) : 10
+            if any([ dst[idx] isa d for d in [_DST.MixtureModel, _Poly.Polynomial]]) lb = _PMD.ref(pm, nw, :meas, i, "min") end
+            if any([ dst[idx] isa d for d in [_DST.MixtureModel, _Poly.Polynomial]]) ub = _PMD.ref(pm, nw, :meas, i, "max") end
             
             shf = abs(Optim.optimize(x -> -pkg_id.logpdf(dst[idx],x),lb,ub).minimum)
             f = Symbol("df_",i,"_",c)

@@ -9,18 +9,17 @@ module PowerModelsDistributionStateEstimation
 
 # import pkgs
 import Base: maximum, minimum, rand
-import CSV
-import DataFrames
+import CSV, DataFrames
 import Distributions
 import Distributions: logpdf, gradlogpdf
 import ForwardDiff
-import GaussianMixtures
 import InfrastructureModels
 import JuMP
 import LinearAlgebra
 import LinearAlgebra: diag, diagm, I
 import Logging, LoggingExtras
 import Optim
+import Polynomials as _Poly
 import PowerModelsDistribution
 import PowerModelsDistribution: _has_nl_expression #need this to use @smart_constraint
 import Random
@@ -35,7 +34,6 @@ export optimizer_with_attributes
 const _CSV = CSV
 const _DFS = DataFrames
 const _DST = Distributions
-const _GMM = GaussianMixtures
 const _IM  = InfrastructureModels
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
@@ -79,6 +77,7 @@ include("form/reduced_ivr.jl")
 include("io/distributions.jl")
 include("io/measurement_parser.jl")
 include("io/network_parser.jl")
+include("io/polynomials.jl")
 include("io/postprocessing.jl")
 
 include("prob/se.jl")

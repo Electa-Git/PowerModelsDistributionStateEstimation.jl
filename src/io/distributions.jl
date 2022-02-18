@@ -136,8 +136,7 @@ end
 rand(dst::ExtendedBeta, N::Int) =
     (dst.max - dst.min) .* rand(_DST.Beta(dst.α, dst.β), N) .+ dst.min
 
-## Gamma
-# functions
+## Gamma heslogpdf
 function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
     if _DST.insupport(_DST.Gamma, x)
         α, θ = _DST.params(d)
@@ -146,30 +145,50 @@ function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
         zero(T)
     end
 end
-
-## logpdf, gradlogpdf and heslogpdf for Gaussian mixture
-#  The GMM type is from package GaussianMixtures
-function logpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
-    σ = sqrt.(d.Σ)
-    μ = d.μ
-    g = _DST.Normal.(μ, σ)
-    log(sum([d.w[i]*_DST.pdf(g[i],x) for i in 1:d.n]))
+##
+# gradlogpdf and heslogpdf for Gaussian mixtures done directly 
+# with Distributions.jl
+function gradlogpdf(d::_DST.MixtureModel, x::Real)
+    @assert all([c isa _DST.Normal for c in d.components]) "Only Gaussian mixture models are supported!"
+    σ = [c.σ for c in d.components]
+    μ = [c.μ for c in d.components]
+    γ = d.prior.p./(sqrt(2*π)*σ)
+    sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:length(d.components)])/sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:length(d.components)])
 end
 
-function gradlogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
-    σ = sqrt.(d.Σ)
-    μ = d.μ
-    γ = d.w./(sqrt(2*π)*σ)
-    sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])/sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])
-end
-
-function heslogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
-    σ = sqrt.(d.Σ)
-    μ = d.μ
-    γ = d.w./(sqrt(2*π)*σ)
-    p1 = sum([γ[i]*(x-μ[i])^2*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-4) - γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])    
-    p2 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n]) 
-    p3 = sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])^2 
-    p4 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])^2
+function heslogpdf(d::_DST.MixtureModel, x::Real)
+    σ = [c.σ for c in d.components]
+    μ = [c.μ for c in d.components]
+    γ = d.prior.p./(sqrt(2*π)*σ)
+    p1 = sum([γ[i]*(x-μ[i])^2*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-4) - γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:length(d.components)])    
+    p2 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:length(d.components)]) 
+    p3 = sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:length(d.components)])^2 
+    p4 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:length(d.components)])^2
     return p1/p2-p3/p4
 end
+
+### LEAVE BELOW FOR A SEC, THEN DEPRECATE AND DELETE
+# function logpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
+#     σ = sqrt.(d.Σ)
+#     μ = d.μ
+#     g = _DST.Normal.(μ, σ)
+#     log(sum([d.w[i]*_DST.pdf(g[i],x) for i in 1:d.n]))
+# end
+
+# function gradlogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
+#     σ = sqrt.(d.Σ)
+#     μ = d.μ
+#     γ = d.w./(sqrt(2*π)*σ)
+#     sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])/sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])
+# end
+
+# function heslogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
+#     σ = sqrt.(d.Σ)
+#     μ = d.μ
+#     γ = d.w./(sqrt(2*π)*σ)
+#     p1 = sum([γ[i]*(x-μ[i])^2*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-4) - γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])    
+#     p2 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n]) 
+#     p3 = sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])^2 
+#     p4 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])^2
+#     return p1/p2-p3/p4
+# end

@@ -1,5 +1,11 @@
 ## Staged
 
+## v0.6.0
+- drop GaussianMixtures.jl dependency in favour of using MixtureModels from Distributions.jl
+- add support for polynomials in mle (adds Polynomials dependency!)
+- add `detect_ambiguities` at the end of the tests
+- update todo.md
+
 ## v0.5.0
 - add support JuMP 0.22, PMD 0.12,0.13, IM 0.7
 - nicer ternary operators
