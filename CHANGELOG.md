@@ -5,6 +5,7 @@
 - add support for polynomials in mle (adds Polynomials dependency!)
 - add `detect_ambiguities` at the end of the tests
 - update todo.md
+- extends _PMDSE.rand to host AbstractRNG and, e.g., seed! the random sample generation
 
 ## v0.5.0
 - add support JuMP 0.22, PMD 0.12,0.13, IM 0.7
