@@ -1,0 +1,6 @@
+# maximum(p::_Poly.Polynomial) = Base.maximum(p)
+# minimum(p::_Poly.Polynomial) = Base.minimum(p)
+pdf(p::_Poly.Polynomial) = error("`pdf` of a polynomial is not definied because it is expected that the polynomial used is an approximation of the `logpdf` instead!")
+logpdf(p::_Poly.Polynomial, x::Real) = p(x)
+gradlogpdf(p::_Poly.Polynomial, x::Real) = _Poly.derivative(p, 1)(x)
+heslogpdf(p::_Poly.Polynomial, x::Real) = _Poly.derivative(p, 2)(x)

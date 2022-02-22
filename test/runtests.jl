@@ -7,9 +7,10 @@
 ################################################################################
 
 # using pkgs
-using Distributions, GaussianMixtures
+using Distributions
 using HDF5
 using Ipopt
+using Polynomials
 using PowerModels, PowerModelsDistribution
 using PowerModelsDistributionStateEstimation
 #using SCS #removed while SDP tests are not active
@@ -17,9 +18,9 @@ using Test
 
 # pkg const
 const _DST = Distributions
-const _GMM = GaussianMixtures
 const _PMD = PowerModelsDistribution
 const _PMDSE = PowerModelsDistributionStateEstimation
+const _Poly = Polynomials
 
 #network and feeder from ENWL for tests
 ntw, fdr = 4, 2
@@ -53,4 +54,8 @@ ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
     include("utils_and_start_val.jl")
     include("with_errors.jl")
 
+end
+ambiguities = Test.detect_ambiguities(PowerModelsDistributionStateEstimation);
+if !isempty(ambiguities)
+    println("ambiguities detected: $ambiguities")
 end
