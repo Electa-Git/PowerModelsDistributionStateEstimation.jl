@@ -4,6 +4,8 @@
 - [ ] MAJOR/BREAKING: after CSV, upgrade PMD, Ipopt, JuMP
       - [ ] move LTS to julia 1.6 and drop support for JuMP < 0.22, and consequently PMD/Ipopt versions
 
+- [ ] import/export pdf, etc. from Distributions.jl? simplify residual constraint
+
 - [ ] update basic notebook (add bad data), add non-Gaussian notebook and more non-Gaussian docs
 
 - [ ] input through array of measurements/dataframe rather than csv

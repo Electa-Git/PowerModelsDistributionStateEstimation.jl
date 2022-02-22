@@ -136,6 +136,9 @@ end
 rand(dst::ExtendedBeta, N::Int) =
     (dst.max - dst.min) .* rand(_DST.Beta(dst.α, dst.β), N) .+ dst.min
 
+rand(r::_RAN.AbstractRNG, dst::ExtendedBeta, N::Int) =
+    (dst.max - dst.min) .* rand(r, _DST.Beta(dst.α, dst.β), N) .+ dst.min
+
 ## Gamma heslogpdf
 function heslogpdf(d::_DST.Gamma{T}, x::Real) where T<:Real
     if _DST.insupport(_DST.Gamma, x)
@@ -166,29 +169,3 @@ function heslogpdf(d::_DST.MixtureModel, x::Real)
     p4 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:length(d.components)])^2
     return p1/p2-p3/p4
 end
-
-### LEAVE BELOW FOR A SEC, THEN DEPRECATE AND DELETE
-# function logpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
-#     σ = sqrt.(d.Σ)
-#     μ = d.μ
-#     g = _DST.Normal.(μ, σ)
-#     log(sum([d.w[i]*_DST.pdf(g[i],x) for i in 1:d.n]))
-# end
-
-# function gradlogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
-#     σ = sqrt.(d.Σ)
-#     μ = d.μ
-#     γ = d.w./(sqrt(2*π)*σ)
-#     sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])/sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])
-# end
-
-# function heslogpdf(d::_GMM.GMM{Float64,Array{Float64,2}}, x::Real)
-#     σ = sqrt.(d.Σ)
-#     μ = d.μ
-#     γ = d.w./(sqrt(2*π)*σ)
-#     p1 = sum([γ[i]*(x-μ[i])^2*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-4) - γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])    
-#     p2 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n]) 
-#     p3 = sum([-γ[i]*(x-μ[i])*exp(-0.5*(x-μ[i])^2/σ[i]^2)*σ[i]^(-2) for i in 1:d.n])^2 
-#     p4 = sum([γ[i]*exp(-0.5*(x-μ[i])^2/σ[i]^2) for i in 1:d.n])^2
-#     return p1/p2-p3/p4
-# end
