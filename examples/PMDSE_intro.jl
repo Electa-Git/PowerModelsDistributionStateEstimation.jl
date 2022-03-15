@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.18.2
 
 using Markdown
 using InteractiveUtils
@@ -9,8 +9,8 @@ begin
 	import Pkg
 	Pkg.activate(mktempdir())
 	Pkg.add([
-			Pkg.PackageSpec(name="PowerModelsDistributionStateEstimation",   version="0.2.3"),
-			Pkg.PackageSpec(name="PowerModelsDistribution", version="0.10.2"),
+			Pkg.PackageSpec(name="PowerModelsDistributionStateEstimation",   version="0.6.0"),
+			Pkg.PackageSpec(name="PowerModelsDistribution", version="0.11.4"),
 		Pkg.PackageSpec(name="Ipopt", version="0.6.5"),
 			Pkg.PackageSpec(name="Plots"), Pkg.PackageSpec(name="CSV")])
 	 Pkg.build("Plots")
@@ -32,7 +32,7 @@ md""" ## ⚡ Power System State Estimation ⚡    with _PowerModelsDistributionS
 # ╔═╡ 44035512-2271-11eb-2ffb-2f3c2b8ea231
 md"This tutorial is made with Pluto notebooks. You can find details on Pluto.jl (and hence on how to run this notebook) on its [github page](https://github.com/fonsp/Pluto.jl) or have a look at the [JuliaCon2020 presentation](https://www.youtube.com/watch?v=IAF8DjrQSSk&ab_channel=TheJuliaProgrammingLanguage). This notebook is available within the PowerModelsDistributionStateEstimation package, in the /example folder.  
 
-⚠️⚠️ Warning! ⚠️⚠️ This notebook refers to version 0.2.3 of the package. The package is in active development. The idea is that we improve functionalities in the future, without breaking the old ones. But you never know..
+⚠️⚠️ Warning! ⚠️⚠️ This notebook refers to version 0.6.0 of the package. The package is in active development. The idea is that we improve functionalities in the future, without breaking the old ones. But you never know..
 "
 
 # ╔═╡ 94c4f342-2277-11eb-2932-89244e8ce3c9
@@ -46,7 +46,7 @@ md"The following packages are needed for your first state estimation script:
 1) PowerModelsDistributionStateEstimation.jl to build a state estimation model/problem,     
 2) PowerModelsDistribution.jl, for power flow calculations and to parse network data, 
 3) A solver (in this case Ipopt), to solve the state estimation problem,  
-4) Plots.jl, because visuals can make things clearer, 
+4) Plots.jl, to visualize some results, 
 5) CSV.jl, to read CSV files, we need it towards the end of the notebook.
 Note, the packages are installed in a temporary environment (see cell below). This might take a while to compile if it is the first time you run this notebook.
 "
@@ -72,7 +72,7 @@ md"Similarly, you can access the measurement file relative to this network, in t
 msr_path = joinpath(PMDSE.BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
 
 # ╔═╡ cdaf7070-258f-11eb-0325-dfc2acfc139b
-	md"Our network data is an OpenDSS file. Then, we can use the PowerModelsDistribution parser to obtain the data dictionary in the format required for our calculations. You should parse to a `MATHEMATICAL_MODEL`, because what we do next is adding the measurement data on top of the network data. This can't be done on the `ENGINEERING_MODEL`. Mathematical and Engineering models are standard input network data representations. If you are not familiar with them, you should probably read the relative documentation in PowerModelsDistribution, see [this](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/math-model/), and [this](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/eng-data-model/) and the sections thereafter."
+	md"Our network data is an OpenDSS file. Then, we can use the PowerModelsDistribution parser to obtain the data dictionary in the format required for our calculations. You should parse to a `MATHEMATICAL_MODEL`, because what we do next is adding the measurement data on top of the network data. This can't be done on the `ENGINEERING_MODEL`. Mathematical and Engineering models are standard input network data representations. If you are not familiar with them, you should probably read the relative documentation in PowerModelsDistribution, see [this](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/manual/eng-data-model.html), and [this](https://lanl-ansi.github.io/PowerModelsDistribution.jl/stable/manual/math-model.html) and the sections thereafter."
 
 # ╔═╡ fd38b2e2-258d-11eb-21b7-11f4d4d3d8bf
 data = PowerModelsDistribution.parse_file(ntw_path; data_model=MATHEMATICAL)
@@ -106,7 +106,7 @@ data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
 md"To solve the SE problem, we need a solver. We previously picked Ipopt, because it's free and can solve nonlinear problems. Let's call it and set some solver parameters:"
 
 # ╔═╡ 0447f220-2599-11eb-043b-d33b03eec478
-slv = PMDSE.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-6, "print_level"=>0)
+slv = PMDSE.optimizer_with_attributes(Ipopt.Optimizer, "tol"=>1e-8, "print_level"=>0)
 
 # ╔═╡ 115d6710-2599-11eb-1d41-2326cd36aa9f
 md"Finally, the last thing to decide is the power flow formulation that describes our problem. Let's go for a classic 'AC' formulation in polar coordinates. It can be chosen it in two different ways: either calling the generic `solve_mc_se(data, model_type, solver)` and passing the formulation, e.g. `_PMD.ACPUPowerModel` as argument `model_type` or by calling the function that directly involves that formulation, as follows:"
@@ -154,7 +154,7 @@ scatter(delta, xlabel="Index [-]", ylabel="ϵ [p.u.]", ylims = [0, max_err*1.05]
 # ╔═╡ a7e4eaf0-259e-11eb-0797-6d7b6db230c3
 md"There is basically no error. This is too good to be true. That measurement file must have been created artificially from power flow results! How and why are explained in the next section. 
 
-⚠️**NB**⚠️: if it is the first time you run this and you get errors > e-7, you might want to manually re-run the cells above where ipopt is called and state estimation and power flow are run (you do this by clicking the triangle symbol at the bottom right of the cells). Sometimes something goes wrong in the solution process at the first go."
+⚠️**NB**⚠️: if it is the first time you run this and you get errors > e-6, you might want to manually re-run the cells above where ipopt is called and state estimation and power flow are run (you do this by clicking the triangle symbol at the bottom right of the cells). Sometimes something goes wrong in the solution process at the first go."
 
 # ╔═╡ 8fa94df0-259e-11eb-1c60-8f8662091210
 md"________________________________________________________________________________  
