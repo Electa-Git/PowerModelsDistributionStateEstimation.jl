@@ -36,7 +36,7 @@
         if meas["cmp"] == :load && m ∉ ["21", "22", "30", "31"]
             for phase in 1:length(meas["dst"])
                 if isa(meas["dst"][phase], _DST.Normal{Float64})
-                    @test mean(meas["dst"][phase]) == data["load"]["$(meas["cmp_id"])"][string(meas["var"])][phase]
+                    @test Statistics.mean(meas["dst"][phase]) == data["load"]["$(meas["cmp_id"])"][string(meas["var"])][phase]
                 end
             end
         end

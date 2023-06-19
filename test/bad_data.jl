@@ -62,7 +62,7 @@ end
     # NB: the length (in terms of lines of code) of this sub-test could/should be significantly result but have no time now
 
     msr_path = joinpath(mktempdir(),"temp.csv")
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
+    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
     #reduce grid
     [delete!(data["load"], l) for (l, load) in data["load"] if l!="1"]
     _PMDSE.reduce_single_phase_loadbuses!(data) 
@@ -187,7 +187,7 @@ end
 @testset "BadData_matrices_and_LNR" begin
 
     msr_path = joinpath(mktempdir(),"temp.csv")
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
+    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
     #reduce grid
     [delete!(data["load"], l) for (l, load) in data["load"] if l!="1"]
     _PMDSE.reduce_single_phase_loadbuses!(data) 
@@ -206,19 +206,19 @@ end
     h_array = _PMDSE.build_measurement_function_array(data, variable_dict)
     state_array = _PMDSE.build_state_array(pf_result, variable_dict)
 
-    stored_H_matrix = h5open(joinpath(BASE_DIR, "test/data/H_matrix.h5"), "r") do file
+    stored_H_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/H_matrix.h5"), "r") do file
         read(file, "H")
     end
 
-    stored_G_matrix = h5open(joinpath(BASE_DIR, "test/data/G_matrix.h5"), "r") do file
+    stored_G_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/G_matrix.h5"), "r") do file
         read(file, "G")
     end
 
-    stored_R_matrix = h5open(joinpath(BASE_DIR, "test/data/R_matrix.h5"), "r") do file
+    stored_R_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/R_matrix.h5"), "r") do file
         read(file, "R")
     end
 
-    stored_Ω_matrix = h5open(joinpath(BASE_DIR, "test/data/Ω_matrix.h5"), "r") do file
+    stored_Ω_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/Ω_matrix.h5"), "r") do file
         read(file, "Ω")
     end
 

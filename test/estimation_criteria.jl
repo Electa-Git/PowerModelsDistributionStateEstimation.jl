@@ -3,7 +3,7 @@
 @testset "test different estimation criteria" begin
 
     msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
+    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
     pf_result = _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
 

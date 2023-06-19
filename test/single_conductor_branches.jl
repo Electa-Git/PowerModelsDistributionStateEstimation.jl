@@ -55,7 +55,7 @@
 
     @testset "three-phase_network_reduced" begin
 
-        data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=MATHEMATICAL)
+        data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
         delete!(data["load"], "2")
         delete!(data["load"], "3")
         reduce_single_phase_loadbuses!(data, exclude = []) #after this, all buses have 3 terminals except bus 3. All branches have 3 connections except branch 1. Thus, dimensions are reduced.
