@@ -2,7 +2,7 @@
 
     msr_path = joinpath(mktempdir(),"temp.csv")
 
-    custom_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
+    custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                               "tol"=>1e-12,
                                                               "print_level"=>0, "mu_strategy"=>"adaptive")
 
@@ -65,7 +65,7 @@ end
     # NB: the length (in terms of lines of code) of this sub-test could/should be significantly result but have no time now
 
     msr_path = joinpath(mktempdir(),"temp.csv")
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
+    data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
     #reduce grid
     [delete!(data["load"], l) for (l, load) in data["load"] if l!="1"]
     _PMDSE.reduce_single_phase_loadbuses!(data) 
@@ -190,7 +190,7 @@ end
 @testset "BadData_matrices_and_LNR" begin
 
     msr_path = joinpath(mktempdir(),"temp.csv")
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
+    data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
     #reduce grid
     [delete!(data["load"], l) for (l, load) in data["load"] if l!="1"]
     _PMDSE.reduce_single_phase_loadbuses!(data) 
@@ -209,19 +209,19 @@ end
     h_array = _PMDSE.build_measurement_function_array(data, variable_dict)
     state_array = _PMDSE.build_state_array(pf_result, variable_dict)
 
-    stored_H_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/H_matrix.h5"), "r") do file
+    stored_H_matrix = HDF5.h5open(joinpath(_PMDSE.BASE_DIR, "test/data/H_matrix.h5"), "r") do file
         read(file, "H")
     end
 
-    stored_G_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/G_matrix.h5"), "r") do file
+    stored_G_matrix = HDF5.h5open(joinpath(_PMDSE.BASE_DIR, "test/data/G_matrix.h5"), "r") do file
         read(file, "G")
     end
 
-    stored_R_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/R_matrix.h5"), "r") do file
+    stored_R_matrix = HDF5.h5open(joinpath(_PMDSE.BASE_DIR, "test/data/R_matrix.h5"), "r") do file
         read(file, "R")
     end
 
-    stored_Ω_matrix = HDF5.h5open(joinpath(BASE_DIR, "test/data/Ω_matrix.h5"), "r") do file
+    stored_Ω_matrix = HDF5.h5open(joinpath(_PMDSE.BASE_DIR, "test/data/Ω_matrix.h5"), "r") do file
         read(file, "Ω")
     end
 
