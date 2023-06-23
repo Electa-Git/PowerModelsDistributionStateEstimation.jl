@@ -53,7 +53,7 @@ ipopt_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" =
     include("with_errors.jl")
 
 end
-ambiguities = Test.detect_ambiguities(PowerModelsDistributionStateEstimation);
+ambiguities = Test.detect_ambiguities(_PMDSE);
 if !isempty(ambiguities)
     println("ambiguities detected: $ambiguities")
 end
