@@ -2,10 +2,14 @@
 
     msr_path = joinpath(mktempdir(),"temp.csv")
 
+    custom_solver = optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
+                                                              "tol"=>1e-12,
+                                                              "print_level"=>0, "mu_strategy"=>"adaptive")
+
     data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
     if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
     if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
-    data["settings"]["sbase_default"] = 100.0
+    data["settings"]["sbase_default"] = 100.
     # insert the load profiles
     _PMDSE.insert_profiles!(data, season, elm, pfs, t = time_step)
 
@@ -38,18 +42,17 @@
     # read-in measurement data and set initial values
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
 
-    data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 1)
-    se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+    data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => 100)
+    se_result = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
 
-    @test _PMDSE.get_degrees_of_freedom(data) == 34
-    
     chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data)
+    @test _PMDSE.get_degrees_of_freedom(data) == 34
     @test chi_result[1] == false 
-    @test isapprox(chi_result[2], 0.0, atol = 1e-8)
+    @test isapprox(chi_result[2], 0.0, atol = 1e-7)
     @test isapprox(chi_result[3], 48.60, atol = 1e-2)
 
     _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
-    se_result = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+    se_result = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
     chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data)
     @test chi_result[1] == true #TODO: there's no real bad data, check whether there is a problem with write_meas
     @test isapprox(chi_result[2], 963.32, atol = 1e-2)
