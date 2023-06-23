@@ -68,14 +68,18 @@
     pf_result= _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
     rescaler = 1
 
+    custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
+                                                            "tol"=>1e-10,
+                                                            "print_level"=>0)#, "mu_strategy"=>"adaptive")
+
     @testset "MLE with normal distr - with error" begin
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = _PMDSE.solve_acr_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.solve_acr_red_mc_se(data, custom_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}("criterion" => "mle", "rescaler" => rescaler)
-        se_result_mle = _PMDSE.solve_acr_red_mc_se(data, ipopt_solver)
+        se_result_mle = _PMDSE.solve_acr_red_mc_se(data, custom_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
         @test se_result_mle["termination_status"] == _PMDSE.LOCALLY_SOLVED
@@ -86,7 +90,7 @@
     @testset "Mixed mle/rwlav criterion - with error" begin
 
         data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+        se_result_rwls = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}( "rescaler" => rescaler)
@@ -97,7 +101,7 @@
                _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="rwls")
            end
         end
-        se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+        se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
         @test se_result_mixed["termination_status"] == _PMDSE.LOCALLY_SOLVED
