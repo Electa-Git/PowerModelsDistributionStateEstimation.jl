@@ -123,7 +123,7 @@
 
     # @testset "SDP with rwlav and rwls" begin
 
-        # sdp_data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
+        # sdp_data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
         # sdp_data["settings"]["sbase_default"] = 0.001 * 1e3
         # merge!(sdp_data["voltage_source"]["source"], Dict{String,Any}(
         #     "cost_pg_parameters" => [0.0, 100.0, 0.0],

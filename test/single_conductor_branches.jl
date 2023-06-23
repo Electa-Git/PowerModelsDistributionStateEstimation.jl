@@ -47,18 +47,18 @@
         # solve the state estimation
         se_result = _PMDSE.solve_mc_se(case5, model, ipopt_solver)
 
-        @test pf_result["termination_status"] == LOCALLY_SOLVED
-        @test se_result["termination_status"] == LOCALLY_SOLVED
+        @test pf_result["termination_status"] == _PMDSE.LOCALLY_SOLVED
+        @test se_result["termination_status"] == _PMDSE.LOCALLY_SOLVED
         @test isapprox(se_result["objective"], 0.0; atol = 2e-7)
         
     end #testset
 
     @testset "three-phase_network_reduced" begin
 
-        data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
+        data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
         delete!(data["load"], "2")
         delete!(data["load"], "3")
-        reduce_single_phase_loadbuses!(data, exclude = []) #after this, all buses have 3 terminals except bus 3. All branches have 3 connections except branch 1. Thus, dimensions are reduced.
+        _PMDSE.reduce_single_phase_loadbuses!(data, exclude = []) #after this, all buses have 3 terminals except bus 3. All branches have 3 connections except branch 1. Thus, dimensions are reduced.
         pf_result= _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
         msr_path = joinpath(mktempdir(),"temp.csv")
         _PMDSE.write_measurements!(_PMD.ACPUPowerModel, data, pf_result, msr_path, exclude = ["vr","vi"])

@@ -2,8 +2,8 @@
 
 @testset "test different estimation criteria" begin
 
-    msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
+    msr_path = joinpath(_PMDSE.BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
+    data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
     pf_result = _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
 
@@ -33,7 +33,7 @@
         se_result_mle = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
-        @test se_result_mle["termination_status"] ∈ [LOCALLY_SOLVED, ALMOST_LOCALLY_SOLVED]
+        @test se_result_mle["termination_status"] ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]
         @test isapprox(se_result_mle["objective"], se_result_rwls["objective"]; atol = 2e-5)
         @test isapprox(abs(max_err-max_err_mle), 0.0; atol = 2e-5)
         @test isapprox(abs(avg-avg_mle), 0.0; atol = 1e-5)
@@ -58,7 +58,7 @@
         se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
-        @test se_result_mixed["termination_status"] ∈ [LOCALLY_SOLVED, ALMOST_LOCALLY_SOLVED]
+        @test se_result_mixed["termination_status"] ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]
         @test isapprox(se_result_mixed["objective"], se_result_rwls["objective"]; atol = 2e-5)
         @test isapprox(abs(max_err-max_err_mixed), 0.0; atol = 2e-5)
         @test isapprox(abs(avg-avg_mixed), 0.0; atol = 1e-5)
@@ -78,7 +78,7 @@
         se_result_mle = _PMDSE.solve_acr_red_mc_se(data, ipopt_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
-        @test se_result_mle["termination_status"] == LOCALLY_SOLVED
+        @test se_result_mle["termination_status"] == _PMDSE.LOCALLY_SOLVED
         @test isapprox(abs(max_err-max_err_mle), 0.0; atol = 1e-4)
         @test isapprox(abs(avg-avg_mle), 0.0; atol = 1e-5)
     end
@@ -100,7 +100,7 @@
         se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
-        @test se_result_mixed["termination_status"] == LOCALLY_SOLVED
+        @test se_result_mixed["termination_status"] == _PMDSE.LOCALLY_SOLVED
         @test isapprox(abs(max_err-max_err_mixed), 0.0; atol = 3e-4)
         @test isapprox(abs(avg-avg_mixed), 0.0; atol = 6e-5)
     end

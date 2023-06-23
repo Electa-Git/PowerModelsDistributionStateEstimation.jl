@@ -2,7 +2,7 @@
 
     # set measurement path
     msr_path = joinpath(mktempdir(),"temp.csv")
-    pseudo_path = joinpath(BASE_DIR, "test/data/extra/measurements/distr_example.csv")
+    pseudo_path = joinpath(_PMDSE.BASE_DIR, "test/data/extra/measurements/distr_example.csv")
 
     # load data
     data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
