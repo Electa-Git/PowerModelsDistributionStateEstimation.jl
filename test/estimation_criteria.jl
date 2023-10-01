@@ -70,7 +70,8 @@
 
     custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
                                                             "tol"=>1e-10,
-                                                            "print_level"=>0)#, "mu_strategy"=>"adaptive")
+                                                            "print_level"=>0, 
+                                                            "warm_start_init_point"=>"yes")
 
     @testset "MLE with normal distr - with error" begin
 
