@@ -50,8 +50,8 @@
         crit = "wls"
         model = _PMD.LPUBFDiagPowerModel
 
-    custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
-                                                            "obj_scaling_factor" => 1e2,
+        custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
+                                                            "obj_scaling_factor" => 1e3,
                                                             "tol" => 1e-10,
                                                             "print_level" => 0, "mu_strategy" => "adaptive")
 

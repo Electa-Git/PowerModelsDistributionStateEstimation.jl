@@ -163,13 +163,15 @@
         custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
                                                          "obj_scaling_factor" => 1e3,
                                                          "tol" => 1e-10,
-                                                         "print_level" => 0)
+                                                         "print_level" => 0,
+                                                         "mu_strategy" => "adaptive")
+
         # set model
         crit     = "rwlav"
         model    = _PMD.IVRUPowerModel #this is going to be used for the SE
 
         # solve the power flow
-        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, custom_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vi","vr"])
