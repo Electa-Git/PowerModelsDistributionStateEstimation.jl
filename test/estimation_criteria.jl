@@ -41,10 +41,13 @@
 
     @testset "Mixed mle/wls criterion - no error" begin
 
-        rescaler = 1
+        custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
+                                                        #  "obj_scaling_factor" => 1e2,
+                                                         "tol" => 1e-10,
+                                                         "print_level" => 0)
 
-        data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
-        se_result_rwls = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+        data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => 1.)
+        se_result_rwls = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
         data["se_settings"] = Dict{String,Any}("rescaler" => rescaler)
@@ -55,7 +58,7 @@
                _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="rwls")
            end
         end
-        se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, ipopt_solver)
+        se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
         @test se_result_mixed["termination_status"] ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]

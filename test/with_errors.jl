@@ -159,6 +159,11 @@
         end
     end
     @testset "IVR input-rwlav" begin
+
+        custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
+                                                         "obj_scaling_factor" => 1e3,
+                                                         "tol" => 1e-10,
+                                                         "print_level" => 0)
         # set model
         crit     = "rwlav"
         model    = _PMD.IVRUPowerModel #this is going to be used for the SE
@@ -176,15 +181,15 @@
         _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
+                                                "rescaler" => 100)
 
         # solve the state estimation
-        original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
+        original_se_result = _PMDSE.solve_mc_se(data, model, custom_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
         for data_model in [_PMD.ACPUPowerModel,_PMD.ACRUPowerModel]
 
             # solve the state estimation
-            se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, data_model, custom_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)

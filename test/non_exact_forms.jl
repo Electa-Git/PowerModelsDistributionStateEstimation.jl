@@ -50,6 +50,11 @@
         crit = "wls"
         model = _PMD.LPUBFDiagPowerModel
 
+    custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
+                                                            "obj_scaling_factor" => 1e2,
+                                                            "tol" => 1e-10,
+                                                            "print_level" => 0, "mu_strategy" => "adaptive")
+
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
         if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
@@ -73,7 +78,7 @@
 
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
+                                                "rescaler" => 100)
 
         # solve the state estimation
         se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
