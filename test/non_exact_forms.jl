@@ -66,14 +66,15 @@
         data = _PMD.transform_data_model(data);
 
         # solve the power flow
-        pf_result = _PMD.solve_mc_pf(data, model, custom_solver)
+        pf_result = _PMD.solve_mc_pf(data, model, ipopt_solver)
 
         # write measurements based on power flow
         _PMDSE.write_measurements!(model, data, pf_result, msr_path, exclude = ["vr","vi"])
 
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
-        _PMDSE.assign_start_to_variables!(data, pf_result)
+        _PMDSE.assign_start_to_variables!(data)
+
         _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0/10, pg_max = 1.0/10, qg_min=-1.0/10, qg_max=1.0/10, pd_min=-1.0/10, pd_max=1.0/10, qd_min=-1.0/10, qd_max=1.0/10)
 
         # set se settings
