@@ -50,6 +50,11 @@
         crit = "wls"
         model = _PMD.LPUBFDiagPowerModel
 
+        custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
+                                                            "obj_scaling_factor" => 1e3,
+                                                            "tol" => 1e-10,
+                                                            "print_level" => 0, "mu_strategy" => "adaptive")
+
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
         if rm_transfo _PMDSE.rm_enwl_transformer!(data) end
         if rd_lines   _PMDSE.reduce_enwl_lines_eng!(data) end
@@ -69,11 +74,12 @@
         # read-in measurement data and set initial values
         _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
         _PMDSE.assign_start_to_variables!(data)
-        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
+
+        _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0/10, pg_max = 1.0/10, qg_min=-1.0/10, qg_max=1.0/10, pd_min=-1.0/10, pd_max=1.0/10, qd_min=-1.0/10, qd_max=1.0/10)
 
         # set se settings
         data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                           "rescaler" => 100)
+                                                "rescaler" => 100)
 
         # solve the state estimation
         se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
@@ -123,7 +129,7 @@
 
     # @testset "SDP with rwlav and rwls" begin
 
-        # sdp_data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
+        # sdp_data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); transformations = [make_lossless!])
         # sdp_data["settings"]["sbase_default"] = 0.001 * 1e3
         # merge!(sdp_data["voltage_source"]["source"], Dict{String,Any}(
         #     "cost_pg_parameters" => [0.0, 100.0, 0.0],

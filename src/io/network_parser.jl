@@ -32,7 +32,7 @@ const ENWL_PROFILE_SIGN = Dict(
 
 # functions
 get_profiles(ssn, dev) =
-    convert(Matrix, _CSV.read("$ENWL_PROFILE_PATH/$(ENWL_PROFILES[(ssn, dev)])"))
+    Matrix{Float64}(_CSV.read("$ENWL_PROFILE_PATH/$(ENWL_PROFILES[(ssn, dev)])", _DFS.DataFrame))
 function get_enwl_dss_path(network::Int, feeder::Int)
     return "$ENWL_NETWORK_PATH/network_$network/Feeder_$feeder/Master.dss"
 end

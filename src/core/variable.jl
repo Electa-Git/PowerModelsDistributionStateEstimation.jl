@@ -27,9 +27,9 @@ function variable_mc_residual(  pm::_PMD.AbstractUnbalancedPowerModel;
 
     if bounded
         for i in _PMD.ids(pm, nw, :meas), c in 1:connections[i]
-            JuMP.set_lower_bound(res[i][c], 0.0)
+            _PMD.set_lower_bound(res[i][c], 0.0)
             res_max = haskey(_PMD.ref(pm, nw, :meas, i), "res_max") ? meas["res_max"] : Inf
-            JuMP.set_upper_bound(res[i][c], res_max)
+            _PMD.set_upper_bound(res[i][c], res_max)
         end
     end
 
@@ -58,12 +58,12 @@ function variable_mc_load_active(pm::_PMD.AbstractUnbalancedPowerModel;
         for (i,load) in _PMD.ref(pm, nw, :load)
             if haskey(load, "pmin")
                 for (idx, c) in enumerate(connections[i])
-                    JuMP.set_lower_bound(pd[i][c], load["pmin"][idx])
+                    _PMD.set_lower_bound(pd[i][c], load["pmin"][idx])
                 end
             end
             if haskey(load, "pmax")
                 for (idx, c) in enumerate(connections[i])
-                    JuMP.set_upper_bound(pd[i][c], load["pmax"][idx])
+                    _PMD.set_upper_bound(pd[i][c], load["pmax"][idx])
                 end
             end
         end
@@ -87,12 +87,12 @@ function variable_mc_load_reactive(pm::_PMD.AbstractUnbalancedPowerModel;
         for (i,load) in _PMD.ref(pm, nw, :load)
             if haskey(load, "qmin")
                 for (idx, c) in enumerate(connections[i])
-                    JuMP.set_lower_bound(qd[i][c], load["qmin"][idx])
+                    _PMD.set_lower_bound(qd[i][c], load["qmin"][idx])
                 end
             end
             if haskey(load, "qmax")
                 for (idx, c) in enumerate(connections[i])
-                    JuMP.set_upper_bound(qd[i][c], load["qmax"][idx])
+                    _PMD.set_upper_bound(qd[i][c], load["qmax"][idx])
                 end
             end
         end

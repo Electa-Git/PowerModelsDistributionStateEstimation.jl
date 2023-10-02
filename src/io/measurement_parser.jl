@@ -7,7 +7,7 @@
 ################################################################################
 
 ## CSV to measurement parser
-function dataString_to_array(input::String)::Array
+function dataString_to_array(input::AbstractString)::Array
     if size(split(input, ","))[1] > 1
         rm_brackets = input[2:(end-1)]
         raw_string = split(rm_brackets, ",")
@@ -37,7 +37,7 @@ function read_measurement!(data::Dict, meas_row::_DFS.DataFrameRow, sample_fake_
     dst_params = []
     for nr in 1:4
         if "par_$(nr)" ∈ names(meas_row) && !ismissing(meas_row[Symbol("par_",nr)]) && meas_row[Symbol("par_",nr)] != "missing"
-            par_array = isa(meas_row[Symbol("par_",nr)], String) ? dataString_to_array(meas_row[Symbol("par_",nr)]) : [meas_row[Symbol("par_",nr)]]
+            par_array = isa(meas_row[Symbol("par_",nr)], AbstractString) ? dataString_to_array(meas_row[Symbol("par_",nr)]) : [meas_row[Symbol("par_",nr)]]
             push!(dst_params, par_array)
         end
     end
@@ -77,7 +77,7 @@ the documentation section that describes the CSV measurement file format.
     Monte Carlo scenarios when sampling measurement with errors from a probability distribution.
 """
 function add_measurements!(data::Dict, meas_file::String; actual_meas::Bool=false, seed::Int = 0)
-    meas_df = _CSV.read(meas_file)
+    meas_df = _CSV.read(meas_file, _DFS.DataFrame)
     data["meas"] = Dict{String, Any}()
     [data["meas"]["$m_id"] = Dict{String,Any}() for m_id in meas_df[!,:meas_id]]
     for row in 1:size(meas_df)[1]
@@ -253,7 +253,7 @@ function write_measurements_and_pseudo!(model::Type, data::Dict, pf_results::Dic
     df = _DFS.DataFrame(meas_id=Int64[], cmp_type=String[], cmp_id=String[],meas_type=String[], meas_var=String[],
              phase=String[], dst=String[], par_1=Union{String, Missing}[], par_2=Union{String, Missing}[],
              par_3=Union{String, Missing}[], par_4=Union{String, Missing}[], crit=Union{String, Missing}[] )
-    di_df = _CSV.read(distribution_info)
+    di_df = _CSV.read(distribution_info, _DFS.DataFrame)
     very_basic_case = true # TO DO: make it an argument?
     for cmp_type in ["gen", "load"]
         for (cmp_id, cmp) in data[cmp_type]

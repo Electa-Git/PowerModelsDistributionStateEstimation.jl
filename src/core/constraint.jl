@@ -62,7 +62,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
             grd(x) = pkg_id.gradlogpdf(dst[idx],x)
             hes(x) = heslogpdf(dst[idx],x)
             JuMP.register(pm.model, f, 1, fun, grd, hes)
-            JuMP.add_NL_constraint(pm.model, :($(res[idx]) == - $(f)($(var[c]))))
+            JuMP.add_nonlinear_constraint(pm.model, :($(res[idx]) == - $(f)($(var[c]))))
         else
             error("SE criterion of measurement $(i) not recognized")
         end

@@ -1,31 +1,31 @@
 ## The scope of this test set is to check that the helper functions in core/utils.jl and core/start_values_methods.jl don't break
 @testset "utils and start value methods" begin
     
-    data = _PMD.parse_file(joinpath(BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
+    data = _PMD.parse_file(joinpath(_PMDSE.BASE_DIR, "test/data/extra/networks/case3_unbalanced.dss"); data_model=_PMD.MATHEMATICAL)
 
     @testset "dimension reduction" begin
         #test 1: three active connections, do nothing
         case3_data = deepcopy(data)
-        reduce_single_phase_loadbuses!(case3_data, exclude = [])
+        _PMDSE.reduce_single_phase_loadbuses!(case3_data, exclude = [])
         @test length(case3_data["bus"]["3"]["terminals"]) == 3
         #test 2: two active connections, do nothing
         delete!(case3_data["load"], "2")
-        reduce_single_phase_loadbuses!(case3_data, exclude = [])
+        _PMDSE.reduce_single_phase_loadbuses!(case3_data, exclude = [])
         @test length(case3_data["bus"]["3"]["terminals"]) == 3
         #test 3: one active connection, but exclude, do nothing
         delete!(case3_data["load"], "3")
-        reduce_single_phase_loadbuses!(case3_data, exclude = [3])
+        _PMDSE.reduce_single_phase_loadbuses!(case3_data, exclude = [3])
         @test length(case3_data["bus"]["3"]["terminals"]) == 3
         #test 4: one active connection, reduce!
         delete!(case3_data["load"], "3")
-        reduce_single_phase_loadbuses!(case3_data, exclude = [])
+        _PMDSE.reduce_single_phase_loadbuses!(case3_data, exclude = [])
         @test case3_data["bus"]["3"]["terminals"] == [2]
 
         pf_result= _PMD.solve_mc_pf(case3_data, _PMD.ACPUPowerModel, ipopt_solver)
-        @test pf_result["termination_status"] == LOCALLY_SOLVED 
+        @test pf_result["termination_status"] == _PMDSE.LOCALLY_SOLVED 
     end
 
-    msr_path = joinpath(BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
+    msr_path = joinpath(_PMDSE.BASE_DIR, "test/data/extra/measurements/case3_meas.csv")
     _PMDSE.add_measurements!(data, msr_path, actual_meas = true)
     pf_result= _PMD.solve_mc_pf(data, _PMD.ACPUPowerModel, ipopt_solver)
 
@@ -37,7 +37,7 @@
         pd = 0.05
         qd = 0.3*pd
 
-        update_all_bounds!(data; v_min=0.9*vn, v_max=1.1*vn, pg_min=-pg, pg_max=pg, qg_min=-qg, qg_max=qg, pd_min=-pd, pd_max=pd, qd_min=-qd, qd_max=qd)
+        _PMDSE.update_all_bounds!(data; v_min=0.9*vn, v_max=1.1*vn, pg_min=-pg, pg_max=pg, qg_min=-qg, qg_max=qg, pd_min=-pd, pd_max=pd, qd_min=-qd, qd_max=qd)
 
         @test data["bus"]["1"]["vmin"][1] == data["bus"]["1"]["vmin"][2] == 0.9*vn
         @test data["bus"]["1"]["vmax"][1] == data["bus"]["1"]["vmax"][2] == 1.1*vn
@@ -70,17 +70,17 @@
         @test data["meas"]["6"]["crit"] == "rwlav"
 
         n_meas = length(data["meas"])
-        add_measurement!(data, :p, :branch, 1, [0.0012], [0.0003])
+        _PMDSE.add_measurement!(data, :p, :branch, 1, [0.0012], [0.0003])
         @test length(data["meas"]) == n_meas+1
         @test data["meas"]["$(n_meas+1)"]["var"] == :p 
     end
 
     @testset "start values" begin
-        assign_start_to_variables!(data)
+        _PMDSE.assign_start_to_variables!(data)
         @test isapprox(data["bus"]["4"]["vm_start"][1], 0.9959; atol = 1e-7)
         @test isapprox(data["load"]["1"]["qd_start"][1], 0.006; atol = 1e-7)
 
-        assign_start_to_variables!(data, pf_result)
+        _PMDSE.assign_start_to_variables!(data, pf_result)
         @test isapprox(data["bus"]["3"]["vm_start"][2], 0.981757; atol = 1e-7)
         @test isapprox(data["load"]["3"]["pd_start"][1], 0.018; atol = 1e-7)
 

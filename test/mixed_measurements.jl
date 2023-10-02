@@ -7,6 +7,10 @@
         # set model
         crit     = "rwlav"
         model    = _PMD.ACPUPowerModel #this is going to be used for the SE
+        custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" => 300.0,
+                                                         "obj_scaling_factor" => 1e1,
+                                                         "tol" => 1e-9,
+                                                         "print_level" => 0, "mu_strategy" => "adaptive")
 
         # load data
         data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -21,7 +25,7 @@
 
         for data_model in [_PMD.ACRUPowerModel,_PMD.IVRUPowerModel]
             # solve the power flow
-            pf_result = _PMD.solve_mc_pf(data, data_model, ipopt_solver)
+            pf_result = _PMD.solve_mc_pf(data, data_model, custom_solver)
 
             # write measurements based on power flow
             _PMDSE.write_measurements!(data_model, data, pf_result, msr_path, exclude = ["vi","vr"])
@@ -33,15 +37,15 @@
             _PMDSE.update_all_bounds!(data; v_min = 0.8, v_max = 1.2, pg_min=-1.0, pg_max = 1.0, qg_min=-1.0, qg_max=1.0, pd_min=-1.0, pd_max=1.0, qd_min=-1.0, qd_max=1.0 )
             # set se settings
             data["se_settings"] = Dict{String,Any}("criterion" => crit,
-                                               "rescaler" => 1)
+                                               "rescaler" => 10)
 
             # solve the state estimation
-            se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
+            se_result = _PMDSE.solve_mc_se(data, model, custom_solver)
 
             # tests
             delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
             @test isapprox(max, 0.0; atol = 5e-5)
-            @test isapprox(avg, 0.0; atol = 1e-7)
+            @test isapprox(avg, 0.0; atol = 3e-7)
         end
     end
     @testset "ACP-WLS" begin

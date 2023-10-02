@@ -27,14 +27,15 @@ Measurement Uncertainties:
 
 ## Core Network Constraint Formulations
 
-- Exact
+- Exact Formulations
 	- (reduced) ACP
 	- (reduced) ACR
 	- (reduced) IVR
-- Relaxations
-	- SDP (Currently unstable)
-- Linear Approximations
+- Linear Approximation
 	- LinDist3Flow
+
+- Other formulations might be added in the future, little preliminary work exists for a SDP relaxation, but it is currently suspended for lack
+of research interest. If you would like to contribute (to add formulations or any other addition/improvement), you are welcome to get in touch.
 
 ## Data Formats
 
@@ -58,28 +59,49 @@ Examples on how to use PowerModelsDistributionStateEstimation can be found in Pl
 ## Acknowledgements
 
 This code has been developed at KU Leuven (University of Leuven). The primary
-developers are Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) and Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday)) with support for
+developers are Marta Vanin ([@MartaVanin](https://github.com/MartaVanin)) and Tom Van Acker ([@timmyfaraday](https://github.com/timmyfaraday)) with support from
 the following contributors:
 
 - Frederik Geth ([@frederikgeth](https://github.com/frederikgeth)), CSIRO, General PowerModelsDistribution.jl Advice.
 - Sander Claeys ([@sanderclaeys](https://github.com/sanderclaeys)), KU Leuven, General PowerModelsDistribution.jl Advice, ENWL data parser.
 
-## Citing PowerModelsDistributionStateEstimation
+## Citing PowerModelsDistributionStateEstimation + Additional References
 
 If you find PowerModelsDistributionStateEstimation.jl useful for your work, we kindly invite you to cite our [paper](https://arxiv.org/abs/2011.11614):
 
 ```bibtex
-@ARTICLE{9552554,
+@ARTICLE{Vanin2022,
   author={Vanin, Marta and Van Acker, Tom and D'hulst, Reinhilde and Van Hertem, Dirk},
   journal={IEEE Transactions on Power Systems}, 
   title={A Framework for Constrained Static State Estimation in Unbalanced Distribution Networks}, 
-  year={2021},
-  volume={},
-  number={},
-  pages={1-1},
+  year={2022},
+  volume={37},
+  number={3},
+  pages={2075-2085},
   doi={10.1109/TPWRS.2021.3116291}}
 
 ```
+
+If you are particularly interested in the non-Gaussian state estimation capabilities, you can refer to this other [paper](https://ieeexplore.ieee.org/abstract/document/10155202):
+
+```bibtex
+@ARTICLE{Vanin2023,
+  author={Vanin, Marta and Van Acker, Tom and D’hulst, Reinhilde and Van Hertem, Dirk},
+  journal={IEEE Transactions on Instrumentation and Measurement}, 
+  title={Exact Modeling of Non-Gaussian Measurement Uncertainty in Distribution System State Estimation}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-1},
+  doi={10.1109/TIM.2023.3287253}}
+```
+
+### Additional references: augmented state estimation
+
+It is possible to use the fast prototyping features of PMDSE to augment the state variables, e.g., with network parameters.
+This is discussed in the following two references where, jointly to the conventional state, we derive:
+1) impedance matrices or cable lengths: https://www.sciencedirect.com/science/article/pii/S0142061523002120
+2) customer phase connectivity: https://arxiv.org/abs/2206.08436
 
 ## License
 
