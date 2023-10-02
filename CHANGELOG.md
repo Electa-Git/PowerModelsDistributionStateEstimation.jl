@@ -1,4 +1,6 @@
-## Staged
+## v0.7.0
+- updates for compatibility with PowerModelsDistribution v0.14 and newer versions of JuMP(+solvers), CSV, DataFrames .... (see Project.toml)
+  - with the contribution of @pseudocubic
 
 ## v0.6.0
 - drop GaussianMixtures.jl dependency in favour of using MixtureModels from Distributions.jl
