@@ -1,8 +1,10 @@
-## A list of things to do for the next release (0.7.0)
+## A list of things to do for the next release (0.8.0)
 
-- [ ] MAJOR/BREAKING: upgrade CSV
-- [ ] MAJOR/BREAKING: after CSV, upgrade PMD, Ipopt, JuMP
-      - [ ] move LTS to julia 1.6 and drop support for JuMP < 0.22, and consequently PMD/Ipopt versions
+- [ ] enable (and test) 4-wire with explicit neutral
+
+- [ ] directly incorporate transformer models from PowerModelsDistribution
+
+- [ ] remove CI if this file or README is updated
 
 - [ ] import/export pdf, etc. from Distributions.jl? simplify residual constraint
 
@@ -25,19 +27,19 @@
       - lines 228, 232-234 in bad_data.jl and move atol to 1.1e-3 in with_errors.jl line 186
 
 - [ ] increase dependency bound on Distributions.jl
+      
 - [ ] nw_id_default: _IM to _PMD. to rm _IM dep, sol_component_value should should be replaced (ask _PMD people to export it?)
 
-## TODO for future releases/research wishlist
+## (possible) TODO for future releases/research wishlist
 
-- [ ] facilitate change ENWL database power_base           (?)
-- [ ] add tests on example notebooks                       (?)
-- [ ] intuitive/automatic inclusion of load/transfo models (?)
+- [ ] facilitate change ENWL database power_base           
+- [ ] add tests on example notebooks                       
+- [ ] intuitive/automatic inclusion of load/transfo models 
       - or MV/LV notebook?
-- [ ] additional (convex?) formulations                    (?)
-- [ ] advanced bad data functionalities                    (?)
-- [ ] consider other robust estimators, e.g. schweppe huber(?)
+- [ ] additional (convex?) formulations                    
+- [ ] advanced bad data functionalities                    
+- [ ] consider other robust estimators, e.g. schweppe huber
       - with MOI/JuMP complementarity constraints ?
       - or ConditionalJuMP.jl ? Or other?
-- [ ] find/build 4-wire test case and test          
-- [ ] de-localize ENWL dataset to other repo (except feeders used in tests)       
-- [ ] impl. own Gauss-Newton solver and matrix functions   (?) 
+- [ ] de-localize ENWL dataset to other repo (except feeders used in tests)        
+- [ ] impl. own Gauss-Newton solver and matrix functions   
