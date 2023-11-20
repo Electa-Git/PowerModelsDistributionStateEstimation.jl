@@ -8,7 +8,7 @@
 
 @enum ConnConfig WYE DELTA
 
-function constraint_mc_generator_power_se(pm::_PMD.AbstractUnbalancedIVRModel, id::Int; nw::Int=_IM.nw_id_default, report::Bool=true, bounded::Bool=true)
+function constraint_mc_generator_power_se(pm::_PMD.AbstractUnbalancedIVRModel, id::Int; nw::Int=_PMD.nw_id_default, report::Bool=true, bounded::Bool=true)
     generator = _PMD.ref(pm, nw, :gen, id)
     bus =  _PMD.ref(pm, nw,:bus, generator["gen_bus"])
 
@@ -77,7 +77,7 @@ function constraint_mc_generator_power_delta_se(pm::_PMD.AbstractUnbalancedIVRMo
     end
 end
 
-function constraint_mc_current_balance_se(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_current_balance_se(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
     bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_conns_switch, i)
@@ -135,7 +135,7 @@ function constraint_mc_current_balance_se(pm::_PMD.AbstractUnbalancedIVRModel, n
 end
 #####
 # "KCL including transformer arcs and load variables."
-function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
     bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_conns_switch, i)

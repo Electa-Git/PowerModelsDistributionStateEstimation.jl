@@ -11,7 +11,7 @@
 Equality constraint that describes the residual definition, which depends on the
 criterion assigned to each individual measurement in data["meas"]["m"]["crit"].
 """
-function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
 
     cmp_id = get_cmp_id(pm, nw, i)
     res = _PMD.var(pm, nw, :res, i)

@@ -15,7 +15,7 @@ AbstractReducedModel = Union{ReducedACRUPowerModel, ReducedACPUPowerModel}
 These formulation are exact for networks like those made available in the ENWL database,
 where there are no gound admittance, storage elements and active switches.
 Other than this, the function is the same as the constraint_mc_load_power_balance defined in PowerModelsDistribution "
-function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=_PMD.nw_id_default)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
@@ -57,7 +57,7 @@ function constraint_mc_power_balance(pm::AbstractReducedModel, i::Int; nw::Int=_
 end
 
 "If the formulation is not reduced, delegates back to PowerModelsDistribution"
-function constraint_mc_power_balance(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_power_balance(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
     _PMD.constraint_mc_power_balance(pm, i; nw=nw)
 end
 

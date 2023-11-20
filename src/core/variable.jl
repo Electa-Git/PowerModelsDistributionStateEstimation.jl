@@ -14,7 +14,7 @@ If bounded, the lower bound is set to zero, while the upper bound defaults to In
 a different value in the measurement dictionary.
 """
 function variable_mc_residual(  pm::_PMD.AbstractUnbalancedPowerModel;
-                                nw::Int=_IM.nw_id_default, bounded::Bool=true,
+                                nw::Int=_PMD.nw_id_default, bounded::Bool=true,
                                 report::Bool=true)
 
     connections = Dict(i => length(meas["dst"]) for (i,meas) in _PMD.ref(pm, nw, :meas) )
@@ -44,7 +44,7 @@ function variable_mc_load(pm::_PMD.AbstractUnbalancedPowerModel; kwargs...)
 end
 
 function variable_mc_load_active(pm::_PMD.AbstractUnbalancedPowerModel;
-                                 nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true)
+                                 nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
 
     connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
@@ -73,7 +73,7 @@ function variable_mc_load_active(pm::_PMD.AbstractUnbalancedPowerModel;
 end
 
 function variable_mc_load_reactive(pm::_PMD.AbstractUnbalancedPowerModel;
-                                   nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true)
+                                   nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
 
     connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
@@ -109,9 +109,8 @@ function variable_mc_load_current(pm::_PMD.AbstractUnbalancedIVRModel; kwargs...
     variable_mc_load_current_imag(pm; kwargs...)
 end
 
-
 function variable_mc_load_current_real(pm::_PMD.AbstractUnbalancedIVRModel;
-                                 nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true)
+                                 nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
 
     connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
@@ -124,7 +123,7 @@ function variable_mc_load_current_real(pm::_PMD.AbstractUnbalancedIVRModel;
     report && _IM.sol_component_value(pm, :pmd, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
 end
 
-function variable_mc_load_current_imag(pm::_PMD.AbstractUnbalancedIVRModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+function variable_mc_load_current_imag(pm::_PMD.AbstractUnbalancedIVRModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
 
     connections = Dict(i => load["connections"] for (i,load) in _PMD.ref(pm, nw, :load))
 
@@ -144,7 +143,7 @@ quantity belongs to the formulation's variable space. If not, the function
 `create_conversion_constraint' is called, that adds a constraint that
 associates the measured quantity to the formulation's variable space.
 """
-function variable_mc_measurement(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=false)
+function variable_mc_measurement(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=false)
     for i in _PMD.ids(pm, nw, :meas)
         msr_var = _PMD.ref(pm, nw, :meas, i, "var")
         cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
@@ -167,7 +166,7 @@ function variable_mc_measurement(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=
     end
 end
 
-function variable_mc_generator_current_se(pm::_PMD.AbstractUnbalancedIVRModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_mc_generator_current_se(pm::_PMD.AbstractUnbalancedIVRModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
     #NB: the difference with PowerModelsDistributions is that pg and qg expressions are not created
     _PMD.variable_mc_generator_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_generator_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)

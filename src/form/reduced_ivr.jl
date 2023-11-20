@@ -9,19 +9,19 @@ mutable struct ReducedIVRUPowerModel <: _PMD.AbstractUnbalancedIVRModel _PMD.@pm
 
 "only total current variables defined over the bus_arcs in PMD are considered: with no shunt admittance, these are
 equivalent to the series current defined over the branches."
-function variable_mc_branch_current(pm::ReducedIVRUPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_mc_branch_current(pm::ReducedIVRUPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
     _PMD.variable_mc_branch_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_branch_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end
 
 "if the formulation is not reduced, it is delegated back to PMD"
-function variable_mc_branch_current(pm::_PMD.IVRUPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_mc_branch_current(pm::_PMD.IVRUPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
     _PMD.variable_mc_branch_current(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end
 
 "constraint_mc_generator_power is re-defined here because in PMD the same function only accepts pm::_PMD.IVRUPowerModel.
 The content of the function is otherwise identical"
-function constraint_mc_generator_power(pm::ReducedIVRUPowerModel, id::Int; nw::Int=_IM.nw_id_default, report::Bool=true, bounded::Bool=true)
+function constraint_mc_generator_power(pm::ReducedIVRUPowerModel, id::Int; nw::Int=_PMD.nw_id_default, report::Bool=true, bounded::Bool=true)
 
     generator = _PMD.ref(pm, nw, :gen, id)
     bus = _PMD.ref(pm, nw,:bus, generator["gen_bus"])
@@ -133,7 +133,7 @@ end
 
 "Simplified version of constraint_mc_current_balance_se, to perform state
 estimation with the reduced IVR formulation: no shunts, no storage elements, no active switches"
-function constraint_mc_current_balance_se(pm::_PMDSE.ReducedIVRUPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_current_balance_se(pm::_PMDSE.ReducedIVRUPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
@@ -173,7 +173,7 @@ end
 
 "Simplified version of constraint_mc_current_balance, to perform power flow
 calculations with the reduced IVR formulation: no shunts, no storage elements, no active switches"
-function constraint_mc_current_balance(pm::_PMDSE.ReducedIVRUPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_current_balance(pm::_PMDSE.ReducedIVRUPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
 
     bus = _PMD.ref(pm, nw, :bus, i)
     bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
@@ -216,7 +216,7 @@ Conceptually similar to the same function in PowerModelsDistribution, but writte
 function of the total current instead of the series current.
 This is because in the ReducedIVRUPowerModel series current is not defined as it is identical to
 the total current due to the absence of shunt admittance."
-function constraint_mc_bus_voltage_drop(pm::ReducedIVRUPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_mc_bus_voltage_drop(pm::ReducedIVRUPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
 
     branch = _PMD.ref(pm, nw, :branch, i)
     f_bus = branch["f_bus"]
@@ -241,7 +241,7 @@ end
 
 "This constraint makes sure that the current entering and exiting a branch are equivalent.
 It is used for state estimation and power flow calculations with the ReducedIVRUPowerModel."
-function constraint_current_to_from(pm::ReducedIVRUPowerModel, i::Int; nw::Int=_IM.nw_id_default)
+function constraint_current_to_from(pm::ReducedIVRUPowerModel, i::Int; nw::Int=_PMD.nw_id_default)
 
     branch = _PMD.ref(pm, nw, :branch, i)
     f_bus = branch["f_bus"]
