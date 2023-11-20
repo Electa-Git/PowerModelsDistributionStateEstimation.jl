@@ -18,6 +18,7 @@
 - [ ] consider deprecating reduced_ac and reduced_ivr after test against @smart_constraint (especially reduced_ac)
 
 - [ ] increase coverage, in particular:
+      - for all measurement conversions, check that the variables of the DSSE result dict match
       - test "ls" and "lav" (no weights)
       - test for rand(ExtendedBeta)
       - test for mles with various distributions
@@ -25,21 +26,7 @@
       - fix test of line 49-50 in pseudo_measurements.jl: in 50, NUMERICAL_ERROR when sol is correct, in 49 EXCEPTION_ACCESS_VIOLATION at 0x2e2075e6 -- mumps_cst_amf_ in windows CI
       - re-introduce start_values in tests and enable ubuntu tests back in CI (julia 1.6 as LTS will move, see below)
       - lines 228, 232-234 in bad_data.jl and move atol to 1.1e-3 in with_errors.jl line 186
-
-- [ ] increase dependency bound on Distributions.jl
       
-- [ ] nw_id_default: _IM to _PMD. to rm _IM dep, sol_component_value should should be replaced (ask _PMD people to export it?)
+- [ ] nw_id_default: ask _PMD to export sol_component_value so we can do without InfrastructureModels dep
 
-## (possible) TODO for future releases/research wishlist
-
-- [ ] facilitate change ENWL database power_base           
-- [ ] add tests on example notebooks                       
-- [ ] intuitive/automatic inclusion of load/transfo models 
-      - or MV/LV notebook?
-- [ ] additional (convex?) formulations                    
-- [ ] advanced bad data functionalities                    
-- [ ] consider other robust estimators, e.g. schweppe huber
-      - with MOI/JuMP complementarity constraints ?
-      - or ConditionalJuMP.jl ? Or other?
-- [ ] de-localize ENWL dataset to other repo (except feeders used in tests)        
-- [ ] impl. own Gauss-Newton solver and matrix functions   
+- [ ] in `measurement_conversion.jl` remove all `d`s, `g`s, ... from power and current measurements, and just _PMD.ref the component they refer to based on the measurement index? (NOTE: this is breaking and would have an impact on the measurement creation / parsing. Maybe add a deprecation warning?)

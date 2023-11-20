@@ -63,6 +63,22 @@ struct MultiplicationFraction<:ConversionType
     voltage::Array
 end
 
+struct PowerSum<:ConversionType
+    pm_type::_PMD.AbstractUnbalancedPowerModel
+    msr_type::Symbol
+    msr_id::Int64
+    cmp_type::Symbol
+    cmp_id::Int64
+end
+
+struct LineVoltageToPhase<:ConversionType
+    pm_type::_PMD.AbstractUnbalancedPowerModel
+    msr_type::Symbol
+    msr_id::Int64
+    cmp_type::Symbol
+    cmp_id::Int64
+end
+
 function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACPModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
     if msr == :cm
@@ -83,6 +99,10 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACPModel,i,msr
         msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], :vm)
     elseif msr == :cid
         msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
+    elseif msr == :vd
+        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
+    elseif msr ∈ [:qtot, :ptot]
+        msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -113,6 +133,10 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACRModel,i,msr
         msr_type = MultiplicationFraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
     elseif msr == :cid
         msr_type = MultiplicationFraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
+    elseif msr == :vd
+        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
+    elseif msr ∈ [:qtot, :ptot]
+        msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and will be ignored")
     end
@@ -149,6 +173,10 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedIVRModel,i,msr
         msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :qd
         msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
+    elseif msr == :vd
+        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
+    elseif msr ∈ [:qtot, :ptot]
+        msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -165,6 +193,8 @@ function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Sy
         msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:w])
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:w])
+    elseif msr == :vdsqr
+        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -208,7 +238,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
         end
     end
 
-    msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    id = msr.cmp_type == :branch ? (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : msr.cmp_id
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if typeof(pm) <: _PMD.LinDist3FlowPowerModel
@@ -249,7 +279,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
         end
     end
 
-    msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    id = msr.cmp_type == :branch ? (msr.cmp_id,  _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : msr.cmp_id
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if typeof(pm) <: _PMD.LinDist3FlowPowerModel
@@ -340,7 +370,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
     end
 
     den = _PMD.var(pm, nw, msr.denominator, msr.bus_ind)
-    msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    id = msr.cmp_type == :branch ? (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : msr.cmp_id
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("r", String(msr.msr_type))
@@ -372,7 +402,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
         push!(v, _PMD.var(pm, nw, vl, msr.bus_ind))
     end
 
-    msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    id = msr.cmp_type == :branch ? (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : msr.cmp_id
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("cr", string(msr.msr_type))
@@ -383,5 +413,100 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
         JuMP.@NLconstraint(pm.model, [c in conn],
             original_var[id][c] == (-p[2][c]*v[1][c]+p[1][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
+    end
+end
+
+function create_conversion_constraint(pm::Union{_PMD.AbstractUnbalancedACRModel, _PMD.AbstractUnbalancedIVRModel}, original_var, msr::LineVoltageToPhase; nw=nw)
+    
+    vr = _PMD.var(pm, nw, :vr, msr.cmp_id)
+    vi = _PMD.var(pm, nw, :vi, msr.cmp_id)
+
+    for c in conn
+        d = c ∈ [1,2] ? c+1 : 1 
+        JuMP.@constraint(pm.model, c, #hope this c works!
+            original_var[msr.cmp_id][c]^2 == vr[d]^2+vr[c]^2-2*vr[c]*vr[d]+vi[d]^2+vi[c]^2-2*vi[c]*vi[d]
+            )
+    end
+
+end
+
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedACPModel, original_var, msr::LineVoltageToPhase; nw=nw)
+    
+    vm = _PMD.var(pm, nw, :vm, msr.cmp_id)
+    va = _PMD.var(pm, nw, :va, msr.cmp_id)
+
+    for c in conn
+        d = c ∈ [1,2] ? c+1 : 1 
+        JuMP.@constraint(pm.model, c, #hope this c works!
+            original_var[msr.cmp_id][c]^2 == vm[d]^2+vm[c]^2-2*vm[c]*vm[d]*cos(va[d]-va[c])
+        )
+    end
+
+end
+
+### NOTE: this is an approximation, to be consistent with the LinDist3Flow,
+# but then nonlinear, it should read:
+# original_var[msr.cmp_id][c] == w[d]+w[c]-2*(w[c]*w[d])^0.5*cos(2.0943951023931953)
+function create_conversion_constraint(pm::_PMD.LinDist3FlowPowerModel, original_var, msr::LineVoltageToPhase; nw=nw)
+    @warn "Using line voltage measurements with the LinDist3Flow leads to an approximation and is not recommended"
+    w = _PMD.var(pm, nw, :w, msr.cmp_id)
+    for c in conn
+        d = c ∈ [1,2] ? c+1 : 1 
+        JuMP.@NLconstraint(pm.model, c, #hope this c works!
+            original_var[msr.cmp_id][c] == w[d]+w[c]-(w[c]+w[d])*cos(2.0943951023931953)
+        )
+    end
+end
+
+function create_conversion_constraint(pm::Union{_PMD.AbstractUnbalancedACPModel, _PMD.AbstractUnbalancedACRModel, _PMD.LinDist3FlowPowerModel}, original_var, msr::PowerSum; nw=nw)
+    
+    cmp_indication, cmp_id = get_cmp_ind_and_id(_PMD.ref(pm,nw,:meas,i)["cmp_type"])
+
+    meas_indication = occursin("p", string(original_var)) ? "p" : "q" 
+    p = [_PMD.var(pm, nw, Symbol(meas_indication*cmp_indication), cmp_id)]
+
+    JuMP.@constraint(pm.model, original_var[cmp_id] == p[1]+p[2]+p[3])
+
+end
+
+function create_conversion_constraint(pm::_PMD.AbstractUnbalancedIVRModel, original_var, msr::PowerSum; nw=nw)
+    
+    cmp_indication, cmp_id = get_cmp_ind_and_id(_PMD.ref(pm,nw,:meas,i)["cmp_type"])
+
+    if _PMD.ref(pm,nw,:meas,i)["cmp_type"] == :branch
+        c_id = (cmp_id, _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,cmp_id)["t_bus"])
+        v_id = _PMD.ref(pm,nw,:branch,cmp_id)["f_bus"]
+    elseif _PMD.ref(pm,nw,:meas,i)["cmp_type"] == :load
+        c_id = cmp_id
+        v_id = _PMD.ref(pm,nw,:load,cmp_id)["load_bus"]
+    elseif _PMD.ref(pm,nw,:meas,i)["cmp_type"] == :gen
+        c_id = cmp_id
+        v_id = _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"]
+    end
+
+    cr = [_PMD.var(pm, nw, Symbol("cr"*cmp_indication), c_id)]
+    ci = [_PMD.var(pm, nw, Symbol("ci"*cmp_indication), c_id)]
+    vr = [_PMD.var(pm, nw, Symbol("vr"*cmp_indication), v_id)]
+    vi = [_PMD.var(pm, nw, Symbol("vi"*cmp_indication), v_id)]
+
+    if occursin("p", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, 
+            original_var[cmp_id] == sum( cr[c]*vr[c]+ci[c]*vi[c] for c in 1:3)
+        )
+    elseif occursin("q", String(original_var))
+        JuMP.@constraint(pm.model, 
+            original_var[cmp_id] == sum(-ci[c]*vr[c]+cr[c]*vi[c] for c in 1:3)
+        )
+    end
+
+end
+
+function get_cmp_ind_and_id(cmp_ind::Symbol)
+    if cmp_ind == :load
+        return ("d", msr.cmp_id)
+    elseif cmp_ind == :gen
+        return ("g", msr.cmp_id)
+    elseif cmp_ind == :branch
+        return ("", (msr.cmp_id, _PMD.ref(pm, nw, :branch, msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch, msr.cmp_id)["t_bus"]))
     end
 end
