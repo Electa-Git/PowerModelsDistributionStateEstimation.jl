@@ -68,3 +68,64 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
         end
     end
 end
+
+# Constraints related to the ANGULAR REFERENCE MODELS
+
+
+function variable_mc_bus_voltage_angle(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
+    terminals = Dict(i => bus["terminals"] for (i,bus) in _PMD.ref(pm, nw, :bus))
+    va_start_defaults = Dict(i => deg2rad.([0.0, -120.0, 120.0, fill(0.0, length(terms))...][terms]) for (i, terms) in terminals)
+    va = _PMD.var(pm, nw)[:va] = Dict(i => JuMP.@variable(pm.model,
+            [t in terminals[i]], base_name="$(nw)_va_$(i)",
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), ["va_start", "va"], t, va_start_defaults[i][findfirst(isequal(t), terminals[i])]),
+            
+        ) for i in _PMD.ids(pm, nw, :bus)
+    )
+
+
+
+
+    if bounded
+        for (i,bus) in _PMD.ref(pm, nw, :bus)
+            for (idx, t) in enumerate(terminals[i])
+                if haskey(bus, "vamin")
+                    _PMD.set_lower_bound(va[i][t], bus["vamin"][idx])
+                end
+                if haskey(bus, "vamax")
+                    _PMD.set_upper_bound(va[i][t], bus["vamax"][idx])
+                end
+            end
+        end
+        display(" va bounds defined ")
+    end
+
+
+    report && _IM.sol_component_value(pm, _PMD.pmd_it_sym, nw, :bus, :va, _PMD.ids(pm, nw, :bus), va)
+end
+
+
+""
+function variable_mc_bus_voltage_magnitude_only(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
+    terminals = Dict(i => bus["terminals"] for (i,bus) in _PMD.ref(pm, nw, :bus))
+    vm = _PMD.var(pm, nw)[:vm] = Dict(i => JuMP.@variable(pm.model,
+            [t in terminals[i]], base_name="$(nw)_vm_$(i)",
+            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), ["vm_start", "vm"], t, 1.0)
+        ) for i in _PMD.ids(pm, nw, :bus)
+    )
+
+    if bounded
+        for (i,bus) in _PMD.ref(pm, nw, :bus)
+            for (idx, t) in enumerate(terminals[i])
+                if haskey(bus, "vmin")
+                    _PMD.set_lower_bound(vm[i][t], bus["vmin"][idx])
+                end
+                if haskey(bus, "vmax")
+                    _PMD.set_upper_bound(vm[i][t], bus["vmax"][idx])
+                end
+            end
+        end
+        display(" vm bounds defined ")
+    end
+
+    report && _IM.sol_component_value(pm, _PMD.pmd_it_sym, nw, :bus, :vm, _PMD.ids(pm, nw, :bus), vm)
+end
