@@ -21,7 +21,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
     crit = _PMD.ref(pm, nw, :meas, i, "crit")
     conns = get_active_connections(pm, nw, _PMD.ref(pm, nw, :meas, i, "cmp"), cmp_id)
 
-    for (idx, c) in enumerate(conns)
+    for (idx, c) in enumerate(setdiff(conns,[_N_IDX]))
         if (occursin("ls", crit) || occursin("lav", crit)) && isa(dst[idx], _DST.Normal)
             μ, σ = occursin("w", crit) ? (_DST.mean(dst[idx]), _DST.std(dst[idx])) : (_DST.mean(dst[idx]), 1.0)
         end
@@ -37,7 +37,7 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
                 res[idx] * rsc^2 * σ^2 >= (var[c] - μ)^2
             )
         elseif crit ∈ ["wlav", "lav"] && isa(dst[idx], _DST.Normal)
-            JuMP.@NLconstraint(pm.model,
+            JuMP.@constraint(pm.model,
                 res[idx] * rsc * σ == abs(var[c] - μ)
             )
         elseif crit == "rwlav" && isa(dst[idx], _DST.Normal)
