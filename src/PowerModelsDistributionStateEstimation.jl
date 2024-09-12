@@ -57,6 +57,8 @@ function __init__()
     Logging.global_logger(_LOGGER)
 end
 
+display("HEY! YOU ARE CURRENTLY RUNNING THE `adrian_quickdelta` BRANCH OF THE PMDSE PARSER, JUST SO YOU KNOW!")
+
 # include
 include("bad_data/chi_squares_test.jl")
 include("bad_data/largest_normalized_residuals.jl")
@@ -81,6 +83,9 @@ include("io/polynomials.jl")
 include("io/postprocessing.jl")
 
 include("prob/se.jl")
+
+# quick fixes for adrian project that cannot wait the next release
+include("adrian_quickextras/delta_users.jl")
 
 # export
 include("core/export.jl")

@@ -71,13 +71,6 @@ struct PowerSum<:ConversionType
     cmp_id::Int64
 end
 
-struct LineVoltageToPhase<:ConversionType
-    pm_type::_PMD.AbstractUnbalancedPowerModel
-    msr_type::Symbol
-    msr_id::Int64
-    cmp_type::Symbol
-    cmp_id::Int64
-end
 
 function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACPModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
@@ -99,8 +92,6 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACPModel,i,msr
         msr_type = Fraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg, :va], :vm)
     elseif msr == :cid
         msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
-    elseif msr == :vd
-        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
     elseif msr ∈ [:qtot, :ptot]
         msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
     else
@@ -133,8 +124,6 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACRModel,i,msr
         msr_type = MultiplicationFraction(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:vr, :vi])
     elseif msr == :cid
         msr_type = MultiplicationFraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:vr, :vi])
-    elseif msr == :vd
-        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
     elseif msr ∈ [:qtot, :ptot]
         msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
     else
@@ -173,8 +162,6 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedIVRModel,i,msr
         msr_type = Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
     elseif msr == :qd
         msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
-    elseif msr == :vd
-        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
     elseif msr ∈ [:qtot, :ptot]
         msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
     else
@@ -193,8 +180,6 @@ function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Sy
         msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:w])
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:w])
-    elseif msr == :vdsqr
-        msr_type = LineVoltageToPhase(pm, msr, i, :bus, cmp_id)
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end

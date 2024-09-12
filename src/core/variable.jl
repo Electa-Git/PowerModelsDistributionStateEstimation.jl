@@ -149,19 +149,23 @@ function variable_mc_measurement(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=
         cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
         cmp_type = _PMD.ref(pm, nw, :meas, i, "cmp")
         connections = get_active_connections(pm, nw, cmp_type, cmp_id)
-        if no_conversion_needed(pm, msr_var)
-            #no additional variable is created, it is already by default in the formulation
+        if msr_var == :vll                                      
+            constraint_line_to_line_voltage(pm, cmp_id, nw=nw)
         else
-            cmp_type == :branch ? id = (cmp_id, _PMD.ref(pm,nw,:branch, cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch, cmp_id)["t_bus"]) : id = cmp_id
-            if haskey(_PMD.var(pm, nw), msr_var)
-                push!(_PMD.var(pm, nw)[msr_var], id => JuMP.@variable(pm.model,
-                    [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
+            if no_conversion_needed(pm, msr_var)
+                #no additional variable is created, it is already by default in the formulation
             else
-                _PMD.var(pm, nw)[msr_var] = Dict(id => JuMP.@variable(pm.model,
-                    [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
+                cmp_type == :branch ? id = (cmp_id, _PMD.ref(pm,nw,:branch, cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch, cmp_id)["t_bus"]) : id = cmp_id
+                if haskey(_PMD.var(pm, nw), msr_var)
+                    push!(_PMD.var(pm, nw)[msr_var], id => JuMP.@variable(pm.model,
+                        [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
+                else
+                    _PMD.var(pm, nw)[msr_var] = Dict(id => JuMP.@variable(pm.model,
+                        [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
+                end
+                msr_type = assign_conversion_type_to_msr(pm, i, msr_var; nw=nw)
+                create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw)
             end
-            msr_type = assign_conversion_type_to_msr(pm, i, msr_var; nw=nw)
-            create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw)
         end
     end
 end

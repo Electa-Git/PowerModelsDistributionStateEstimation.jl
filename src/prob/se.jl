@@ -65,6 +65,7 @@ end
 function build_mc_se(pm::_PMD.AbstractUnbalancedPowerModel)
 
     # Variables
+    variable_line_to_line_voltage_magnitude(pm; bounded = false)
     _PMDSE.variable_mc_bus_voltage(pm; bounded = true)
     _PMD.variable_mc_branch_power(pm; bounded = true)
     _PMD.variable_mc_transformer_power(pm; bounded = true)
@@ -105,6 +106,7 @@ end
 function build_mc_se(pm::_PMD.AbstractUnbalancedIVRModel)
     # Variables
 
+    variable_line_to_line_voltage_magnitude(pm; bounded = false)
     _PMD.variable_mc_bus_voltage(pm, bounded = true)
     _PMDSE.variable_mc_branch_current(pm, bounded = true)
     variable_mc_generator_current_se(pm, bounded = true)
