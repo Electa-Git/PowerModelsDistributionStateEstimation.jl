@@ -94,6 +94,7 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedACPModel,i,msr
         msr_type = Fraction(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd, :va], :vm)
     elseif msr ∈ [:qtot, :ptot]
         msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
+    elseif msr == :vll
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -164,6 +165,7 @@ function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedIVRModel,i,msr
         msr_type = Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
     elseif msr ∈ [:qtot, :ptot]
         msr_type = PowerSum(pm, msr, i, _PMD.ref(pm,nw,:meas,i)["cmp_type"], cmp_id)
+    elseif msr == :vll 
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
@@ -180,6 +182,7 @@ function assign_conversion_type_to_msr(pm::_PMD.LinDist3FlowPowerModel,i,msr::Sy
         msr_type = SquareFraction(i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:pg, :qg], [:w])
     elseif msr == :cmd
         msr_type = SquareFraction(i,:load, cmp_id, _PMD.ref(pm,nw,:load,cmp_id)["load_bus"], [:pd, :qd], [:w])
+    elseif msr == :vll
     else
        error("the chosen measurement $(msr) at $(_PMD.ref(pm, nw, :meas, i, "cmp")) $(_PMD.ref(pm, nw, :meas, i, "cmp_id")) is not supported and should be removed")
     end
