@@ -121,7 +121,7 @@ end
 
 function assign_conversion_type_to_msr(pm::_PMD.AbstractUnbalancedIVRModel,i,msr::Symbol;nw=nw)
     cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
-    if msr == :vm
+    if msr == :vm || msr == :vmn
         msr_type = Square(i,:bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
     elseif msr == :va
         msr_type = Tangent(i, :bus, cmp_id, :vi, :vr)
@@ -317,7 +317,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
                 den = _PMD.var(pm, nw, msr.denominator, (msr.cmp_id, _PMD.ref(pm, nw, :branch,msr.cmp_id)["f_bus"], _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"]))
             else
                 num = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
-                den = _PMD.var(pm, nw, msr.numerator, msr.cmp_id)
+                den = _PMD.var(pm, nw, msr.denominator, msr.cmp_id)
             end
             msr.cmp_type == :branch ? id = (msr.cmp_id, _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
             JuMP.@NLconstraint(pm.model,

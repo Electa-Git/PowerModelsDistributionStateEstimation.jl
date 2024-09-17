@@ -32,9 +32,9 @@ JuMP = "1"
 LoggingExtras = "~0.4"
 Optim = "~1.2.0, 1.7"
 Polynomials = "~2.0.17, 3"
-PowerModelsDistribution = "~0.11, ~0.12, ~0.13, 0.14"
+PowerModelsDistribution = "~0.11, ~0.12, ~0.13, ~0.14,  ~0.15"
 SpecialFunctions = "~1.5.1, ~1.6, ~1.7, ~1.8, ~2.0"
-julia = "^1.6"
+julia = "~1.6"
 
 [extras]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
