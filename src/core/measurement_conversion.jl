@@ -401,47 +401,47 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
     end
 end
 
-function create_conversion_constraint(pm::Union{_PMD.AbstractUnbalancedACRModel, _PMD.AbstractUnbalancedIVRModel}, original_var, msr::LineVoltageToPhase; nw=nw)
+# function create_conversion_constraint(pm::Union{_PMD.AbstractUnbalancedACRModel, _PMD.AbstractUnbalancedIVRModel}, original_var, msr::LineVoltageToPhase; nw=nw)
     
-    vr = _PMD.var(pm, nw, :vr, msr.cmp_id)
-    vi = _PMD.var(pm, nw, :vi, msr.cmp_id)
+#     vr = _PMD.var(pm, nw, :vr, msr.cmp_id)
+#     vi = _PMD.var(pm, nw, :vi, msr.cmp_id)
 
-    for c in conn
-        d = c ∈ [1,2] ? c+1 : 1 
-        JuMP.@constraint(pm.model, c, #hope this c works!
-            original_var[msr.cmp_id][c]^2 == vr[d]^2+vr[c]^2-2*vr[c]*vr[d]+vi[d]^2+vi[c]^2-2*vi[c]*vi[d]
-            )
-    end
+#     for c in conn
+#         d = c ∈ [1,2] ? c+1 : 1 
+#         JuMP.@constraint(pm.model, c, #hope this c works!
+#             original_var[msr.cmp_id][c]^2 == vr[d]^2+vr[c]^2-2*vr[c]*vr[d]+vi[d]^2+vi[c]^2-2*vi[c]*vi[d]
+#             )
+#     end
 
-end
+# end
 
-function create_conversion_constraint(pm::_PMD.AbstractUnbalancedACPModel, original_var, msr::LineVoltageToPhase; nw=nw)
+# function create_conversion_constraint(pm::_PMD.AbstractUnbalancedACPModel, original_var, msr::LineVoltageToPhase; nw=nw)
     
-    vm = _PMD.var(pm, nw, :vm, msr.cmp_id)
-    va = _PMD.var(pm, nw, :va, msr.cmp_id)
+#     vm = _PMD.var(pm, nw, :vm, msr.cmp_id)
+#     va = _PMD.var(pm, nw, :va, msr.cmp_id)
 
-    for c in conn
-        d = c ∈ [1,2] ? c+1 : 1 
-        JuMP.@constraint(pm.model, c, #hope this c works!
-            original_var[msr.cmp_id][c]^2 == vm[d]^2+vm[c]^2-2*vm[c]*vm[d]*cos(va[d]-va[c])
-        )
-    end
+#     for c in conn
+#         d = c ∈ [1,2] ? c+1 : 1 
+#         JuMP.@constraint(pm.model, c, #hope this c works!
+#             original_var[msr.cmp_id][c]^2 == vm[d]^2+vm[c]^2-2*vm[c]*vm[d]*cos(va[d]-va[c])
+#         )
+#     end
 
-end
+# end
 
 ### NOTE: this is an approximation, to be consistent with the LinDist3Flow,
 # but then nonlinear, it should read:
 # original_var[msr.cmp_id][c] == w[d]+w[c]-2*(w[c]*w[d])^0.5*cos(2.0943951023931953)
-function create_conversion_constraint(pm::_PMD.LinDist3FlowPowerModel, original_var, msr::LineVoltageToPhase; nw=nw)
-    @warn "Using line voltage measurements with the LinDist3Flow leads to an approximation and is not recommended"
-    w = _PMD.var(pm, nw, :w, msr.cmp_id)
-    for c in conn
-        d = c ∈ [1,2] ? c+1 : 1 
-        JuMP.@NLconstraint(pm.model, c, #hope this c works!
-            original_var[msr.cmp_id][c] == w[d]+w[c]-(w[c]+w[d])*cos(2.0943951023931953)
-        )
-    end
-end
+# function create_conversion_constraint(pm::_PMD.LinDist3FlowPowerModel, original_var, msr::LineVoltageToPhase; nw=nw)
+#     @warn "Using line voltage measurements with the LinDist3Flow leads to an approximation and is not recommended"
+#     w = _PMD.var(pm, nw, :w, msr.cmp_id)
+#     for c in conn
+#         d = c ∈ [1,2] ? c+1 : 1 
+#         JuMP.@NLconstraint(pm.model, c, #hope this c works!
+#             original_var[msr.cmp_id][c] == w[d]+w[c]-(w[c]+w[d])*cos(2.0943951023931953)
+#         )
+#     end
+# end
 
 function create_conversion_constraint(pm::Union{_PMD.AbstractUnbalancedACPModel, _PMD.AbstractUnbalancedACRModel, _PMD.LinDist3FlowPowerModel}, original_var, msr::PowerSum; nw=nw)
     

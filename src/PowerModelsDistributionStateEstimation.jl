@@ -57,7 +57,7 @@ function __init__()
     Logging.global_logger(_LOGGER)
 end
 
-display("HEY! YOU ARE CURRENTLY RUNNING THE `adrian_quickdelta` BRANCH OF THE PMDSE PARSER, JUST SO YOU KNOW!")
+display("HEY! YOU ARE CURRENTLY RUNNING THE `adrian_quickdelta` BRANCH OF THE PMDSE PACKAGE, JUST SO YOU KNOW!")
 
 # include
 include("bad_data/chi_squares_test.jl")
