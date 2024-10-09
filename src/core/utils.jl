@@ -244,18 +244,19 @@ end
     function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
 Returns the list of terminals, connections or t_ and f_connections, depending on the type of the component.
 """
-function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
-    if cmp_type == :bus
-       active_conn = _PMD.ref(pm, nw, :bus, cmp_id)["terminals"]
-   elseif cmp_type ∈ [:gen, :load]
-       active_conn = _PMD.ref(pm, nw, cmp_type, cmp_id)["connections"]
-   elseif cmp_type == :branch
-       active_conn = intersect(_PMD.ref(pm, nw, :branch, cmp_id)["f_connections"], _PMD.ref(pm, nw, :branch, cmp_id)["t_connections"])
-   else
-       error("Measurements for component of type $cmp_type are not supported")
-   end
-   return active_conn
-end
+### NB REPLACED TEMPORARILY BY NAMESAKE FUNCTION IN `delta_users.jl`
+# function get_active_connections(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, cmp_type::Symbol, cmp_id::Int)
+#     if cmp_type == :bus
+#        active_conn = _PMD.ref(pm, nw, :bus, cmp_id)["terminals"]
+#    elseif cmp_type ∈ [:gen, :load]
+#        active_conn = _PMD.ref(pm, nw, cmp_type, cmp_id)["connections"]
+#    elseif cmp_type == :branch
+#        active_conn = intersect(_PMD.ref(pm, nw, :branch, cmp_id)["f_connections"], _PMD.ref(pm, nw, :branch, cmp_id)["t_connections"])
+#    else
+#        error("Measurements for component of type $cmp_type are not supported")
+#    end
+#    return active_conn
+# end
 """
     function add_zib_virtual_meas!(data::Dict, σ::Float64; exclude::Array=[])
 Adds zero-injection buses measurements to the "meas" dictionary if they are not present.
