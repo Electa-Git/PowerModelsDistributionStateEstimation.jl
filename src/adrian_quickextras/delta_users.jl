@@ -17,10 +17,10 @@ function variable_line_to_line_voltage_magnitude(pm::_PMD.AbstractUnbalancedPowe
             if i ∈ bus_with_vll_meas
                 for (idx, t) in enumerate(terminals[i])
                     if haskey(bus, "vmin")
-                        JuMP.set_lower_bound(vd[i][t], bus["vmin"][idx])
+                        JuMP.set_lower_bound(vd[i][t], sqrt(3)*bus["vmin"][idx])
                     end
                     if haskey(bus, "vmax")
-                        JuMP.set_upper_bound(vd[i][t], bus["vmax"][idx])
+                        JuMP.set_upper_bound(vd[i][t], sqrt(3)*bus["vmax"][idx])
                     end
                 end
             end
@@ -53,7 +53,7 @@ function constraint_line_to_line_voltage(pm::Union{_PMD.AbstractUnbalancedACRMod
             vll[c]^2 == vr[d1]^2+vr[d2]^2-2*vr[d2]*vr[d1]+vi[d1]^2+vi[d2]^2-2*vi[d2]*vi[d1]
         )
     end
-
+    JuMP.@constraint(pm.model, vr[1] >= 0)
 end
 """
 Replaces old namesake function
