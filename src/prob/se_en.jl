@@ -1,7 +1,14 @@
 
-abstract type SM_vmnpq end
+abstract type SM_ind_en_Models end
+
+"solves state estimation in current and voltage rectangular coordinates for an explicit neutral model (IVREN formulation)"
+function solve_ivr_en_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
+    return solve_mc_se(data, _PMD.IVRENPowerModel, solver; kwargs...)
+end
 
 
+#####################################################################
+###################### Optimization Problem Formulation ##############
 #####################################################################
 
 "specification of the state estimation problem for the IVR Flow formulation"
@@ -53,6 +60,12 @@ end
 
 
 ####################################################################
+
+
+#####################################################################
+###################### Special Constraints Definition ##############
+#####################################################################
+
 "only total current variables defined over the bus_arcs in PMD are considered: with no shunt admittance, these are
 equivalent to the series current defined over the branches."
 function variable_mc_branch_current(pm::_PMD.IVRENPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
@@ -211,90 +224,37 @@ function constraint_mc_current_balance_se(pm::_PMD.IVRENPowerModel, nw::Int, i::
     end
 end
 
+# """
+#     function constraint_mc_voltage_reference(
+#         pm::ExplicitNeutralModels,
+#         id::Int;
+#         nw::Int=nw_id_default,
+#         bounded::Bool=true,
+#         report::Bool=true,
+#     )
 
-
-
-
-
-
-
+# Imposes suitable constraints for the voltage at the reference bus
+# """
+# function constraint_mc_voltage_reference(pm::_PMD.IVRENPowerModel, id::Int; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     bus = ref(pm, nw, :bus, id)
+#     terminals = bus["terminals"]
+#     grounded = bus["grounded"]
+#     constraint_mc_theta_ref(pm, id; nw=nw)
+#     # if haskey(bus, "va") && !haskey(bus, "vm")
+#     # elseif haskey(bus, "vm") && !haskey(bus, "va")
+#     #     constraint_mc_voltage_magnitude_fixed(pm, nw, id, bus["vm"], terminals, grounded)
+#     # elseif haskey(bus, "vm") && haskey(bus, "va")
+#     #     constraint_mc_voltage_fixed(pm, nw, id, bus["vm"], bus["va"], terminals, grounded)
+#     # end
+# end
 
 #####################################################################
-###################### MEASUREMENT Variables
+######################      Conversion Functions       ##############
 #####################################################################
 
-"""
-    variable_mc_measurement
-checks for every measurement if the measured
-quantity belongs to the formulation's variable space. If not, the function
-`create_conversion_constraint' is called, that adds a constraint that
-associates the measured quantity to the formulation's variable space.
-"""
-function variable_mc_measurement(pm::_PMD.IVRENPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=false)
-    for i in _PMD.ids(pm, nw, :meas)
-        msr_var = _PMD.ref(pm, nw, :meas, i, "var")
-        cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
-        cmp_type = _PMD.ref(pm, nw, :meas, i, "cmp")
-        connections = get_active_connections(pm, nw, cmp_type, cmp_id)
-        if no_conversion_needed(pm, msr_var)
-            #no additional variable is created, it is already by default in the formulation
-        else
-            cmp_type == :branch ? id = (cmp_id, _PMD.ref(pm,nw,:branch, cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch, cmp_id)["t_bus"]) : id = cmp_id
-            if haskey(_PMD.var(pm, nw), msr_var)
-                push!(_PMD.var(pm, nw)[msr_var], id => JuMP.@variable(pm.model,
-                    [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
-            else
-                _PMD.var(pm, nw)[msr_var] = Dict(id => JuMP.@variable(pm.model,
-                    [c in connections], base_name="$(nw)_$(String(msr_var))_$id"))
-            end
 
 
-            msr_type = assign_conversion_type_to_msr(pm, i, msr_var; nw=nw)
-
-            create_conversion_constraint(pm, _PMD.var(pm, nw)[msr_var], msr_type; nw=nw)
-        
-        end
-    end
-end
-
-
-############## constraints 
-
-
-"""
-    function constraint_mc_voltage_reference(
-        pm::ExplicitNeutralModels,
-        id::Int;
-        nw::Int=nw_id_default,
-        bounded::Bool=true,
-        report::Bool=true,
-    )
-
-Imposes suitable constraints for the voltage at the reference bus
-"""
-function constraint_mc_voltage_reference(pm::_PMD.IVRENPowerModel, id::Int; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
-    bus = ref(pm, nw, :bus, id)
-    terminals = bus["terminals"]
-    grounded = bus["grounded"]
-    constraint_mc_theta_ref(pm, id; nw=nw)
-    # if haskey(bus, "va") && !haskey(bus, "vm")
-    # elseif haskey(bus, "vm") && !haskey(bus, "va")
-    #     constraint_mc_voltage_magnitude_fixed(pm, nw, id, bus["vm"], terminals, grounded)
-    # elseif haskey(bus, "vm") && haskey(bus, "va")
-    #     constraint_mc_voltage_fixed(pm, nw, id, bus["vm"], bus["va"], terminals, grounded)
-    # end
-end
-
-################## CONVERSION FUNCTIONS 
-
-
-
-
-
-
-
-
-#                                                                                  ↗  :vmn        ↗ Square(i, :bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
+#                                                                 ↗  :vmn        ↗ Square(i, :bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
 function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::Square; nw=nw)
     new_var = []
     # prepare the :vi and :vr inside pm.model
@@ -315,6 +275,18 @@ function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, ms
 
     )
 
+end
+
+#                                                                    ↗  :vll        ↗ LineVoltage(i, :bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
+function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::LineVoltage; nw=nw)
+    # msr.elements = [:vi, :vr]
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id) 
+    vr = _PMD.var(pm, nw, msr.elements[2], msr.cmp_id) # msr.elements[2] = :vr  0_vr_3[]
+    vi = _PMD.var(pm, nw, msr.elements[1], msr.cmp_id) # msr.elements[1] = :vi
+    index_pairs = length(conn) > 2 ?  [(1,2), (2,3), (3,1)] :  [tuple(setdiff(conn, _N_IDX)...)] # checks if :vll is for three phase or single line-to-line load
+    for (idx, (i, j)) in enumerate(index_pairs)
+        JuMP.@constraint(pm.model, original_var[msr.cmp_id][idx]^2 == vr[i]^2 + vr[j]^2 - 2*vr[i]*vr[j] + vi[i]^2 + vi[j]^2 - 2*vi[i]*vi[j])
+    end
 end
 
 #                                                               ↗  :pd || :qd         ↗ Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
@@ -349,7 +321,7 @@ function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, ms
     conn = setdiff(conn,_N_IDX)
     if occursin("p", String(msr.msr_sym))
         pcons = JuMP.@constraint(pm.model, [c in conn],
-            original_var[id][c] == m1[1][c]*(m2[1][c]-m2[1][_N_IDX])+m1[2][c]*(m2[2][c]-m2[2][_N_IDX])  #TODO: fix the Ur[c] - Ur[n] &  Ui[c] - Ui[n]
+            original_var[id][c] == m1[1][c]*(m2[1][c]-m2[1][_N_IDX])+m1[2][c]*(m2[2][c]-m2[2][_N_IDX]) 
             )
             display(pcons)
     elseif occursin("q", String(msr.msr_sym))
@@ -357,5 +329,32 @@ function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, ms
             original_var[id][c] == -m1[2][c]*(m2[1][c]-m2[1][_N_IDX])+m1[1][c]*(m2[2][c]-m2[2][_N_IDX])
             )
             display(qcons)
+    end
+end
+
+
+#                                                               ↗  :ptot || :qtot         ↗ PowerSum(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
+#                                                               ↗  :ptot || :qtot         ↗ PowerSum(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
+function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::PowerSum; nw=nw)
+
+    # decide if its a load or a generator
+    cmp_indication =    msr.cmp_type == :load ? "d" : msr.cmp_type == :gen ? "g" : ""
+    cs = Symbol.(String.(msr.arr1).*cmp_indication)
+    vs = msr.arr2
+    vr = _PMD.var(pm,nw, vs[1],msr.bus_ind)
+    vi = _PMD.var(pm,nw, vs[2],msr.bus_ind)
+    cr = _PMD.var(pm,nw, cs[1],msr.cmp_id)
+    ci = _PMD.var(pm,nw, cs[2],msr.cmp_id)
+
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
+    conn = setdiff(conn,_N_IDX)
+    if occursin("p", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, 
+            original_var[msr.cmp_id] .- sum(cr[c]*(vr[c]-vr[_N_IDX])+ci[c]*(vi[c]-vi[_N_IDX]) for c in conn) == 0
+        )
+    elseif occursin("q", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, 
+            original_var[msr.cmp_id] .- sum(-ci[c]*(vr[c]-vr[_N_IDX])+cr[c]*(vi[c]-vi[_N_IDX])  for c in conn) == 0
+        )
     end
 end

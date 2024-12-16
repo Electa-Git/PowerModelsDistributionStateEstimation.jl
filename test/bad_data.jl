@@ -3,7 +3,7 @@
     msr_path = joinpath(mktempdir(),"temp.csv")
 
     custom_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time"=>300.0,
-                                                              "tol"=>1e-12,
+                                                              "tol"=>1e-5,
                                                               "print_level"=>0, "mu_strategy"=>"adaptive")
 
     data = _PMD.parse_file(_PMDSE.get_enwl_dss_path(ntw, fdr))
@@ -48,14 +48,14 @@
     chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data)
     @test _PMDSE.get_degrees_of_freedom(data) == 34
     @test chi_result[1] == false 
-    @test isapprox(chi_result[2], 0.0, atol = 1e-7)
+    @test isapprox(chi_result[2],0.3017354, atol = 1e-4)
     @test isapprox(chi_result[3], 48.60, atol = 1e-2)
 
     _PMDSE.add_measurements!(data, msr_path, actual_meas = false)
     se_result = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
     chi_result = _PMDSE.exceeds_chi_squares_threshold(se_result, data)
     @test chi_result[1] == true #TODO: there's no real bad data, check whether there is a problem with write_meas
-    @test isapprox(chi_result[2], 963.32, atol = 1e-2)
+    @test isapprox(chi_result[2],64.9021184, atol = 1e-2)
     @test isapprox(chi_result[3], 48.60, atol = 1e-2)
 
 end

@@ -16,7 +16,7 @@ import Polynomials as _Poly
 import PowerModels
 import PowerModelsDistribution as _PMD
 import Statistics
-#import SCS #removed while SDP tests are not active
+# import SCS #removed while SDP tests are not active
 using Test
 
 #network and feeder from ENWL for tests
@@ -40,19 +40,20 @@ ipopt_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" =
 #                                                             "alpha"=>0.4, "verbose"=>0) #deactivated while SDP tests not active
 
 @testset "PowerModelsDistributionStateEstimation" begin
-
     include("bad_data.jl")
     include("distributions.jl")
     include("estimation_criteria.jl")
+    include("ivren.jl")
     include("mixed_measurements.jl")
     include("non_exact_forms.jl")
     include("power_flow.jl")
     include("pseudo_measurements.jl")
+    include("reference_angles.jl")
     include("single_conductor_branches.jl")
     include("utils_and_start_val.jl")
     include("with_errors.jl")
-
 end
+
 ambiguities = Test.detect_ambiguities(_PMDSE);
 if !isempty(ambiguities)
     println("ambiguities detected: $ambiguities")

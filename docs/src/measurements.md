@@ -2,6 +2,33 @@
 
 ## Introduction
 
+
+PMDSE provides a high degree of modularity in terms of the possible measurement space, the package separates three different variable spaces: the measured variables space, the formulation variable space and the state variables. 
+ 
+### Examples of conversion from the measurement space to the formulation space
+
+**In the ACP formulation**
+
+A typical smart meter measures the voltage magnitude, active and reactive powers, thus the **measured variable space** is: $|U_{m}|$, $P_c$ and $Q_c$.
+However, if the ACP formulation is used then the **formulation variable space** is: $|U_{m}|$, $\angle U_{a}$, $P_c$ and $Q_c$.
+And the **state variable space** is: $|U_{m}|$, $\angle U_{a}$.
+
+In that case it can be seen that the state estimator requires an extra conversion step to calculate the voltage angle $\angle U_{a}$ from the measured space variables.
+
+![ACP-Conv-gif](ACP-Conv-once.gif)
+
+
+**### **In the IVREN formulation**
+
+Similarly, if the IVREN formulation is used, the  **measured variables space** remains the same as: $|U_{m}|$, $P_c$ and $Q_c$.
+
+However, the **formulation variable space** is the real and imaginary voltages and currents: $U_{r}$, $U_{i}$, $I_{r}$ and $I_{i}$. So the state estimator requires an extra conversion step to calculate the real and imaginary voltages and currents from the measured space variables. And in that case the **state variable space** is: $U_{r}$, $U_{i}$.
+
+![IVREN-Conv-gif](IVR-anim-once.gif)
+
+
+
+
 Any network formulation has a specific variable space, e.g., ACP includes `vm`,
 `va`, `px` and `qx`[^1]. `w` = `vm^2` is the lifted voltage variable native to branch flow conic and linear forms.
 The conversions for the reduced formulations work identically as their non-reduced equivalent.
@@ -12,13 +39,16 @@ The conversions for the reduced formulations work identically as their non-reduc
       should be rewritten, e.g., `"px"` respectively becomes `"p"`, `"pg"` and
       `"pd"`.
 
-| -         | vm  | va  | cmx | cax | crx | cix | px  | qx  | vr  | vi  |  w  |
-| :-------- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
-| **ACP**   | N   | N   | SF  | X   | F   | F   | N   | N   | X   | X   | X  |
-| **ACR**   | S  | PP  | SF  | X   | MF  | MF  | N   | N   | N   | N   |  X  |
-| **IVR**   | S  | PP  | S  | PP  | N   | N   | M   | M   | N   | N   |   X  |
-| **SDP**   | X  |  X  | X | X   | X   | X   | N*   | N*   | X   | X   |  N  |
-| **LD3F**  | S  |  X  | SF | X   | X   | X   | N   | N   | X   | X   |   N  |
+
+
+| -         | vm  | va  | cmx | cax | crx | cix | px  | qx  | vr  | vi  |  w  | Ptot | Qtot | vll |
+| :-------- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :--  | :--  | :-- |
+| **ACP**   | N   | N   | SF  | X   | F   | F   | N   | N   | X   | X   |  X  |  Σ   |  Σ   |  S  |
+| **ACR**   | S  | PP   | SF  | X   | MF  | MF  | N   | N   | N   | N   |  X  |  Σ   |  Σ   |     |
+| **IVR**   | S  | PP   | S   | PP  | N   | N   | M   | M   | N   | N   |  X  |  Σ   |  Σ   |  S  |
+| **SDP**   | X  |  X   | X   | X   | X   | X   | N*  | N*  | X   | X   |  N  |  Σ   |  Σ   |     |
+| **LD3F**  | S  |  X   | SF  | X   | X   | X   | N   | N   | X   | X   |  N  |  Σ   |  Σ   |     |
+| **IVREN** | S  | PP   | S   | PP  | N   | N   | M   | M   | N   | N   |  X  |  Σ   |  Σ   |  S  |
 
 where:
 - F:  conversion of type Fraction
@@ -29,6 +59,7 @@ where:
 - S: conversion of type Square
 - SF: conversion of type SquareFraction
 - X:  not provided
+- Σ:  sum of the variables
 
 The N* in the SDP formulation indicates that those variable are only available for
 generators, loads and other devices/extensions, but not for measurements that

@@ -8,3 +8,5 @@ docs/build/
 Manifest.toml
 test/data/enwl/measurements/temp.csv
 .vscode/
+*.dbl
+*.DSV

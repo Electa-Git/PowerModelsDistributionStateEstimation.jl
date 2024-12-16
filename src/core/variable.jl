@@ -149,7 +149,7 @@ function variable_mc_measurement(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=
         msr_var = _PMD.ref(pm, nw, :meas, i, "var")
         cmp_id = _PMD.ref(pm, nw, :meas, i, "cmp_id")
         cmp_type = _PMD.ref(pm, nw, :meas, i, "cmp")
-        connections = get_active_connections(pm, nw, cmp_type, cmp_id)
+        connections = get_active_connections(pm, nw, cmp_type, cmp_id, msr_var)
         if no_conversion_needed(pm, msr_var)
             #no additional variable is created, it is already by default in the formulation
         else
