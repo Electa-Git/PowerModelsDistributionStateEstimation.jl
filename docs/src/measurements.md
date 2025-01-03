@@ -18,7 +18,7 @@ In that case it can be seen that the state estimator requires an extra conversio
 ![ACP-Conv-gif](ACP-Conv-once.gif)
 
 
-**### **In the IVREN formulation**
+### In the IVREN formulation
 
 Similarly, if the IVREN formulation is used, the  **measured variables space** remains the same as: $|U_{m}|$, $P_c$ and $Q_c$.
 
