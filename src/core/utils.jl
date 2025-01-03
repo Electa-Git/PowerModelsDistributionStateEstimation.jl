@@ -354,18 +354,11 @@ function remove_virtual_bus!(math)
     
     r_new = math["branch"][virtual_branch]["t_bus"]
     
-    # math["bus"][string(r_new)]["va"] = math["bus"][string(virtual_bus)]["va"]
-    # math["bus"][string(r_new)]["vm"] = math["bus"][string(virtual_bus)]["vm"]
-    # math["bus"][string(r_new)]["vmin"] = math["bus"][string(virtual_bus)]["vmin"]
-    # math["bus"][string(r_new)]["vmax"] = math["bus"][string(virtual_bus)]["vmax"]
     math["bus"][string(r_new)]["bus_type"] = 3
     math["gen"][string(virtual_gen)]["gen_bus"] = r_new
 
     delete!(math["bus"], string(virtual_bus))
     delete!(math["branch"], string(virtual_branch))
-    
-
-    #delete!(math_b["gen"], string(virtual_gen))
 
     return virtual_bus, r_new
 end
