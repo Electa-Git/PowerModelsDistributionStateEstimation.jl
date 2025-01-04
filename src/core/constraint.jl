@@ -410,3 +410,94 @@ end
 
 #     end
 # end
+
+# Explicit Neutral related Constraints
+
+function constraint_mc_generator_power_se(pm::_PMD.IVRENPowerModel, id::Int; nw::Int=_IM.nw_id_default, report::Bool=true, bounded::Bool=true)
+    generator = _PMD.ref(pm, nw, :gen, id)
+    bus =  _PMD.ref(pm, nw,:bus, generator["gen_bus"])
+
+    N = length(generator["connections"])
+    pmin = get(generator, "pmin", fill(-Inf, N))
+    pmax = get(generator, "pmax", fill( Inf, N))
+    qmin = get(generator, "qmin", fill(-Inf, N))
+    qmax = get(generator, "qmax", fill( Inf, N))
+
+    if get(generator, "configuration", WYE) == _PMD.WYE
+        constraint_mc_generator_power_wye_se(pm, nw, id, bus["index"], generator["connections"], pmin, pmax, qmin, qmax; report=report, bounded=bounded)
+    else
+        constraint_mc_generator_power_delta_se(pm, nw, id, bus["index"], generator["connections"], pmin, pmax, qmin, qmax; report=report, bounded=bounded)
+    end
+end
+
+"wye connected generator setpoint constraint for IVR formulation - SE adaptation"
+function constraint_mc_generator_power_wye_se(pm::_PMD.IVRENPowerModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, pmin::Vector, pmax::Vector, qmin::Vector, qmax::Vector; report::Bool=true, bounded::Bool=true)
+    vr =  _PMD.var(pm, nw, :vr, bus_id)
+    vi =  _PMD.var(pm, nw, :vi, bus_id)
+    crg =  _PMD.var(pm, nw, :crg, id)
+    cig =  _PMD.var(pm, nw, :cig, id)
+
+    if bounded
+        for (idx, c) in enumerate(connections[1:end-1])
+            if pmin[c]> -Inf
+                JuMP.@constraint(pm.model, pmin[idx] .<= vr[c]*crg[c]  + vi[c]*cig[c])
+            end
+            if pmax[c]< Inf
+                JuMP.@constraint(pm.model, pmax[idx] .>= vr[c]*crg[c]  + vi[c]*cig[c])
+            end
+            if qmin[c]>-Inf
+                JuMP.@constraint(pm.model, qmin[idx] .<= vi[c]*crg[c]  - vr[c]*cig[c])
+            end
+            if qmax[c]< Inf
+                JuMP.@constraint(pm.model, qmax[idx] .>= vi[c]*crg[c]  - vr[c]*cig[c])
+            end
+        end
+    end
+end
+
+
+
+
+function constraint_mc_current_balance_se(pm::_PMD.IVRENPowerModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
+    #NB only difference with pmd is crd_bus replaced by crd, and same with cid
+    vr = _PMD.var(pm, nw, :vr, i)
+    vi = _PMD.var(pm, nw, :vi, i)
+
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMD._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMD._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd, Dict()); _PMD._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid, Dict()); _PMD._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg, Dict()); _PMD._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig, Dict()); _PMD._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crs   = get(_PMD.var(pm, nw),   :crs, Dict()); _PMD._check_var_keys(crs, bus_storage, "real currentr", "storage")
+    cis   = get(_PMD.var(pm, nw),   :cis, Dict()); _PMD._check_var_keys(cis, bus_storage, "imaginary current", "storage")
+    crsw  = get(_PMD.var(pm, nw),  :crsw, Dict()); _PMD._check_var_keys(crsw, bus_arcs_sw, "real current", "switch")
+    cisw  = get(_PMD.var(pm, nw),  :cisw, Dict()); _PMD._check_var_keys(cisw, bus_arcs_sw, "imaginary current", "switch")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMD._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMD._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+
+    Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
+
+    ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
+
+    for (idx, t) in ungrounded_terminals
+        JuMP.@NLconstraint(pm.model,  sum(cr[a][t] for (a, conns) in bus_arcs if t in conns)
+                                    + sum(crsw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
+                                    + sum(crt[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
+                                    ==
+                                      sum(crg[g][t]         for (g, conns) in bus_gens if t in conns)
+                                    - sum(crs[s][t]         for (s, conns) in bus_storage if t in conns)
+                                    - sum(crd[d][t]         for (d, conns) in bus_loads if t in conns)
+                                    - sum( Gs[idx,jdx]*vr[u] -Bs[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals) # shunts
+                                    )
+        JuMP.@NLconstraint(pm.model, sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
+                                    + sum(cisw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
+                                    + sum(cit[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
+                                    ==
+                                      sum(cig[g][t]         for (g, conns) in bus_gens if t in conns)
+                                    - sum(cis[s][t]         for (s, conns) in bus_storage if t in conns)
+                                    - sum(cid[d][t]         for (d, conns) in bus_loads if t in conns)
+                                    - sum( Gs[idx,jdx]*vi[u] +Bs[idx,jdx]*vr[u] for (jdx,u) in ungrounded_terminals) # shunts
+                                    )
+    end
+end

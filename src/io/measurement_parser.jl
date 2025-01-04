@@ -6,6 +6,9 @@
 # State Estimation.                                                            #
 ################################################################################
 
+abstract type IndustrialENMeasurementsModel end
+
+
 ## CSV to measurement parser
 function dataString_to_array(input::AbstractString)::Array
     if occursin("[", input) && occursin("]", input)

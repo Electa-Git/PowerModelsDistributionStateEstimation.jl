@@ -172,3 +172,75 @@ function variable_mc_generator_current_se(pm::_PMD.AbstractUnbalancedIVRModel; n
     _PMD.variable_mc_generator_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMD.variable_mc_generator_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end
+
+# Explicit Neutral related variables
+
+
+"only total current variables defined over the bus_arcs in PMD are considered: with no shunt admittance, these are
+equivalent to the series current defined over the branches."
+function variable_mc_branch_current(pm::_PMD.IVRENPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+    _PMD.variable_mc_branch_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMD.variable_mc_branch_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+
+    # ADD MISSING SERIES CURRENT VARIABLES
+end
+
+function variable_mc_generator_current_se(pm::_PMD.IVRENPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+    #NB: the difference with PowerModelsDistributions is that pg and qg expressions are not created
+    _PMD.variable_mc_generator_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMD.variable_mc_generator_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+end
+
+"""
+    variable_mc_load_current, IVR current equivalent of variable_mc_load
+"""
+function variable_mc_load_current(pm::_PMD.IVRENPowerModel; kwargs...)
+    variable_mc_load_current_real(pm; kwargs...)
+    variable_mc_load_current_imag(pm; kwargs...)
+end
+
+
+function variable_mc_load_current_real(pm::_PMD.IVRENPowerModel;
+    nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true)
+
+    int_dim = Dict(i => _PMD._infer_int_dim_unit(load, false) for (i,load) in _PMD.ref(pm, nw, :load))
+
+    crd_phases = _PMD.var(pm, nw)[:crd_phases] = Dict(i => JuMP.@variable(pm.model,
+    [c in 1: int_dim[i]], base_name="$(nw)_crd_$(i)"
+    #,start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "crd_start", c, 0.0)
+    ) for i in _PMD.ids(pm, nw, :load)
+    )
+
+    _PMD.var(pm, nw)[:crd] = Dict()
+
+    for i in _PMD.ids(pm, nw, :load)
+        _PMD.var(pm, nw, :crd)[i] = _PMD._merge_bus_flows(pm, [crd_phases[i]..., -sum(crd_phases[i])], _PMD.ref(pm, nw, :load, i)["connections"])
+    end
+
+    crd = _PMD.var(pm, nw, :crd)
+
+    report && _IM.sol_component_value(pm, :pmd, nw, :load, :crd, _PMD.ids(pm, nw, :load), crd)
+
+end
+
+function variable_mc_load_current_imag(pm::_PMD.IVRENPowerModel; nw::Int=_IM.nw_id_default, bounded::Bool=true, report::Bool=true, meas_start::Bool=false)
+
+
+    int_dim = Dict(i => _PMD._infer_int_dim_unit(load, false) for (i,load) in _PMD.ref(pm, nw, :load))
+
+    # Note: `cid_phases` is a Dict of variable reference for phases (no neutral) current variables
+    cid_phases = _PMD.var(pm, nw)[:cid_phases] = Dict(i => JuMP.@variable(pm.model,
+    [c in 1: int_dim[i]], base_name="$(nw)_cid_$(i)"
+    #,start = _PMD.comp_start_value(_PMD.ref(pm, nw, :load, i), "cid_start", c, 0.0)
+    ) for i in _PMD.ids(pm, nw, :load)
+    )
+    _PMD.var(pm, nw)[:cid] = Dict()
+    
+    for i in _PMD.ids(pm, nw, :load)
+        _PMD.var(pm, nw, :cid)[i] = _PMD._merge_bus_flows(pm, [cid_phases[i]..., -sum(cid_phases[i])], _PMD.ref(pm, nw, :load, i)["connections"])
+    end
+    
+    cid = _PMD.var(pm, nw, :cid)
+report && _IM.sol_component_value(pm, :pmd, nw, :load, :cid, _PMD.ids(pm, nw, :load), cid)
+
+end

@@ -513,3 +513,110 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedIVRModel, origi
         JuMP.@constraint(pm.model, original_var[msr.cmp_id][idx]^2 == vr[i]^2 + vr[j]^2 - 2*vr[i]*vr[j] + vi[i]^2 + vi[j]^2 - 2*vi[i]*vi[j])
     end
 end
+
+# Explicit Neutral related conversion functions 
+
+#                                                                 ↗  :vmn        ↗ Square(i, :bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
+function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::Square; nw=nw)
+    new_var = []
+    # prepare the :vi and :vr inside pm.model
+    for nvn in msr.elements
+        if msr.cmp_type == :branch
+            push!(new_var, _PMD.var(pm, nw, nvn, (msr.cmp_id, _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"])))
+        else
+            push!(new_var, _PMD.var(pm, nw, nvn, msr.cmp_id))
+        end
+    end
+    
+
+    msr.cmp_type == :branch ? id = (msr.cmp_id,  _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)  # 1:4 for buses and branches while 1:3 for loads and gens by nature
+
+    JuMP.@constraint(pm.model, [c in setdiff(conn,_N_IDX)],
+    original_var[id][c]^2 == (sum( (n[c]- n[_N_IDX])^2 for n in new_var ))
+
+    )
+
+end
+
+#                                                                    ↗  :vll        ↗ LineVoltage(i, :bus, cmp_id, _PMD.ref(pm,nw,:bus,cmp_id)["index"], [:vi, :vr])
+function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::LineVoltage; nw=nw)
+    # msr.elements = [:vi, :vr]
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id) 
+    vr = _PMD.var(pm, nw, msr.elements[2], msr.cmp_id) # msr.elements[2] = :vr  0_vr_3[]
+    vi = _PMD.var(pm, nw, msr.elements[1], msr.cmp_id) # msr.elements[1] = :vi
+    index_pairs = length(conn) > 2 ?  [(1,2), (2,3), (3,1)] :  [tuple(setdiff(conn, _N_IDX)...)] # checks if :vll is for three phase or single line-to-line load
+    for (idx, (i, j)) in enumerate(index_pairs)
+        JuMP.@constraint(pm.model, original_var[msr.cmp_id][idx]^2 == vr[i]^2 + vr[j]^2 - 2*vr[i]*vr[j] + vi[i]^2 + vi[j]^2 - 2*vi[i]*vi[j])
+    end
+end
+
+#                                                               ↗  :pd || :qd         ↗ Multiplication(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
+#                                                               ↗  :pg || :qg         ↗ Multiplication(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
+function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::Multiplication; nw=nw)
+
+    m1 = []
+    m2 = []
+
+    for m in msr.mult1
+        if occursin("v", String(m)) && msr.cmp_type != :bus
+            push!(m1, _PMD.var(pm, nw, m, msr.bus_ind))
+        elseif msr.cmp_type == :branch
+            push!(m1, _PMD.var(pm, nw, m, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
+        else
+            push!(m1, _PMD.var(pm, nw, m, msr.cmp_id))
+        end
+    end
+
+    for mm in msr.mult2
+        if occursin("v", String(mm)) && msr.cmp_type != :bus
+            push!(m2, _PMD.var(pm, nw, mm, msr.bus_ind))
+        elseif msr.cmp_type == :branch
+            push!(m2, _PMD.var(pm, nw, mm, (msr.cmp_id, msr.bus_ind, _PMD.ref(pm, nw, :branch,msr.cmp_id)["t_bus"])))
+        else
+            push!(m2, _PMD.var(pm, nw, mm, msr.cmp_id))
+        end
+    end
+    msr.cmp_type == :branch ? id = (msr.cmp_id,  msr.bus_ind, _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
+
+    conn = setdiff(conn,_N_IDX)
+    if occursin("p", String(msr.msr_sym))
+        pcons = JuMP.@constraint(pm.model, [c in conn],
+            original_var[id][c] == m1[1][c]*(m2[1][c]-m2[1][_N_IDX])+m1[2][c]*(m2[2][c]-m2[2][_N_IDX]) 
+            )
+            display(pcons)
+    elseif occursin("q", String(msr.msr_sym))
+        qcons= JuMP.@constraint(pm.model, [c in conn],
+            original_var[id][c] == -m1[2][c]*(m2[1][c]-m2[1][_N_IDX])+m1[1][c]*(m2[2][c]-m2[2][_N_IDX])
+            )
+            display(qcons)
+    end
+end
+
+
+#                                                               ↗  :ptot || :qtot         ↗ PowerSum(msr, i,:load, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["load_bus"], [:crd, :cid], [:vr, :vi])
+#                                                               ↗  :ptot || :qtot         ↗ PowerSum(msr, i,:gen, cmp_id, _PMD.ref(pm,nw,:gen,cmp_id)["gen_bus"], [:crg, :cig], [:vr, :vi])
+function create_conversion_constraint(pm::_PMD.IVRENPowerModel, original_var, msr::PowerSum; nw=nw)
+
+    # decide if its a load or a generator
+    cmp_indication =    msr.cmp_type == :load ? "d" : msr.cmp_type == :gen ? "g" : ""
+    cs = Symbol.(String.(msr.arr1).*cmp_indication)
+    vs = msr.arr2
+    vr = _PMD.var(pm,nw, vs[1],msr.bus_ind)
+    vi = _PMD.var(pm,nw, vs[2],msr.bus_ind)
+    cr = _PMD.var(pm,nw, cs[1],msr.cmp_id)
+    ci = _PMD.var(pm,nw, cs[2],msr.cmp_id)
+
+    conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
+    conn = setdiff(conn,_N_IDX)
+    if occursin("p", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, 
+            original_var[msr.cmp_id] .- sum(cr[c]*(vr[c]-vr[_N_IDX])+ci[c]*(vi[c]-vi[_N_IDX]) for c in conn) == 0
+        )
+    elseif occursin("q", String(msr.msr_sym))
+        JuMP.@constraint(pm.model, 
+            original_var[msr.cmp_id] .- sum(-ci[c]*(vr[c]-vr[_N_IDX])+cr[c]*(vi[c]-vi[_N_IDX])  for c in conn) == 0
+        )
+    end
+end
