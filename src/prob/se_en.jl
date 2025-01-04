@@ -1,5 +1,5 @@
 
-abstract type SM_ind_en_Models end
+abstract type IndustrialENMeasurementsModel end
 
 "solves state estimation in current and voltage rectangular coordinates for an explicit neutral model (IVREN formulation)"
 function solve_ivr_en_mc_se(data::Union{Dict{String,<:Any},String}, solver; kwargs...)

@@ -127,7 +127,7 @@ function get_measures(model::DataType, cmp_type::String)
         if cmp_type == "bus"  return ["w"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
-    elseif model <: SM_ind_en_Models #TODO: improve naming :IndustrialENMeasurementsModel
+    elseif model <: IndustrialENMeasurementsModel
         if cmp_type == "bus"  return ["vmn"] end
         #if cmp_type == "bus"  return ["vr","vi"] end
         if cmp_type == "bus-Δ"  return ["vll"] end
