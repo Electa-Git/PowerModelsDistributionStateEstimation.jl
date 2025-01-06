@@ -16,7 +16,6 @@ import Polynomials as _Poly
 import PowerModels
 import PowerModelsDistribution as _PMD
 import Statistics
-# import SCS #removed while SDP tests are not active
 using Test
 
 #network and feeder from ENWL for tests
