@@ -70,8 +70,31 @@ function constraint_mc_residual(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; n
 end
 
 # Constraints related to the ANGULAR REFERENCE MODELS
+########################################################
+## ACP
+function variable_mc_bus_voltage(pm::_PMD.AbstractUnbalancedPowerModel; bounded = true)
+    _PMD.variable_mc_bus_voltage_magnitude_only(pm; bounded = true)
+    _PMDSE.variable_mc_bus_voltage_angle(pm; bounded = true)
+end
 
-# ACP
+
+"""
+    variable_mc_bus_voltage_angle(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
+
+Defines the bus voltage angle variables for a multi-conductor unbalanced power model.
+
+# Arguments
+- `pm::AbstractUnbalancedPowerModel`: The power model instance.
+- `nw::Int`: The network identifier (default is `_PMD.nw_id_default`).
+- `bounded::Bool`: If `true`, applies bounds to the voltage angle variables based on the bus data (default is `true`).
+- `report::Bool`: If `true`, reports the solution component values (default is `true`).
+
+# Description
+This function initializes the bus voltage angle variables for each bus in the power model. It sets the starting values for the voltage angles based on default values or specified start values in the bus data. If `bounded` is `true`, it applies lower and upper bounds to the voltage angle variables based on the `vamin` and `vamax` fields in the bus data. If `report` is `true`, it reports the solution component values for the voltage angles.
+
+# Notes
+- The starting values for the voltage angles are converted from degrees to radians.
+"""
 function variable_mc_bus_voltage_angle(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
     terminals = Dict(i => bus["terminals"] for (i,bus) in _PMD.ref(pm, nw, :bus))
     va_start_defaults = Dict(i => deg2rad.([0.0, -120.0, 120.0, fill(0.0, length(terms))...][terms]) for (i, terms) in terminals)
@@ -81,9 +104,6 @@ function variable_mc_bus_voltage_angle(pm::_PMD.AbstractUnbalancedPowerModel; nw
             
         ) for i in _PMD.ids(pm, nw, :bus)
     )
-
-
-
 
     if bounded
         for (i,bus) in _PMD.ref(pm, nw, :bus)
@@ -100,38 +120,10 @@ function variable_mc_bus_voltage_angle(pm::_PMD.AbstractUnbalancedPowerModel; nw
         end
     end
 
-
     report && _IM.sol_component_value(pm, _PMD.pmd_it_sym, nw, :bus, :va, _PMD.ids(pm, nw, :bus), va)
 end
 
-
-""
-function variable_mc_bus_voltage_magnitude_only(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
-    terminals = Dict(i => bus["terminals"] for (i,bus) in _PMD.ref(pm, nw, :bus))
-    vm = _PMD.var(pm, nw)[:vm] = Dict(i => JuMP.@variable(pm.model,
-            [t in terminals[i]], base_name="$(nw)_vm_$(i)",
-            start = _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), ["vm_start", "vm"], t, 1.0)
-        ) for i in _PMD.ids(pm, nw, :bus)
-    )
-
-    if bounded
-        for (i,bus) in _PMD.ref(pm, nw, :bus)
-            for (idx, t) in enumerate(terminals[i])
-                if haskey(bus, "vmin")
-                    _PMD.set_lower_bound(vm[i][t], bus["vmin"][idx])
-                end
-                if haskey(bus, "vmax")
-                    _PMD.set_upper_bound(vm[i][t], bus["vmax"][idx])
-                end
-            end
-        end
-        @warn " vm bounds defined "
-    end
-
-    report && _IM.sol_component_value(pm, _PMD.pmd_it_sym, nw, :bus, :vm, _PMD.ids(pm, nw, :bus), vm)
-end
-
-
+## ACR
 
 ""
 function variable_mc_bus_voltage(pm::_PMD.AbstractUnbalancedACRModel; nw::Int=_PMD.nw_id_default, bounded::Bool=true, report::Bool=true)
@@ -182,7 +174,7 @@ function variable_mc_bus_voltage(pm::_PMD.AbstractUnbalancedACRModel; nw::Int=_P
     # apply bounds if bounded
     if bounded
         for i in _PMD.ids(pm, nw, :bus)
-            constraint_mc_voltage_magnitude_bounds(pm, i; nw=nw)
+            _PMD.constraint_mc_voltage_magnitude_bounds(pm, i; nw=nw)
             constraint_mc_voltage_angle_bounds(pm, i; nw=nw)
         end
     end
@@ -198,28 +190,6 @@ function variable_mc_bus_voltage_real(pm::_PMD.AbstractUnbalancedACRModel; nw::I
             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), "vr_start", t, 1.0)
         ) for i in _PMD.ids(pm, nw, :bus)
     )
-
-    # if bounded
-    #     for (i,bus) in _PMD.ref(pm, nw, :bus)
-    #         if haskey(bus, "vmax")
-    #             for (idx,t) in enumerate(terminals[i])
-    #                 set_lower_bound(vr[i][t], -bus["vmax"][idx])
-    #                 set_upper_bound(vr[i][t],  bus["vmax"][idx])
-    #             end
-    #         end
-    #         if haskey(bus, "vamax") && haskey(bus, "vamin")
-    #             for (idx,t) in enumerate(terminals[i])
-    #                 va_max = bus["vamax"][idx]
-    #                 va_min = bus["vamin"][idx]
-    #                 vm = sqrt(vr[i][t]^2 + _PMD.var(pm, nw, :vi, i)[t]^2)
-    #                 JuMP.@constraint(pm.model, cos(va_min) <= vr[i][t] / vm)
-    #                 JuMP.@constraint(pm.model, vr[i][t] / vm <= cos(va_max))
-    #                 @warn " vr bounds defined based on va bounds "
-    #             end
-    #         end
-    #     end
-    # end
-
     report && _IM.sol_component_value(pm, _PMD.pmd_it_sym, nw, :bus, :vr, _PMD.ids(pm, nw, :bus), vr)
 end
 
@@ -232,88 +202,9 @@ function variable_mc_bus_voltage_imaginary(pm::_PMD.AbstractUnbalancedACRModel; 
     start = _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), "vi_start", t, 0.0)
     ) for i in _PMD.ids(pm, nw, :bus)
     )
-    
-    # if bounded
-    #     for (i,bus) in _PMD.ref(pm, nw, :bus)
-    #         if haskey(bus, "vmax")
-    #             for (idx,t) in enumerate(terminals[i])
-    #                 set_lower_bound(vi[i][t], -bus["vmax"][idx])
-    #                 set_upper_bound(vi[i][t],  bus["vmax"][idx])
-    #             end
-    #         end
-    #         if haskey(bus, "vamax") && haskey(bus, "vamin")
-    #             for (idx,t) in enumerate(terminals[i])
-    #                 va_max = bus["vamax"][idx]
-    #                 va_min = bus["vamin"][idx]
-    #                 vm = sqrt(_PMD.var(pm, nw, :vr, i)[t]^2 + vi[i][t]^2)
-    #                 JuMP.@constraint(pm.model, sin(va_min) <= vi[i][t] / vm)
-    #                 JuMP.@constraint(pm.model, vi[i][t] / vm <= sin(va_max))
-    #                 @warn " vi bounds defined based on va bounds "
-    #             end
-    #         end
-    #     end
-    # end
-
     report && _IM.sol_component_value(pm, _PMD.pmd_it_sym, nw, :bus, :vi, _PMD.ids(pm, nw, :bus), vi)
 end
 
-function constraint_mc_voltage_magnitude_bounds(pm::_PMD.AbstractUnbalancedACRModel, i::Int; nw::Int=_PMD.nw_id_default)::Nothing
-    bus = _PMD.ref(pm, nw, :bus, i)
-    vmin = _PMD.get(bus, "vmin", fill(0.0, length(bus["terminals"])))
-    vmax = _PMD.get(bus, "vmax", fill(Inf, length(bus["terminals"])))
-    constraint_mc_voltage_magnitude_bounds(pm, nw, i, vmin, vmax)
-    nothing
-end
-
-"`vmin <= vm[i] <= vmax`"
-function constraint_mc_voltage_magnitude_bounds(pm::_PMD.AbstractUnbalancedACRModel, nw::Int, i::Int, vmin::Vector{<:Real}, vmax::Vector{<:Real})
-    @assert all(vmin .<= vmax)
-    vr = _PMD.var(pm, nw, :vr, i)
-    vi = _PMD.var(pm, nw, :vi, i)
-    
-    for (idx,t) in enumerate(_PMD.ref(pm, nw, :bus, i)["terminals"])
-        JuMP.@constraint(pm.model, vmin[idx]^2 <= vr[t]^2 + vi[t]^2)
-        if vmax[idx] < Inf
-            JuMP.@constraint(pm.model, vmax[idx]^2 >= vr[t]^2 + vi[t]^2)
-        end
-    end
-end
-
-
-# Angular reference for ACR/IVR  with the `atan()` function
-# function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel, i::Int; nw::Int=_PMD.nw_id_default)::Nothing
-#     bus = _PMD.ref(pm, nw, :bus, i)
-#     if haskey(bus, "vamin") && haskey(bus, "vamax")    
-#         vamin = _PMD.get(bus, "vamin", fill(0.0, length(bus["terminals"])))
-#         vamax = _PMD.get(bus, "vamax", fill(Inf, length(bus["terminals"])))
-#         constraint_mc_voltage_angle_bounds(pm, nw, i, vamin, vamax)
-#     end
-#     nothing
-# end
-
-# "`vamin <= va[i] <= vamax`"
-# function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel, nw::Int, i::Int, vamin::Vector{<:Real}, vamax::Vector{<:Real})
-#     @assert all(vamin .<= vamax)
-#     vr = _PMD.var(pm, nw, :vr, i)
-#     vi = _PMD.var(pm, nw, :vi, i)
-
-#     for (idx,t) in enumerate(_PMD.ref(pm, nw, :bus, i)["terminals"])
-
-#         if vamin[idx] > -Inf
-#             JuMP.@NLconstraint(pm.model, vamin[idx] <= atan(vi[t],vr[t]))
-#             @warn "consrtained minimum angle vamin at $(vamin[idx]) for bus $i to be less than $(atan(vi[t],vr[t]))" 
-#         end
-
-#         if vamax[idx] < Inf
-#             JuMP.@NLconstraint(pm.model, vamax[idx] >= atan(vi[t],vr[t]))
-#             @warn "consrtained maximum angle vamax at $(vamax[idx]) for bus $i to be greater than $(atan(vi[t],vr[t]))"
-#         end
-
-#     end
-# end
-
-
-# Angular reference for ACR/IVR  without `atan()` function - by taking tan both sides
 function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel, i::Int; nw::Int=_PMD.nw_id_default)::Nothing
     bus = _PMD.ref(pm, nw, :bus, i)
     terminals = length(bus["terminals"])
@@ -332,21 +223,6 @@ function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel,
     vr = _PMD.var(pm, nw, :vr, i)
     vi = _PMD.var(pm, nw, :vi, i)
 
-    # example values   
-    # va = [0, -120, 120]
-    # vamin = [0, -120.55, 119.0]
-    # vamax = [0, -119, 121]
-    # va = [0, -120, 120]
-    # vamin = [0, -Inf, -Inf]
-    # vamax = [0, Inf, Inf]
-
-    # then to relate the vamin and vamax to the va to calculate the theta around which they can deactivated
-    
-
-
-    # θₘᵢₙ = va - vamin  
-    # θₘₐₓ = vamax - va
-
     for (idx,t) in enumerate(_PMD.ref(pm, nw, :bus, i)["terminals"])
         if vamin[idx] > -Inf
             JuMP.@NLconstraint(pm.model, tan(vamin[idx]) <= vi[t]/vr[t])
@@ -361,57 +237,8 @@ function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel,
     end
 end
 
-
-# Angular reference for ACR/IVR  without `atan()` function - by constraining the difference between the angles instead of bounding individual angles
-
-# function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel, i::Int; nw::Int=_PMD.nw_id_default)::Nothing
-#     bus = _PMD.ref(pm, nw, :bus, i)
-#     terminals = length(bus["terminals"])
-#     if haskey(bus, "vamin") && haskey(bus, "vamax")    
-#         va = haskey(bus, "va_start") ? bus["va_start"] : haskey(bus, "va") ? bus["va"] : [deg2rad.([0, -120, 120])..., zeros(length(terminals))...][terminals]
-#         vamin = _PMD.get(bus, "vamin", fill(0.0, length(bus["terminals"])))
-#         vamax = _PMD.get(bus, "vamax", fill(Inf, length(bus["terminals"])))
-#         constraint_mc_voltage_angle_bounds(pm, nw, i, va, vamin, vamax)
-#     end
-#     nothing
-# end
-
-# "`vamin <= va[i] <= vamax`"
-# function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel, nw::Int, i::Int, va::Vector{<:Real}, vamin::Vector{<:Real}, vamax::Vector{<:Real})
-#     @assert all(vamin .<= vamax)
-#     vr = _PMD.var(pm, nw, :vr, i)
-#     vi = _PMD.var(pm, nw, :vi, i)
-
-#     # example values   
-#     # va = [0, -120, 120]
-#     # vamin = [0, -120.55, 119.0]
-#     # vamax = [0, -119, 121]
-#     # va = [0, -120, 120]
-#     # vamin = [0, -Inf, -Inf]
-#     # vamax = [0, Inf, Inf]
-
-#     # then to relate the vamin and vamax to the va to calculate the theta around which they can deactivated
-    
-
-
-#     # θₘᵢₙ = va - vamin  
-#     # θₘₐₓ = vamax - va
-
-#     for (idx,t) in enumerate(_PMD.ref(pm, nw, :bus, i)["terminals"])
-#         if vamin[idx] > -Inf
-#             JuMP.@NLconstraint(pm.model, tan(vamin[idx]) <= vi[t]/vr[t])
-#             @warn "consrtained minimum angle vamin at $(vamin[idx]) for bus $i to be less than $(atan(vi[t],vr[t]))" 
-#         end
-
-#         if vamax[idx] < Inf
-#             JuMP.@NLconstraint(pm.model, tan(vamax[idx]) >= vi[t]/vr[t])
-#             @warn "consrtained maximum angle vamax at $(vamax[idx]) for bus $i to be greater than $(atan(vi[t],vr[t]))"
-#         end
-
-#     end
-# end
-
 # Explicit Neutral related Constraints
+########################################################
 
 function constraint_mc_generator_power_se(pm::_PMD.IVRENPowerModel, id::Int; nw::Int=_IM.nw_id_default, report::Bool=true, bounded::Bool=true)
     generator = _PMD.ref(pm, nw, :gen, id)
@@ -454,9 +281,6 @@ function constraint_mc_generator_power_wye_se(pm::_PMD.IVRENPowerModel, nw::Int,
         end
     end
 end
-
-
-
 
 function constraint_mc_current_balance_se(pm::_PMD.IVRENPowerModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
     #NB only difference with pmd is crd_bus replaced by crd, and same with cid

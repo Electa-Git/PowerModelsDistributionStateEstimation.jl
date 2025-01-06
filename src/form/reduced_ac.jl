@@ -69,9 +69,3 @@ end
 function variable_mc_bus_voltage(pm::ReducedACRUPowerModel; bounded = true)
     _PMD.variable_mc_bus_voltage(pm; bounded = bounded)
 end
-
-"If the formulation is not reduced, delegates back to PowerModelsDistributionStateEstimation"
-function variable_mc_bus_voltage(pm::_PMD.AbstractUnbalancedPowerModel; bounded = true)
-    _PMDSE.variable_mc_bus_voltage_magnitude_only(pm; bounded = true)
-    _PMDSE.variable_mc_bus_voltage_angle(pm; bounded = true)
-end
