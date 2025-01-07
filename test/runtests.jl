@@ -35,10 +35,8 @@ ipopt_solver = _PMDSE.optimizer_with_attributes(Ipopt.Optimizer,"max_cpu_time" =
                                                          "print_level" => 0, 
                                                          "mu_strategy" => "adaptive")
 
-# scs_solver = _PMDSE.optimizer_with_attributes(SCS.Optimizer, "max_iters"=>20000, "eps"=>1e-5,
-#                                                             "alpha"=>0.4, "verbose"=>0) #deactivated while SDP tests not active
-
 @testset "PowerModelsDistributionStateEstimation" begin
+    include("test_utils.jl")
     include("bad_data.jl")
     include("distributions.jl")
     include("estimation_criteria.jl")
