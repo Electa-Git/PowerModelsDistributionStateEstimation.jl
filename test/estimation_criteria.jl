@@ -110,7 +110,7 @@
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
         @test se_result_mixed["termination_status"]  ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]
-        @test isapprox(abs(max_err-max_err_mixed), 0.0; atol =1)
-        @test isapprox(abs(avg-avg_mixed), 0.0; atol = 1)
+        @test isapprox(abs(max_err-max_err_mixed), 0.0; atol =1e-3)
+        @test isapprox(abs(avg-avg_mixed), 0.0; atol = 1e-4)
     end
 end
