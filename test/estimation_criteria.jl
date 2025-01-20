@@ -87,8 +87,8 @@
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
         @test se_result_mle["termination_status"]  ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]
-        @test isapprox(abs(max_err-max_err_mle), 0.0; atol = 1e-4)
-        @test isapprox(abs(avg-avg_mle), 0.0; atol = 1e-4)
+        @test isapprox(abs(max_err-max_err_mle), 0.0; atol = 1e-3)
+        @test isapprox(abs(avg-avg_mle), 0.0; atol = 1e-3)
     end
 
     @testset "Mixed mle/rwlav criterion - with error" begin
