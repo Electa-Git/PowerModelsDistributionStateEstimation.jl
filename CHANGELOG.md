@@ -1,3 +1,9 @@
+## v0.8.0
+- @MohamedNumair adds:
+    - explicit nuetral modelling
+    - bounding angles capabilities for angular reference
+    - industrial-grade measurement support (:vll, :ptot, :qtot)
+
 ## v0.7.0
 - updates for compatibility with PowerModelsDistribution v0.14 and newer versions of JuMP(+solvers), CSV, DataFrames .... (see Project.toml)
   - with the contribution of @pseudocubic
