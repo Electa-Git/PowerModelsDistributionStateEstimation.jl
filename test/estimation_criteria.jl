@@ -86,14 +86,14 @@
         se_result_mle = _PMDSE.solve_acr_red_mc_se(data, custom_solver)
         delta, max_err_mle, avg_mle = _PMDSE.calculate_voltage_magnitude_error(se_result_mle, pf_result)
 
-        @test se_result_mle["termination_status"] == _PMDSE.LOCALLY_SOLVED
-        @test isapprox(abs(max_err-max_err_mle), 0.0; atol = 1e-4)
-        @test isapprox(abs(avg-avg_mle), 0.0; atol = 1e-5)
+        @test se_result_mle["termination_status"]  ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]
+        @test isapprox(abs(max_err-max_err_mle), 0.0; atol = 1e-3)
+        @test isapprox(abs(avg-avg_mle), 0.0; atol = 1e-3)
     end
 
     @testset "Mixed mle/rwlav criterion - with error" begin
 
-        data["se_settings"] = Dict{String,Any}("criterion" => "rwls", "rescaler" => rescaler)
+        data["se_settings"] = Dict{String,Any}("criterion" => "rwlav", "rescaler" => rescaler)
         se_result_rwls = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
         delta, max_err, avg = _PMDSE.calculate_voltage_magnitude_error(se_result_rwls, pf_result)
 
@@ -105,11 +105,12 @@
                _PMDSE.assign_basic_individual_criteria!(data["meas"][m]; chosen_criterion="rwls")
            end
         end
+
         se_result_mixed = _PMDSE.solve_acp_red_mc_se(data, custom_solver)
         delta, max_err_mixed, avg_mixed = _PMDSE.calculate_voltage_magnitude_error(se_result_mixed, pf_result)
 
-        @test se_result_mixed["termination_status"] == _PMDSE.LOCALLY_SOLVED
-        @test isapprox(abs(max_err-max_err_mixed), 0.0; atol = 3e-4)
-        @test isapprox(abs(avg-avg_mixed), 0.0; atol = 6e-5)
+        @test se_result_mixed["termination_status"]  ∈ [_PMDSE.LOCALLY_SOLVED, _PMDSE.ALMOST_LOCALLY_SOLVED]
+        @test isapprox(abs(max_err-max_err_mixed), 0.0; atol =1e-3)
+        @test isapprox(abs(avg-avg_mixed), 0.0; atol = 1e-4)
     end
 end

@@ -41,6 +41,7 @@ const _RAN = Random
 const _SF  = SpecialFunctions
 const _STT = Statistics
 
+const _N_IDX = 4
 # paths
 const BASE_DIR = dirname(@__DIR__)
 
@@ -81,6 +82,7 @@ include("io/polynomials.jl")
 include("io/postprocessing.jl")
 
 include("prob/se.jl")
+include("prob/se_en.jl")
 
 # export
 include("core/export.jl")

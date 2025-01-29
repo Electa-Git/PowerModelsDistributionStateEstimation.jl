@@ -12,6 +12,8 @@ makedocs(
                             "Input Data Format"                       => "input_data_format.md",
                             "Measurements and Conversions"            => "measurements.md",
                             "State Estimation Criteria"               => "se_criteria.md",
+                            "Angular Reference Models"                => "angular_ref.md",
+                            "Explicit Neutral Models"                 => "explicit_neutral_models.md",
                             "Bad Data Detection and Identification"   => "bad_data.md",
                             ],
              "Library " => [

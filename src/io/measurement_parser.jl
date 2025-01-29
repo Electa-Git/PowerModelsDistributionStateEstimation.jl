@@ -6,9 +6,12 @@
 # State Estimation.                                                            #
 ################################################################################
 
+abstract type IndustrialENMeasurementsModel end
+
+
 ## CSV to measurement parser
 function dataString_to_array(input::AbstractString)::Array
-    if size(split(input, ","))[1] > 1
+    if occursin("[", input) && occursin("]", input)
         rm_brackets = input[2:(end-1)]
         raw_string = split(rm_brackets, ",")
         float_array = [parse(Float64, ss) for ss in raw_string]
@@ -105,6 +108,11 @@ function get_measures(model::DataType, cmp_type::String)
         if cmp_type == "bus"  return ["vm"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
+    elseif model  <: _PMD.IVRENPowerModel
+        # NB: EN IVR AbstractExplicitNeutralIVRModel is a subtype of ACR, therefore it should preceed ACR and superceeds IVRENPowerModel (maybe and IVRReducedENPowerModel)
+        if cmp_type == "bus"  return ["vr","vi"] end
+        if cmp_type == "gen"  return ["crg","cig"] end
+        if cmp_type == "load" return ["crd","cid"] end #no cxd_bus
     elseif model  <: _PMD.AbstractUnbalancedIVRModel
         # NB: IVR is a subtype of ACR, therefore it should preceed ACR
         if cmp_type == "bus"  return ["vr","vi"] end
@@ -122,6 +130,17 @@ function get_measures(model::DataType, cmp_type::String)
         if cmp_type == "bus"  return ["w"] end
         if cmp_type == "gen"  return ["pg","qg"] end
         if cmp_type == "load" return ["pd","qd"] end
+    elseif model <: IndustrialENMeasurementsModel
+        if cmp_type == "bus"  return ["vmn"] end
+        #if cmp_type == "bus"  return ["vr","vi"] end
+        if cmp_type == "bus-Δ"  return ["vll"] end
+        #if cmp_type == "bus-Δ"  return ["vr","vi"] end
+        #if cmp_type == "bus-Δ"  return ["vmn"] end
+        if cmp_type == "load-Δ"  return ["ptot","qtot"] end
+        #if cmp_type == "load-Δ"  return ["pd","qd"] end
+        #if cmp_type == "load" return ["pd","qd"] end
+        if cmp_type == "gen"  return ["pg","qg"] end
+        #if cmp_type == "gen-Δ"  return ["pg","qg"] end #doesn't happen -for now- but for completeness
     end
     return []
 end
@@ -146,29 +165,30 @@ init_measurements() =
 function write_cmp_measurement!(df::_DFS.DataFrame, model::Type, cmp_id::String, cmp_type::String, cmp_data::Dict{String,Any},
                                         cmp_res::Dict{String,Any}, phases, very_basic_case::Bool; exclude::Vector{String}=String[], σ::Float64)
 
-    if length(phases) == 1
-        phases = phases[1]
-        ph = 1
-    else
-        ph = [1,2,3]
-    end
+    ph = [1:length(phases)...]
 
     if !repeated_measurement(df, cmp_id, cmp_type, phases)
         config = get_configuration(cmp_type, cmp_data)
-        for meas_var in get_measures(model, cmp_type) if !(meas_var in exclude)
-            par_2 = very_basic_case ? string(get_sigma(σ, meas_var,phases)) : string(length(phases) == 1 ? σ : σ.*ones(length(phases)))
+        for meas_var in get_measures(model, cmp_type) 
+            if !(meas_var in exclude)
+            par_1 = meas_var == "ptot" || meas_var == "qtot" ?  string(cmp_res[meas_var][1]) : string(cmp_res[meas_var][ph])
+            par_2 = meas_var == "ptot" || meas_var == "qtot" ?  string(get_sigma(σ, meas_var,1))  : string(get_sigma(σ, meas_var,phases)) 
             push!(df, [length(df.meas_id)+1,                  # meas_id
-                       cmp_type,                              # cmp_type
+                       split(cmp_type,"-")[1],                              # cmp_type
                        cmp_id,                                # cmp_id
                        config,                                # config
                        reduce_name(meas_var),                 # meas_var
                        string(phases),                        # phase
                        "Normal",                              # dst
-                       string(cmp_res[meas_var][ph]),         # par_1
+                       par_1,                                 # par_1
                        par_2,                                 # par_2
                        missing, missing, missing             # par_3,4,crit
                       ])
-    end end end
+            end 
+        end 
+    else
+     @warn "Measurement for $cmp_type[$cmp_id] already present in the dataframe"
+    end
 end
 function write_cmp_measurements!(df::_DFS.DataFrame, model::Type, cmp_type::String,
                                  data::Dict{String,Any}, pf_results::Dict{String,Any}, very_basic_case::Bool;
@@ -176,15 +196,28 @@ function write_cmp_measurements!(df::_DFS.DataFrame, model::Type, cmp_type::Stri
     for (cmp_id, cmp_res) in pf_results["solution"][cmp_type]
         # write the properties for the component
         cmp_data = data[cmp_type][cmp_id]
-        phases = cmp_data["connections"]
+        phases = setdiff(cmp_data["connections"],[_N_IDX])
         σ_cmp = isa(σ, Dict) ? σ[cmp_type] : σ
-        write_cmp_measurement!(df, model, cmp_id, cmp_type, cmp_data, cmp_res, phases, very_basic_case, exclude = exclude, σ = σ_cmp)
-        # write the properties for its bus
-        cmp_id = string(cmp_data["$(cmp_type)_bus"])
-        cmp_data = data["bus"][cmp_id]
-        cmp_res = pf_results["solution"]["bus"][cmp_id]
-        σ_cmp = isa(σ, Dict) ? σ["bus"] : σ
-        write_cmp_measurement!(df, model, cmp_id, "bus", cmp_data, cmp_res, cmp_data["terminals"], very_basic_case, exclude = exclude, σ = σ_cmp)
+        
+        if cmp_data["configuration"] == _PMD.WYE
+            write_cmp_measurement!(df, model, cmp_id, cmp_type, cmp_data, cmp_res, phases, very_basic_case, exclude = exclude, σ = σ_cmp)
+            # write the properties for its bus
+            cmp_id = string(cmp_data["$(cmp_type)_bus"])
+            cmp_data = data["bus"][cmp_id]
+            cmp_res = pf_results["solution"]["bus"][cmp_id]
+            σ_cmp = isa(σ, Dict) ? σ["bus"] : σ
+            write_cmp_measurement!(df, model, cmp_id, "bus", cmp_data, cmp_res, cmp_data["terminals"], very_basic_case, exclude = exclude, σ = σ_cmp)
+        elseif cmp_data["configuration"] ==  _PMD.DELTA
+            write_cmp_measurement!(df, model, cmp_id, "$cmp_type-Δ", cmp_data, cmp_res, phases, very_basic_case, exclude = exclude, σ = σ_cmp)
+            # write the properties for its bus
+            cmp_id = string(cmp_data["$(cmp_type)_bus"])
+            cmp_data = data["bus"][cmp_id]
+            cmp_res = pf_results["solution"]["bus"][cmp_id]
+            σ_cmp = isa(σ, Dict) ? σ["bus"] : σ
+            write_cmp_measurement!(df, model, cmp_id, "bus-Δ", cmp_data, cmp_res, cmp_data["terminals"], very_basic_case, exclude = exclude, σ = σ_cmp)
+        else 
+        error("Configuration of $cmp_data[$cmp_id] not recognized")
+        end
     end
 end
 """

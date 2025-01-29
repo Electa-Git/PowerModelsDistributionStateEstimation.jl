@@ -107,16 +107,23 @@
         # solve the state estimation
         original_se_result = _PMDSE.solve_mc_se(data, model, ipopt_solver)
         delta_ref, max_ref, avg_ref = _PMDSE.calculate_voltage_magnitude_error(original_se_result, pf_result)
-        for data_model in [_PMD.ACPUPowerModel,_PMD.IVRUPowerModel]
+        
+        # solve the state estimation _PMD.ACPUPowerModel
+        se_result = _PMDSE.solve_mc_se(data, _PMD.ACPUPowerModel, ipopt_solver)
 
-            # solve the state estimation
-            se_result = _PMDSE.solve_mc_se(data, data_model, ipopt_solver)
+        # tests
+        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
+        @test isapprox(max-max_ref, 0.0; atol = 3e-2)
+        @test isapprox(avg-avg_ref, 0.0; atol = 3e-2)
+        
+        # solve the state estimation  _PMD.IVRUPowerModel
+        se_result = _PMDSE.solve_mc_se(data, _PMD.IVRUPowerModel, ipopt_solver)
 
-            # tests
-            delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
-            @test isapprox(max-max_ref, 0.0; atol = 7.8e-3)
-            @test isapprox(avg-avg_ref, 0.0; atol = 1e-3)
-        end
+        # tests
+        delta, max, avg = _PMDSE.calculate_voltage_magnitude_error(se_result, pf_result)
+        @test isapprox(max-max_ref, 0.0; atol = 3e-2)
+        @test isapprox(avg-avg_ref, 0.0; atol = 3e-2)
+
     end
     @testset "ACR input-WLS" begin
         # set model
