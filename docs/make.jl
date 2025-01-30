@@ -24,5 +24,5 @@ makedocs(
 )
 
 deploydocs(
-     repo = "github.com/Electa-Git/PowerModelsDistributionStateEstimation.jl.git"
+     repo = "github.com/MohamedNumair/PowerModelsDistributionStateEstimation.jl.git"
 )
