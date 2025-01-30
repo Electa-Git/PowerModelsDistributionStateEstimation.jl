@@ -23,7 +23,6 @@ makedocs(
                  ]
 )
 
-
 deploydocs(
      repo = "github.com/MohamedNumair/PowerModelsDistributionStateEstimation.jl.git"
 )
