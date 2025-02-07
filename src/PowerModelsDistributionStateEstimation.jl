@@ -21,7 +21,7 @@ import Logging, LoggingExtras
 import Optim
 import Polynomials as _Poly
 import PowerModelsDistribution
-import PowerModelsDistribution: _has_nl_expression #need this to use @smart_constraint
+#import PowerModelsDistribution: _has_nl_expression #need this to use @smart_constraint, but not anymore from PMD 0.16
 import Random
 import SpecialFunctions
 import Statistics

@@ -225,12 +225,12 @@ function constraint_mc_voltage_angle_bounds(pm::_PMD.AbstractUnbalancedACRModel,
 
     for (idx,t) in enumerate(_PMD.ref(pm, nw, :bus, i)["terminals"])
         if vamin[idx] > -Inf
-            JuMP.@NLconstraint(pm.model, tan(vamin[idx]) <= vi[t]/vr[t])
+            JuMP.@constraint(pm.model, tan(vamin[idx]) <= vi[t]/vr[t])
             @warn "consrtained minimum angle vamin at $(vamin[idx]) for bus $i to be less than $(atan(vi[t],vr[t]))" 
         end
 
         if vamax[idx] < Inf
-            JuMP.@NLconstraint(pm.model, tan(vamax[idx]) >= vi[t]/vr[t])
+            JuMP.@constraint(pm.model, tan(vamax[idx]) >= vi[t]/vr[t])
             @warn "consrtained maximum angle vamax at $(vamax[idx]) for bus $i to be greater than $(atan(vi[t],vr[t]))"
         end
 
@@ -303,9 +303,9 @@ function constraint_mc_current_balance_se(pm::_PMD.IVRENPowerModel, nw::Int, i::
     Gs, Bs = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
 
     ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
-
-    for (idx, t) in ungrounded_terminals
-        JuMP.@NLconstraint(pm.model,  sum(cr[a][t] for (a, conns) in bus_arcs if t in conns)
+    
+    for (idx, t) in ungrounded_terminals      
+        JuMP.@constraint(pm.model,  sum(cr[a][t] for (a, conns) in bus_arcs if t in conns)
                                     + sum(crsw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
                                     + sum(crt[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
                                     ==
@@ -314,7 +314,7 @@ function constraint_mc_current_balance_se(pm::_PMD.IVRENPowerModel, nw::Int, i::
                                     - sum(crd[d][t]         for (d, conns) in bus_loads if t in conns)
                                     - sum( Gs[idx,jdx]*vr[u] -Bs[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals) # shunts
                                     )
-        JuMP.@NLconstraint(pm.model, sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
+        JuMP.@constraint(pm.model, sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
                                     + sum(cisw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
                                     + sum(cit[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
                                     ==

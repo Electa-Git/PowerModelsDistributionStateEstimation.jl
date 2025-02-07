@@ -84,7 +84,7 @@ respectively through:
       \tan(\text{cax})  &= \frac{\text{cix}}{\text{crx}}
 \end{eqnarray}
 ```
-These are non-linear equality constraints, modeled using `@NLconstraint`.
+These are non-linear equality constraints, modeled using `@constraint`.
 
 ### Fraction
 
@@ -96,7 +96,7 @@ in the ACP formulation, respectively through:
       \text{cix} &= \frac{\text{px}\cdot\sin(\text{va})-\text{qx}\cdot\cos(\text{va})}{\text{vm}}
 \end{eqnarray}
 ```
-These are non-linear equality constraints, modeled using `@NLconstraint`.
+These are non-linear equality constraints, modeled using `@constraint`.
 
 ### Multiplication
 
@@ -120,7 +120,7 @@ measurements in the ACR formulation, respectively through:
       \text{cix} &= \frac{\text{px}\cdot\text{vi}-\text{qx}\cdot\text{vr}}{\text{vr}^{2}+\text{vi}^{2}} \\
 \end{eqnarray}
 ```
-These are non-linear equality constraints, modeled using `@NLconstraint`.
+These are non-linear equality constraints, modeled using `@constraint`.
 
 ### SquareFraction
 
@@ -132,7 +132,7 @@ formulation, through:
 \end{equation}
 ```
 If the conversion is applied to the LinDist3Flow formulation, then vm^2 is replaced by w.
-These are non-linear equality constraints, modeled using `@NLconstraint`.
+These are non-linear equality constraints, modeled using `@constraint`.
 
 ### Square
 

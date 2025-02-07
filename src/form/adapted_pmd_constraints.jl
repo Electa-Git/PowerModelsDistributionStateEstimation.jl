@@ -65,15 +65,15 @@ function constraint_mc_generator_power_delta_se(pm::_PMD.AbstractUnbalancedIVRMo
     vrg = Dict()
     vig = Dict()
     for c in connections
-        vrg[c] = JuMP.@NLexpression(pm.model, vr[c]-vr[next[c]])
-        vig[c] = JuMP.@NLexpression(pm.model, vi[c]-vi[next[c]])
+        vrg[c] = JuMP.@expression(pm.model, vr[c]-vr[next[c]])
+        vig[c] = JuMP.@expression(pm.model, vi[c]-vi[next[c]])
     end
 
     if bounded
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], pmin[i] <= vrg[i]*crg[i]+vig[i]*cig[i])
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], pmax[i] >= vrg[i]*crg[i]+vig[i]*cig[i])
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], qmin[i] <= -vrg[i]*cig[i]+vig[i]*crg[i])
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], qmax[i] >= -vrg[i]*cig[i]+vig[i]*crg[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], pmin[i] <= vrg[i]*crg[i]+vig[i]*cig[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], pmax[i] >= vrg[i]*crg[i]+vig[i]*cig[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], qmin[i] <= -vrg[i]*cig[i]+vig[i]*crg[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], qmax[i] >= -vrg[i]*cig[i]+vig[i]*crg[i])
     end
 end
 
@@ -113,7 +113,7 @@ function constraint_mc_current_balance_se(pm::_PMD.AbstractUnbalancedIVRModel, n
     ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
 
     for (idx, t) in ungrounded_terminals
-        JuMP.@NLconstraint(pm.model,  sum(cr[a][t] for (a, conns) in bus_arcs if t in conns)
+        JuMP.@constraint(pm.model,  sum(cr[a][t] for (a, conns) in bus_arcs if t in conns)
                                     + sum(crsw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
                                     + sum(crt[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
                                     ==
@@ -122,7 +122,7 @@ function constraint_mc_current_balance_se(pm::_PMD.AbstractUnbalancedIVRModel, n
                                     - sum(crd[d][t]         for (d, conns) in bus_loads if t in conns)
                                     - sum( Gs[idx,jdx]*vr[u] -Bs[idx,jdx]*vi[u] for (jdx,u) in ungrounded_terminals) # shunts
                                     )
-        JuMP.@NLconstraint(pm.model, sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
+        JuMP.@constraint(pm.model, sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
                                     + sum(cisw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
                                     + sum(cit[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
                                     ==
@@ -175,7 +175,7 @@ function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACRModel, nw:
 
     # pd/qd can be NLexpressions, so cannot be vectorized
     for (idx, t) in ungrounded_terminals
-        cp = _PMD.@smart_constraint(pm.model, [p, q, pg, qg, ps, qs, psw, qsw, pt, qt, pd, qd, vr, vi],
+        cp = JuMP.@constraint(pm.model, [p, q, pg, qg, ps, qs, psw, qsw, pt, qt, pd, qd, vr, vi],
               sum(  p[arc][t] for (arc, conns) in bus_arcs if t in conns)
             + sum(psw[arc][t] for (arc, conns) in bus_arcs_sw if t in conns)
             + sum( pt[arc][t] for (arc, conns) in bus_arcs_trans if t in conns)
@@ -189,7 +189,7 @@ function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACRModel, nw:
         )
         push!(cstr_p, cp)
 
-        cq = _PMD.@smart_constraint(pm.model, [p, q, pg, qg, ps, qs, psw, qsw, pt, qt, pd, qd, vr, vi],
+        cq = JuMP.@constraint(pm.model, [p, q, pg, qg, ps, qs, psw, qsw, pt, qt, pd, qd, vr, vi],
               sum(  q[arc][t] for (arc, conns) in bus_arcs if t in conns)
             + sum(qsw[arc][t] for (arc, conns) in bus_arcs_sw if t in conns)
             + sum( qt[arc][t] for (arc, conns) in bus_arcs_trans if t in conns)
@@ -231,7 +231,7 @@ function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACPModel, nw:
 
     for (idx,t) in ungrounded_terminals
         if any(Bs[idx,jdx] != 0 for (jdx, u) in ungrounded_terminals if idx != jdx) || any(Gs[idx,jdx] != 0 for (jdx, u) in ungrounded_terminals if idx != jdx)
-            cp = JuMP.@NLconstraint(pm.model,
+            cp = JuMP.@constraint(pm.model,
                   sum(  p[a][t] for (a, conns) in bus_arcs if t in conns)
                 + sum(psw[a][t] for (a, conns) in bus_arcs_sw if t in conns)
                 + sum( pt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
@@ -249,7 +249,7 @@ function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACPModel, nw:
             )
             push!(cstr_p, cp)
 
-            cq = JuMP.@NLconstraint(pm.model,
+            cq = JuMP.@constraint(pm.model,
                   sum(  q[a][t] for (a, conns) in bus_arcs if t in conns)
                 + sum(qsw[a][t] for (a, conns) in bus_arcs_sw if t in conns)
                 + sum( qt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
@@ -267,7 +267,7 @@ function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACPModel, nw:
             )
             push!(cstr_q, cq)
         else
-            cp = _PMD.@smart_constraint(pm.model, [p, pg, ps, psw, pt, pd, vm],
+            cp = JuMP.@constraint(pm.model, [p, pg, ps, psw, pt, pd, vm],
                   sum(  p[a][t] for (a, conns) in bus_arcs if t in conns)
                 + sum(psw[a][t] for (a, conns) in bus_arcs_sw if t in conns)
                 + sum( pt[a][t] for (a, conns) in bus_arcs_trans if t in conns)
@@ -280,7 +280,7 @@ function constraint_mc_power_balance_se(pm::_PMD.AbstractUnbalancedACPModel, nw:
             )
             push!(cstr_p, cp)
 
-            cq = _PMD.@smart_constraint(pm.model, [q, qg, qs, qsw, qt, qd, vm],
+            cq = JuMP.@constraint(pm.model, [q, qg, qs, qsw, qt, qd, vm],
                   sum(  q[a][t] for (a, conns) in bus_arcs if t in conns)
                 + sum(qsw[a][t] for (a, conns) in bus_arcs_sw if t in conns)
                 + sum( qt[a][t] for (a, conns) in bus_arcs_trans if t in conns)

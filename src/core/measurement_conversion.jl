@@ -256,7 +256,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
 
         new_var_den = [_PMD.var(pm, nw, msr.denominator, msr.cmp_id)]
 
-        JuMP.@NLconstraint(pm.model, [c in conn],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
                        (sum( d[c] for d in new_var_den))
             )
@@ -272,7 +272,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
             end
         end
 
-        JuMP.@NLconstraint(pm.model, [c in conn],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c]^2 == (sum( n[c]^2 for n in new_var_num ))/
                        (sum( d[c]^2 for d in new_var_den))
             )
@@ -361,7 +361,7 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
                 den = _PMD.var(pm, nw, msr.denominator, msr.cmp_id)
             end
             msr.cmp_type == :branch ? id = (msr.cmp_id, _PMD.ref(pm,nw,:branch,msr.cmp_id)["f_bus"], _PMD.ref(pm,nw,:branch,msr.cmp_id)["t_bus"]) : id = msr.cmp_id
-            JuMP.@NLconstraint(pm.model,
+            JuMP.@constraint(pm.model,
                 original_var[id][c]*den[c] == num[c]
                 )
         end
@@ -385,11 +385,11 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("r", String(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in conn],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c]*den[c] == num[1][c]*cos(num[3][c])+num[2][c]*sin(num[3][c])
             )
     elseif occursin("i", String(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in conn],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c]*den[c] == -num[2][c]*cos(num[3][c])+num[1][c]*sin(num[3][c])
             )
     else
@@ -417,11 +417,11 @@ function create_conversion_constraint(pm::_PMD.AbstractUnbalancedPowerModel, ori
     conn = get_active_connections(pm, nw, msr.cmp_type, msr.cmp_id)
 
     if occursin("cr", string(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in conn],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c] == (p[1][c]*v[1][c]+p[2][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
     elseif occursin("ci", string(msr.msr_type))
-        JuMP.@NLconstraint(pm.model, [c in conn],
+        JuMP.@constraint(pm.model, [c in conn],
             original_var[id][c] == (-p[2][c]*v[1][c]+p[1][c]*v[2][c])/(v[1][c]^2+v[2][c]^2)
             )
     end

@@ -48,12 +48,12 @@ function constraint_mc_generator_power_wye(pm::ReducedIVRUPowerModel, nw::Int, i
     crg = _PMD.var(pm, nw, :crg, id)
     cig = _PMD.var(pm, nw, :cig, id)
 
-    pg = Vector{JuMP.NonlinearExpression}([])
-    qg = Vector{JuMP.NonlinearExpression}([])
+    pg = JuMP.NonlinearExpr[]
+    qg = JuMP.NonlinearExpr[]
 
     for (idx, c) in enumerate(connections)
-        push!(pg, JuMP.@NLexpression(pm.model,  vr[c]*crg[c]+vi[c]*cig[c]))
-        push!(qg, JuMP.@NLexpression(pm.model, -vr[c]*cig[c]+vi[c]*crg[c]))
+        push!(pg, JuMP.@expression(pm.model,  vr[c]*crg[c]+vi[c]*cig[c]))
+        push!(qg, JuMP.@expression(pm.model, -vr[c]*cig[c]+vi[c]*crg[c]))
     end
 
     if bounded
@@ -93,29 +93,29 @@ function constraint_mc_generator_power_delta(pm::ReducedIVRUPowerModel, nw::Int,
     vrg = Dict()
     vig = Dict()
     for c in connections
-        vrg[c] = JuMP.@NLexpression(pm.model, vr[c]-vr[next[c]])
-        vig[c] = JuMP.@NLexpression(pm.model, vi[c]-vi[next[c]])
+        vrg[c] = JuMP.@expression(pm.model, vr[c]-vr[next[c]])
+        vig[c] = JuMP.@expression(pm.model, vi[c]-vi[next[c]])
     end
 
-    pg = Vector{JuMP.NonlinearExpression}([])
-    qg = Vector{JuMP.NonlinearExpression}([])
+    pg = JuMP.NonlinearExpr[]
+    qg = JuMP.NonlinearExpr[]
     for c in connections
-        push!(pg, JuMP.@NLexpression(pm.model,  vrg[c]*crg[c]+vig[c]*cig[c]))
-        push!(qg, JuMP.@NLexpression(pm.model, -vrg[c]*cig[c]+vig[c]*crg[c]))
+        push!(pg, JuMP.@expression(pm.model,  vrg[c]*crg[c]+vig[c]*cig[c]))
+        push!(qg, JuMP.@expression(pm.model, -vrg[c]*cig[c]+vig[c]*crg[c]))
     end
 
     if bounded
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], pmin[i] <= pg[i])
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], pmax[i] >= pg[i])
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], qmin[i] <= qg[i])
-        JuMP.@NLconstraint(pm.model, [i in 1:nph], qmax[i] >= qg[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], pmin[i] <= pg[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], pmax[i] >= pg[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], qmin[i] <= qg[i])
+        JuMP.@constraint(pm.model, [i in 1:nph], qmax[i] >= qg[i])
     end
 
-    crg_bus = Vector{JuMP.NonlinearExpression}([])
-    cig_bus = Vector{JuMP.NonlinearExpression}([])
+    crg_bus = JuMP.NonlinearExpr[]
+    cig_bus = JuMP.NonlinearExpr[]
     for c in connections
-        push!(crg_bus, JuMP.@NLexpression(pm.model, crg[c]-crg[prev[c]]))
-        push!(cig_bus, JuMP.@NLexpression(pm.model, cig[c]-cig[prev[c]]))
+        push!(crg_bus, JuMP.@expression(pm.model, crg[c]-crg[prev[c]]))
+        push!(cig_bus, JuMP.@expression(pm.model, cig[c]-cig[prev[c]]))
     end
 
    _PMD.var(pm, nw, :crg_bus)[id] = JuMP.Containers.DenseAxisArray(crg_bus, connections)
